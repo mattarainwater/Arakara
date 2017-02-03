@@ -120,6 +120,11 @@ namespace Nez
 			_basicEffect.VertexColorEnabled = true;
 		}
 
+        public void changeColor(Color color)
+        {
+            for (var i = 0; i < _verts.Length; i++)
+                _verts[i].Color = color;
+        }
 
 		public override void render( Graphics graphics, Camera camera )
 		{
