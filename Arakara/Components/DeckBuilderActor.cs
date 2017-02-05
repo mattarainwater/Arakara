@@ -14,142 +14,108 @@ namespace Arakara.Components
         private List<Card> _discardPile;
 
         private List<Entity> _handEntities;
+        private List<Entity> _targetableEntities;
 
         private Card _selectedCard;
+        private BattleActor _selectedTarget;
 
         private int _handSize = 3;
 
-        public DeckBuilderActor(int maxHP, Faction faction) :
+        public DeckBuilderActor(int maxHP, Faction faction, List<Card> cards) :
             base(maxHP, faction)
         {
-            _deck = new List<Card>()
-            {
-                new Card
-                {
-                    Delay =  5,
-                    Effect = Effect.Attack,
-                    Name = "Quick Slash",
-                    Magnitude = 5,
-                    Targeting = Targeting.Enemies,
-                    Text = "Deal 5 damage"
-                },
-                new Card
-                {
-                    Delay =  5,
-                    Effect = Effect.Attack,
-                    Name = "Quick Slash",
-                    Magnitude = 5,
-                    Targeting = Targeting.Enemies,
-                    Text = "Deal 5 damage"
-                },
-                new Card
-                {
-                    Delay =  5,
-                    Effect = Effect.Attack,
-                    Name = "Quick Slash",
-                    Magnitude = 5,
-                    Targeting = Targeting.Enemies,
-                    Text = "Deal 5 damage"
-                },
-                new Card
-                {
-                    Delay =  5,
-                    Effect = Effect.Attack,
-                    Name = "Quick Slash",
-                    Magnitude = 5,
-                    Targeting = Targeting.Enemies,
-                    Text = "Deal 5 damage"
-                },
-                new Card
-                {
-                    Delay =  10,
-                    Effect = Effect.Attack,
-                    Name = "Heavy Slash",
-                    Magnitude = 10,
-                    Targeting = Targeting.Enemies,
-                    Text = "Deal 10 damage"
-                },
-                new Card
-                {
-                    Delay =  10,
-                    Effect = Effect.Attack,
-                    Name = "Heavy Slash",
-                    Magnitude = 10,
-                    Targeting = Targeting.Enemies,
-                    Text = "Deal 10 damage"
-                },
-                new Card
-                {
-                    Delay =  20,
-                    Effect = Effect.Heal,
-                    Name = "Pocket Potion",
-                    Magnitude = 20,
-                    Targeting = Targeting.Self,
-                    Text = "Heal 20 HP"
-                },
-                new Card
-                {
-                    Delay =  20,
-                    Effect = Effect.Heal,
-                    Name = "Pocket Potion",
-                    Magnitude = 20,
-                    Targeting = Targeting.Self,
-                    Text = "Heal 20 HP"
-                },
-                new Card
-                {
-
-                    Delay =  5,
-                    Effect = Effect.Defense,
-                    Name = "Evade",
-                    Magnitude = 10,
-                    Targeting = Targeting.Self,
-                    Text = "Evade until next turn"
-                },
-            };
+            _deck = cards;
             _hand = new List<Card>();
             _discardPile = new List<Card>();
             _handEntities = new List<Entity>();
+            _targetableEntities = new List<Entity>();
 
             ShuffleDeck();
-        }
-
-        public override void update()
-        {
-            if(State == BattleState.StartOfTurn)
-            {
-                DrawCards();
-                State = BattleState.AwaitingDecision;
-            }
-            if(State == BattleState.Targeting)
-            {
-                var i = 0;
-            }
-            if(State == BattleState.EndOfTurn)
-            {
-                Delay = _selectedCard.Delay;
-                _discardPile.AddRange(_hand);
-                _hand = new List<Card>();
-            }
         }
 
         public void PlayCard(Card card)
         {
             _selectedCard = card;
-            State = BattleState.Targeting;
+            State = BattleState.AwaitingDecision;
+        }
+
+        public void SelectTarget(BattleActor target)
+        {
+            _selectedTarget = target;
+        }
+
+        protected override void OnStartOfTurn(BattleController controller)
+        {
+            DrawCards();
+            State = BattleState.AwaitingDecision;
+            Immune = false;
+        }
+
+        protected override void OnAwaitingDecision(BattleController controller)
+        {
+            if(_selectedCard != null)
+            {
+                MakeTargetables(controller.Actors);
+                State = BattleState.Targeting;
+            }
+        }
+
+        protected override void OnTargeting(BattleController controller)
+        {
+            if(_selectedTarget != null)
+            {
+                switch (_selectedCard.Effect)
+                {
+                    case Effect.Attack:
+                        _selectedTarget.CurrentHP -= _selectedCard.Magnitude;
+                        break;
+                    case Effect.Defense:
+                        Immune = true;
+                        break;
+                    case Effect.Heal:
+                        _selectedTarget.CurrentHP += _selectedCard.Magnitude;
+                        if (_selectedTarget.CurrentHP > _selectedTarget.MaxHP)
+                        {
+                            _selectedTarget.CurrentHP = _selectedTarget.MaxHP;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                State = BattleState.EndOfTurn;
+            }
+        }
+
+        protected override void OnEndOfTurn(BattleController controller)
+        {
+            Reset();
+            State = BattleState.NotTurn;
+        }
+
+        private void Reset()
+        {
+            Delay = _selectedCard.Delay;
+            _discardPile.AddRange(_hand);
+            _handEntities.ForEach(entity => entity.destroy());
+            _handEntities = new List<Entity>();
+            _targetableEntities.ForEach(entity => entity.destroy());
+            _targetableEntities = new List<Entity>();
+            _hand = new List<Card>();
+            _selectedCard = null;
+            _selectedTarget = null;
         }
 
         private void DrawCards()
         {
-            for(var i = 0; i < _handSize; i++)
+            for (var i = 0; i < _handSize; i++)
             {
                 if (!_deck.Any())
                 {
                     ShuffleDeck();
                 }
                 _hand.Add(_deck.First());
-                _deck.Remove(_deck.First());
                 CreateCardEntity(i, _deck.First());
+                _deck.Remove(_deck.First());
             }
         }
 
@@ -167,16 +133,55 @@ namespace Arakara.Components
             cardEntity.addComponent(new SimplePolygon(verts, Color.Black));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Name, new Vector2(5, 5), Color.White));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Text, new Vector2(5, 30), Color.White));
-            cardEntity.addComponent(new CardClicker(card));
+            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Delay, new Vector2(5, 60), Color.White));
+            cardEntity.addComponent(new CardClicker(card, this));
             cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 150, 200)));
             _handEntities.Add(cardEntity);
+        }
+
+        private void MakeTargetables(List<BattleActor> actors)
+        {
+            _targetableEntities.ForEach(entity => entity.destroy());
+            _targetableEntities = new List<Entity>();
+            var targetableActors = GetTargetableActors(_selectedCard.Targeting, actors);
+            for (var i = 0; i < targetableActors.Count(); i++)
+            {
+                var actor = targetableActors[i];
+                var actorEntity = actor.entity;
+                var targetableEntity = entity.scene.createEntity("target " + i, new Vector2(actorEntity.transform.position.X, actorEntity.transform.position.Y - 25));
+                var verts = new Vector2[3]
+                {
+                    new Vector2(65, 0),
+                    new Vector2(85, 0),
+                    new Vector2(75, 10),
+                };
+                targetableEntity.addComponent(new SimplePolygon(verts, Color.LightPink));
+                targetableEntity.addCollider(new BoxCollider(new Rectangle(0, 25, 150, 200)));
+                targetableEntity.addComponent(new Targetable(actor, this));
+                _targetableEntities.Add(targetableEntity);
+            }
+        }
+
+        private List<BattleActor> GetTargetableActors(Targeting targeting, List<BattleActor> actors)
+        {
+            switch (targeting)
+            {
+                case Targeting.Allies:
+                    return actors.Where(x => x.Faction.Id == Faction.Id).ToList();
+                case Targeting.Enemies:
+                    return actors.Where(x => x.Faction.Id != Faction.Id).ToList();
+                case Targeting.Self:
+                    return actors.Where(x => x == this).ToList();
+                default:
+                    return null;
+            }
         }
 
         private void ShuffleDeck()
         {
             var deckList = _discardPile.Concat(_deck).ToArray();
 
-            for(var i = 0; i < deckList.Length; i++)
+            for (var i = 0; i < deckList.Length; i++)
             {
                 var j = Nez.Random.range(0, i);
                 var entryI = deckList[i];

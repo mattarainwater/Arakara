@@ -15,7 +15,26 @@ namespace Arakara.Components
 
         }
 
-        public override void update()
+        protected override void OnAwaitingDecision(BattleController controller)
+        {
+        }
+
+        protected override void OnEndOfTurn(BattleController controller)
+        {
+        }
+
+        protected override void OnStartOfTurn(BattleController controller)
+        {
+            var enemyActor = controller.Actors.First(x => x.Faction.Id != Faction.Id);
+            if (!enemyActor.Immune)
+            {
+                enemyActor.CurrentHP -= 5;
+            }
+            Delay = 10;
+            State = BattleState.NotTurn;
+        }
+
+        protected override void OnTargeting(BattleController controller)
         {
         }
     }

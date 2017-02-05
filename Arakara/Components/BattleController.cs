@@ -11,8 +11,7 @@ namespace Arakara.Components
     public class BattleController : Component, IUpdatable
     {
         public List<BattleActor> Actors { get; set; }
-
-        private BattleActor _currentActor;
+        public BattleActor CurrentActor { get; set; }
 
         public BattleController()
         {
@@ -21,24 +20,29 @@ namespace Arakara.Components
 
         public void update()
         {
-            if(Actors.All(x => x.State == BattleState.NotTurn) || _currentActor == null)
+            if (CurrentActor != null)
             {
-                var nextActor = Actors.OrderBy(x => x.TimeUntilTurn).First();
-                nextActor.State = BattleState.StartOfTurn;
-                _currentActor = nextActor;
-                foreach(var actor in Actors)
+                CurrentActor.ProcessTurn(this);
+                if (CurrentActor.State == BattleState.NotTurn)
                 {
-                    actor.TimeUntilTurn -= _currentActor.TimeUntilTurn;
+                    CurrentActor.TimeUntilTurn = CurrentActor.Delay;
+                    while(Actors.Any(x => x.TimeUntilTurn == CurrentActor.TimeUntilTurn && x != CurrentActor))
+                    {
+                        CurrentActor.TimeUntilTurn++;
+                    }
+                    CurrentActor = Actors.OrderBy(x => x.TimeUntilTurn).First();
+                    var timeUntilTurn = CurrentActor.TimeUntilTurn;
+                    foreach (var actor in Actors)
+                    {
+                        actor.TimeUntilTurn -= timeUntilTurn;
+                    }
+                    CurrentActor.State = BattleState.StartOfTurn;
                 }
             }
-            if(_currentActor.State == BattleState.EndOfTurn)
+            else
             {
-                while(Actors.Any(x => x.TimeUntilTurn == _currentActor.Delay))
-                {
-                    _currentActor.Delay++;
-                }
-                _currentActor.TimeUntilTurn = _currentActor.Delay;
-                _currentActor.State = BattleState.NotTurn;
+                CurrentActor = Actors.First();
+                CurrentActor.State = BattleState.StartOfTurn;
             }
         }
     }

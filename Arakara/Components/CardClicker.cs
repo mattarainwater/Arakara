@@ -13,12 +13,14 @@ namespace Arakara.Components
     {
         private SimplePolygon _simplePolygon;
         private Card _card;
+        private DeckBuilderActor _actor;
 
         public bool Selected { get; set; }
 
-        public CardClicker(Card card)
+        public CardClicker(Card card, DeckBuilderActor actor)
         {
             _card = card;
+            _actor = actor;
         }
 
         public override void onAddedToEntity()
@@ -28,6 +30,10 @@ namespace Arakara.Components
 
         public void update()
         {
+            var mainColor = GetMainColor(_card.Grade);
+            var hoverColor = GetSmartShadeColorByBase(mainColor, .25f);
+            var selectedColor = GetSmartShadeColorByBase(mainColor, -.25f);
+
             var mousePosition = Input.mousePosition;
             if(!Selected)
             {
@@ -40,29 +46,52 @@ namespace Arakara.Components
                         {
                             var clicker = card.getComponent<CardClicker>();
                             clicker.Selected = false;
-                            clicker._simplePolygon.changeColor(Color.Black);
+                            var mainColorForRest = GetMainColor(clicker._card.Grade);
+                            clicker._simplePolygon.changeColor(mainColorForRest);
                         }
 
                         Selected = true;
-                        _simplePolygon.changeColor(Color.Blue);
-                        var mc = entity.scene.entities.findEntity("mc");
-                        var mcActor = mc.getComponent<DeckBuilderActor>();
-                        mcActor.PlayCard(_card);
-                    }
-                    else if (Input.leftMouseButtonDown)
-                    {
-                        _simplePolygon.changeColor(Color.Green);
+                        _simplePolygon.changeColor(selectedColor);
+                        _actor.PlayCard(_card);
                     }
                     else
                     {
-                        _simplePolygon.changeColor(Color.Red);
+                        _simplePolygon.changeColor(hoverColor);
                     }
                 }
                 else
                 {
-                    _simplePolygon.changeColor(Color.Black);
+                    _simplePolygon.changeColor(mainColor);
                 }
             }
         }
+
+        private Color GetMainColor(Grade grade)
+        {
+            switch(grade)
+            {
+                case Grade.Bronze:
+                    return new Color(144, 89, 35);
+                case Grade.Silver:
+                    return new Color(128, 128, 128);
+                case Grade.Gold:
+                    return new Color(212, 175, 55);
+                default:
+                    return Color.Black;
+            }
+        }
+
+        private Color GetSmartShadeColorByBase(Color color, float percent)
+        {
+            var t = percent < 0 ? 0 : 255;
+            var p = percent < 0 ? percent * -1 : percent;
+
+            var newR = Convert.ToInt32(Math.Round((t - color.R) * p) + color.R);
+            var newG = Convert.ToInt32(Math.Round((t - color.G) * p) + color.G);
+            var newB = Convert.ToInt32(Math.Round((t - color.B) * p) + color.B);
+
+            return new Color(newR, newG, newB);
+        }
+
     }
 }

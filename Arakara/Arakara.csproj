@@ -49,6 +49,7 @@
     <Compile Include="Components\BattleController.cs" />
     <Compile Include="Components\CardClicker.cs" />
     <Compile Include="Components\DeckBuilderActor.cs" />
+    <Compile Include="Components\Targetable.cs" />
     <Compile Include="Components\UpdatableText.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="Program.cs" />

@@ -17,7 +17,7 @@ namespace Arakara.Components
 
         public void update()
         {
-            var actor = entity.getComponent<DeckBuilderActor>();
+            var actor = entity.getComponent<BattleActor>();
             setText("Current HP: " + actor.CurrentHP);
         }
     }

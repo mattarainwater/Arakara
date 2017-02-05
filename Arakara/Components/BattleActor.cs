@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Arakara.Components
 {
-    public abstract class BattleActor : Component, IUpdatable
+    public abstract class BattleActor : Component
     {
         public int MaxHP { get; set; }
         public int CurrentHP { get; set; }
@@ -16,6 +16,7 @@ namespace Arakara.Components
         public int Delay { get; set; }
         public Faction Faction { get; set; }
         public BattleState State { get; set; }
+        public bool Immune { get; set; }
 
         public BattleActor(int maxHp, Faction faction)
         {
@@ -27,6 +28,31 @@ namespace Arakara.Components
             State = BattleState.NotTurn;
         }
 
-        public abstract void update();
+        public virtual void ProcessTurn(BattleController controller)
+        {
+            switch (State)
+            {
+                case BattleState.StartOfTurn:
+                    OnStartOfTurn(controller);
+                    break;
+                case BattleState.AwaitingDecision:
+                    OnAwaitingDecision(controller);
+                    break;
+                case BattleState.Targeting:
+                    OnTargeting(controller);
+                    break;
+                case BattleState.EndOfTurn:
+                    OnEndOfTurn(controller);
+                    break;
+            }
+        }
+
+        protected abstract void OnStartOfTurn(BattleController controller);
+
+        protected abstract void OnAwaitingDecision(BattleController controller);
+
+        protected abstract void OnTargeting(BattleController controller);
+
+        protected abstract void OnEndOfTurn(BattleController controller);
     }
 }
