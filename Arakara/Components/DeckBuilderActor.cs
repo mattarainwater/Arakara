@@ -135,7 +135,7 @@ namespace Arakara.Components
 
         private void CreateCardEntity(int index, Card card)
         {
-            var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (200 * (index - 1)), transform.position.Y - 250));
+            var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (100 * (index - 1)), transform.position.Y - 125));
             cardEntity.tag = EntityTags.CARDCLICKER_TAG;
             var verts = new Vector2[4]
             {
@@ -149,7 +149,7 @@ namespace Arakara.Components
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Text, new Vector2(5, 30), Color.White));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Delay, new Vector2(5, 60), Color.White));
             cardEntity.addComponent(new CardClicker(card, this));
-            cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 75, 100)));
+            cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 50, 75)));
             _handEntities.Add(cardEntity);
         }
 
@@ -162,7 +162,7 @@ namespace Arakara.Components
             {
                 var actor = targetableActors[i];
                 var actorEntity = actor.entity;
-                var targetableEntity = entity.scene.createEntity("target " + i, new Vector2(actorEntity.transform.position.X, actorEntity.transform.position.Y - 25));
+                var targetableEntity = entity.scene.createEntity("target " + i, new Vector2(actorEntity.transform.position.X -  20, actorEntity.transform.position.Y - 20));
                 targetableEntity.tag = EntityTags.TARGETABLE_TAG;
                 var verts = new Vector2[3]
                 {
@@ -171,7 +171,7 @@ namespace Arakara.Components
                     new Vector2(75, 10),
                 };
                 targetableEntity.addComponent(new SimplePolygon(verts, Color.LightPink));
-                targetableEntity.addCollider(new BoxCollider(new Rectangle(0, 25, 150, 200)));
+                targetableEntity.addCollider(new BoxCollider(new Rectangle(0, 25, 98, 40)));
                 targetableEntity.addComponent(new Targetable(actor, this));
                 _targetableEntities.Add(targetableEntity);
             }
