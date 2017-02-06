@@ -1,4 +1,5 @@
 ﻿using Arakara.Battle;
+using Arakara.Common;
 using Microsoft.Xna.Framework;
 using Nez;
 using System;
@@ -41,7 +42,7 @@ namespace Arakara.Components
                 {
                     if (Input.leftMouseButtonReleased)
                     {
-                        var cards = entity.scene.findEntitiesWithTag(5);
+                        var cards = entity.scene.findEntitiesWithTag(EntityTags.CARDCLICKER_TAG);
                         foreach(var card in cards)
                         {
                             var clicker = card.getComponent<CardClicker>();

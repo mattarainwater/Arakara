@@ -10,6 +10,7 @@ namespace Arakara.Components
 {
     public abstract class BattleActor : Component
     {
+        public string Name { get; set; }
         public int MaxHP { get; set; }
         public int CurrentHP { get; set; }
         public int TimeUntilTurn { get; set; }
@@ -18,8 +19,11 @@ namespace Arakara.Components
         public BattleState State { get; set; }
         public bool Immune { get; set; }
 
-        public BattleActor(int maxHp, Faction faction)
+        protected BattleActor _selectedTarget;
+
+        public BattleActor(string name, int maxHp, Faction faction)
         {
+            Name = name;
             MaxHP = maxHp;
             CurrentHP = maxHp;
             TimeUntilTurn = 0;
@@ -45,6 +49,11 @@ namespace Arakara.Components
                     OnEndOfTurn(controller);
                     break;
             }
+        }
+
+        public void SelectTarget(BattleActor target)
+        {
+            _selectedTarget = target;
         }
 
         protected abstract void OnStartOfTurn(BattleController controller);

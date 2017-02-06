@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Arakara.Common;
+using Microsoft.Xna.Framework;
 using Nez;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,11 @@ namespace Arakara.Components
     {
         private SimplePolygon _simplePolygon;
         private BattleActor _target;
-        private DeckBuilderActor _actor;
+        private BattleActor _actor;
 
         public bool Selected { get; set; }
 
-        public Targetable(BattleActor target, DeckBuilderActor actor)
+        public Targetable(BattleActor target, BattleActor actor)
         {
             _target = target;
             _actor = actor;
@@ -39,7 +40,7 @@ namespace Arakara.Components
                 {
                     if (Input.leftMouseButtonReleased)
                     {
-                        var targetables = entity.scene.findEntitiesWithTag(3);
+                        var targetables = entity.scene.findEntitiesWithTag(EntityTags.TARGETABLE_TAG);
                         foreach (var targetableEntity in targetables)
                         {
                             var targetable = targetableEntity.getComponent<Targetable>();

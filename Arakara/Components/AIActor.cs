@@ -9,8 +9,8 @@ namespace Arakara.Components
 {
     public class AIActor : BattleActor
     {
-        public AIActor(int maxHP, Faction faction) :
-            base(maxHP, faction)
+        public AIActor(string name, int maxHP, Faction faction) :
+            base(name, maxHP, faction)
         {
 
         }

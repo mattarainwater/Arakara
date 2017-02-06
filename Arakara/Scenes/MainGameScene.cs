@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nez;
 using Nez.Sprites;
+using Nez.Textures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,16 +22,18 @@ namespace Arakara.Scenes
 
         public override void initialize()
         {
+            setDesignResolution(512, 256, Scene.SceneResolutionPolicy.ShowAllPixelPerfect);
+            Screen.setSize(512 * 3, 256 * 3);
             addRenderer(new RenderLayerExcludeRenderer(0));
 
             clearColor = Color.WhiteSmoke;
 
-            var controllerEntity = createEntity("controller", new Vector2(0, 0));
+            var controllerEntity = createEntity("controller");
             var controllerComponent = new BattleController();
             controllerEntity.addComponent(controllerComponent);
 
-            var mainCharacterEntity = createEntity("mc", new Vector2(300, 300));
-            var mainCharacterActor = new DeckBuilderActor(100, new Faction {
+            var mainCharacterEntity = createEntity("mc", new Vector2(50, 100));
+            var mainCharacterActor = new DeckBuilderActor("Main Character", 100, new Faction {
                 FactionName = "PC",
                 Id = 1
             }, new List<Card>()
@@ -42,8 +45,6 @@ namespace Arakara.Scenes
                     Name = "Quick Slash",
                     Magnitude = 5,
                     Targeting = Targeting.Enemies,
-                    Text = "Deal 5 damage",
-                    Grade = Grade.Silver
                 },
                 new Card
                 {
@@ -52,8 +53,6 @@ namespace Arakara.Scenes
                     Name = "Quick Slash",
                     Magnitude = 5,
                     Targeting = Targeting.Enemies,
-                    Text = "Deal 5 damage",
-                    Grade = Grade.Gold
                 },
                 new Card
                 {
@@ -62,7 +61,6 @@ namespace Arakara.Scenes
                     Name = "Quick Slash",
                     Magnitude = 5,
                     Targeting = Targeting.Enemies,
-                    Text = "Deal 5 damage"
                 },
                 new Card
                 {
@@ -71,7 +69,6 @@ namespace Arakara.Scenes
                     Name = "Quick Slash",
                     Magnitude = 5,
                     Targeting = Targeting.Enemies,
-                    Text = "Deal 5 damage"
                 },
                 new Card
                 {
@@ -80,8 +77,6 @@ namespace Arakara.Scenes
                     Name = "Heavy Slash",
                     Magnitude = 10,
                     Targeting = Targeting.Enemies,
-                    Text = "Deal 10 damage",
-                    Grade = Grade.Silver
                 },
                 new Card
                 {
@@ -90,8 +85,6 @@ namespace Arakara.Scenes
                     Name = "Heavy Slash",
                     Magnitude = 10,
                     Targeting = Targeting.Enemies,
-                    Text = "Deal 10 damage",
-                    Grade = Grade.Gold
                 },
                 new Card
                 {
@@ -100,7 +93,6 @@ namespace Arakara.Scenes
                     Name = "Pocket Potion",
                     Magnitude = 20,
                     Targeting = Targeting.Self,
-                    Text = "Heal 20 HP"
                 },
                 new Card
                 {
@@ -108,8 +100,7 @@ namespace Arakara.Scenes
                     Effect = Battle.Effect.Heal,
                     Name = "Pocket Potion",
                     Magnitude = 20,
-                    Targeting = Targeting.Self,
-                    Text = "Heal 20 HP"
+                    Targeting = Targeting.Self
                 },
                 new Card
                 {
@@ -119,36 +110,47 @@ namespace Arakara.Scenes
                     Name = "Evade",
                     Magnitude = 10,
                     Targeting = Targeting.Self,
-                    Text = "Evade until next turn"
                 },
             });
             var mcVerts = new Vector2[4]
             {
                 new Vector2(0, 0),
-                new Vector2(150, 0),
-                new Vector2(150, 200),
-                new Vector2(0, 200),
+                new Vector2(75, 0),
+                new Vector2(75, 100),
+                new Vector2(0, 100),
             };
             mainCharacterEntity.addComponent(mainCharacterActor);
             mainCharacterEntity.addComponent(new SimplePolygon(mcVerts, Color.Blue));
             mainCharacterEntity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, 210), Color.Red));
-            //var mainCharacterTexture = content.Load<Texture2D>(Content.Shared.moon);
-            //mainCharacterEntity.addComponent(new Sprite(mainCharacterTexture));
 
-            var enemyEntity = createEntity("enemy", new Vector2(1000, 300));
-            var aIActor = new AIActor(100, new Faction
+
+            var knight = contentManager.Load<Texture2D>("Knight");
+            var subtextures = Subtexture.subtexturesFromAtlas(knight, 98, 40);
+
+            var enemyEntity = createEntity("enemy1", new Vector2(400, 100));
+            var aIActor = new AIActor("Guard", 100, new Faction
             {
                 FactionName = "Enemies",
                 Id = 2
             });
             enemyEntity.addComponent(aIActor);
-            enemyEntity.addComponent(new SimplePolygon(mcVerts, Color.ForestGreen));
             enemyEntity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, 210), Color.Red));
-            //var moonTexture = content.Load<Texture2D>(Content.Shared.moon);
-            //enemyEntity.addComponent(new Sprite(moonTexture));
+            enemyEntity.addComponent(new Sprite(subtextures[0]));
+
+
+            var enemyEntity2 = createEntity("enemy2", new Vector2(300, 100));
+            var aIActor2 = new AIActor("Guard", 100, new Faction
+            {
+                FactionName = "Enemies",
+                Id = 2
+            });
+            enemyEntity2.addComponent(aIActor2);
+            enemyEntity2.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, 210), Color.Red));
+            enemyEntity2.addComponent(new Sprite(subtextures[0]));
 
             controllerComponent.Actors.Add(mainCharacterActor);
             controllerComponent.Actors.Add(aIActor);
+            controllerComponent.Actors.Add(aIActor2);
         }
     }
 }

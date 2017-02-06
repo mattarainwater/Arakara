@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Nez;
 using Microsoft.Xna.Framework;
+using Arakara.Common;
 
 namespace Arakara.Components
 {
@@ -17,12 +18,11 @@ namespace Arakara.Components
         private List<Entity> _targetableEntities;
 
         private Card _selectedCard;
-        private BattleActor _selectedTarget;
 
         private int _handSize = 3;
 
-        public DeckBuilderActor(int maxHP, Faction faction, List<Card> cards) :
-            base(maxHP, faction)
+        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card> cards) :
+            base(name, maxHP, faction)
         {
             _deck = cards;
             _hand = new List<Card>();
@@ -37,11 +37,6 @@ namespace Arakara.Components
         {
             _selectedCard = card;
             State = BattleState.AwaitingDecision;
-        }
-
-        public void SelectTarget(BattleActor target)
-        {
-            _selectedTarget = target;
         }
 
         protected override void OnStartOfTurn(BattleController controller)
@@ -92,6 +87,24 @@ namespace Arakara.Components
             State = BattleState.NotTurn;
         }
 
+        private void UpgradeCards()
+        {
+            var nonSelectedCards = _hand.Where(x => x == _selectedCard);
+            foreach(var card in nonSelectedCards)
+            {
+                if(card.Grade == Grade.Bronze)
+                {
+                    card.Grade = Grade.Silver;
+                    card.Magnitude = (int)(card.Magnitude * 1.5);
+                }
+                else if(card.Grade == Grade.Silver)
+                {
+                    card.Grade = Grade.Gold;
+                    card.Magnitude = (int)(card.Magnitude * 1.5);
+                }
+            }
+        }
+
         private void Reset()
         {
             Delay = _selectedCard.Delay;
@@ -100,6 +113,7 @@ namespace Arakara.Components
             _handEntities = new List<Entity>();
             _targetableEntities.ForEach(entity => entity.destroy());
             _targetableEntities = new List<Entity>();
+            UpgradeCards();
             _hand = new List<Card>();
             _selectedCard = null;
             _selectedTarget = null;
@@ -122,20 +136,20 @@ namespace Arakara.Components
         private void CreateCardEntity(int index, Card card)
         {
             var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (200 * (index - 1)), transform.position.Y - 250));
-            cardEntity.tag = 5;
+            cardEntity.tag = EntityTags.CARDCLICKER_TAG;
             var verts = new Vector2[4]
             {
                 new Vector2(0, 0),
-                new Vector2(150, 0),
-                new Vector2(150, 200),
-                new Vector2(0, 200),
+                new Vector2(75, 0),
+                new Vector2(75, 100),
+                new Vector2(0, 100),
             };
             cardEntity.addComponent(new SimplePolygon(verts, Color.Black));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Name, new Vector2(5, 5), Color.White));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Text, new Vector2(5, 30), Color.White));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Delay, new Vector2(5, 60), Color.White));
             cardEntity.addComponent(new CardClicker(card, this));
-            cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 150, 200)));
+            cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 75, 100)));
             _handEntities.Add(cardEntity);
         }
 
@@ -149,6 +163,7 @@ namespace Arakara.Components
                 var actor = targetableActors[i];
                 var actorEntity = actor.entity;
                 var targetableEntity = entity.scene.createEntity("target " + i, new Vector2(actorEntity.transform.position.X, actorEntity.transform.position.Y - 25));
+                targetableEntity.tag = EntityTags.TARGETABLE_TAG;
                 var verts = new Vector2[3]
                 {
                     new Vector2(65, 0),
