@@ -15,6 +15,8 @@ namespace Arakara.Scenes
 {
     public class MainGameScene : Scene
     {
+        private BattleContainer _battle;
+
         public MainGameScene()
             : base()
         {
@@ -28,12 +30,27 @@ namespace Arakara.Scenes
 
             clearColor = Color.WhiteSmoke;
 
-            var controllerEntity = createEntity("controller");
-            var controllerComponent = new BattleController();
-            controllerEntity.addComponent(controllerComponent);
+            var battleEntity = createEntity("battle");
+            _battle = new BattleContainer();
+            battleEntity.addComponent(_battle);
+        }
 
-            var mainCharacterEntity = createEntity("mc", new Vector2(110, 150));
-            var mainCharacterActor = new DeckBuilderActor("Main Character", 100, new Faction {
+        public override void onStart()
+        {
+            var knight = contentManager.Load<Texture2D>("Knight");
+
+            _battle.AddBattleEntity(MakeMC());
+            _battle.AddBattleEntity(MakeEnemy(knight));
+            _battle.AddBattleEntity(MakeEnemy(knight));
+
+            _battle.ToggleBattleActive();
+        }
+
+        private Entity MakeMC()
+        {
+            var mainCharacterEntity = createEntity("mc");
+            var mainCharacterActor = new DeckBuilderActor("Main Character", 100, new Faction
+            {
                 FactionName = "PC",
                 Id = 1
             }, new List<Card>()
@@ -121,40 +138,25 @@ namespace Arakara.Scenes
             };
             mainCharacterEntity.addComponent(mainCharacterActor);
             mainCharacterEntity.addComponent(new SimplePolygon(mcVerts, Color.Blue));
-            mainCharacterEntity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, 50), Color.Red));
 
+            return mainCharacterEntity;
+        }
 
-            var knight = contentManager.Load<Texture2D>("Knight");
-            var subtextures = Subtexture.subtexturesFromAtlas(knight, 98, 40);
-
-            var enemyEntity = createEntity("enemy1", new Vector2(400, 150));
+        private Entity MakeEnemy(Texture2D image)
+        {
+            var subtextures = Subtexture.subtexturesFromAtlas(image, 98, 40);
+            var enemyEntity = createEntity("enemy");
             var aIActor = new AIActor("Guard", 100, new Faction
             {
                 FactionName = "Enemies",
                 Id = 2
             });
             enemyEntity.addComponent(aIActor);
-            enemyEntity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, 50), Color.Red));
             var enemySprite = new Sprite(subtextures[0]);
             enemySprite.originNormalized = new Vector2(0, 0);
             enemyEntity.addComponent(enemySprite);
 
-
-            var enemyEntity2 = createEntity("enemy2", new Vector2(300, 150));
-            var aIActor2 = new AIActor("Guard", 100, new Faction
-            {
-                FactionName = "Enemies",
-                Id = 2
-            });
-            enemyEntity2.addComponent(aIActor2);
-            enemyEntity2.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, 50), Color.Red));
-            var enemy2Sprite = new Sprite(subtextures[0]);
-            enemy2Sprite.originNormalized = new Vector2(0, 0);
-            enemyEntity2.addComponent(enemy2Sprite);
-
-            controllerComponent.Actors.Add(mainCharacterActor);
-            controllerComponent.Actors.Add(aIActor);
-            controllerComponent.Actors.Add(aIActor2);
+            return enemyEntity;
         }
     }
 }

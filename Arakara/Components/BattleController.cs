@@ -8,42 +8,52 @@ using System.Threading.Tasks;
 
 namespace Arakara.Components
 {
-    public class BattleController : Component, IUpdatable
+    public class BattleController
     {
         public List<BattleActor> Actors { get; set; }
         public BattleActor CurrentActor { get; set; }
+
+        public bool IsActive { get; set; }
 
         public BattleController()
         {
             Actors = new List<BattleActor>();
         }
 
-        public void update()
+        public void Update()
         {
-            if (CurrentActor != null)
+            if(IsActive)
             {
-                CurrentActor.ProcessTurn(this);
-                if (CurrentActor.State == BattleState.NotTurn)
+                if (CurrentActor != null)
                 {
-                    CurrentActor.TimeUntilTurn = CurrentActor.Delay;
-                    while(Actors.Any(x => x.TimeUntilTurn == CurrentActor.TimeUntilTurn && x != CurrentActor))
+                    CurrentActor.ProcessTurn(this);
+                    if (CurrentActor.State == BattleState.NotTurn)
                     {
-                        CurrentActor.TimeUntilTurn++;
+                        CurrentActor.TimeUntilTurn = CurrentActor.Delay;
+                        while (Actors.Any(x => x.TimeUntilTurn == CurrentActor.TimeUntilTurn && x != CurrentActor))
+                        {
+                            CurrentActor.TimeUntilTurn++;
+                        }
+                        CurrentActor = Actors.OrderBy(x => x.TimeUntilTurn).First();
+                        var timeUntilTurn = CurrentActor.TimeUntilTurn;
+                        foreach (var actor in Actors)
+                        {
+                            actor.TimeUntilTurn -= timeUntilTurn;
+                        }
+                        CurrentActor.State = BattleState.StartOfTurn;
                     }
-                    CurrentActor = Actors.OrderBy(x => x.TimeUntilTurn).First();
-                    var timeUntilTurn = CurrentActor.TimeUntilTurn;
-                    foreach (var actor in Actors)
-                    {
-                        actor.TimeUntilTurn -= timeUntilTurn;
-                    }
+                }
+                else
+                {
+                    CurrentActor = Actors.First();
                     CurrentActor.State = BattleState.StartOfTurn;
                 }
             }
-            else
-            {
-                CurrentActor = Actors.First();
-                CurrentActor.State = BattleState.StartOfTurn;
-            }
+        }
+
+        public void AddActor(BattleActor actor)
+        {
+            Actors.Add(actor);
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Arakara.Components
             var hoverColor = GetSmartShadeColorByBase(mainColor, .25f);
             var selectedColor = GetSmartShadeColorByBase(mainColor, -.25f);
 
-            var mousePosition = Input.mousePosition;
+            var mousePosition = entity.scene.camera.screenToWorldPoint(Input.mousePosition);
             if(!Selected)
             {
                 if (entity.colliders.mainCollider.bounds.contains(mousePosition))

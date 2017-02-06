@@ -1,4 +1,5 @@
 ﻿using Arakara.Battle;
+using Nez;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,9 @@ namespace Arakara.Components
 
         protected override void OnEndOfTurn(BattleController controller)
         {
+            Core.schedule(2, (x) => {
+                State = BattleState.NotTurn;
+            });
         }
 
         protected override void OnStartOfTurn(BattleController controller)
@@ -31,7 +35,7 @@ namespace Arakara.Components
                 enemyActor.CurrentHP -= 5;
             }
             Delay = 10;
-            State = BattleState.NotTurn;
+            State = BattleState.EndOfTurn;
         }
 
         protected override void OnTargeting(BattleController controller)

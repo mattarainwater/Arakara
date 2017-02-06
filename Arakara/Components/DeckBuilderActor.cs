@@ -149,7 +149,7 @@ namespace Arakara.Components
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Text, new Vector2(5, 30), Color.White));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Delay, new Vector2(5, 60), Color.White));
             cardEntity.addComponent(new CardClicker(card, this));
-            cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 50, 75)));
+            cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 75, 100)));
             _handEntities.Add(cardEntity);
         }
 
