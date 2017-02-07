@@ -146,15 +146,46 @@ namespace Arakara.Scenes
         {
             var subtextures = Subtexture.subtexturesFromAtlas(image, 98, 40);
             var enemyEntity = createEntity("enemy");
-            var aIActor = new AIActor("Guard", 100, new Faction
+
+            var animation = enemyEntity.addComponent(new Sprite<Animations>(subtextures[0]));
+            animation.originNormalized = new Vector2(0, 0);
+            animation.addAnimation(Animations.Idle, new SpriteAnimation(new List<Subtexture>()
             {
-                FactionName = "Enemies",
-                Id = 2
-            });
+                subtextures[0],
+                subtextures[20],
+            }));
+            var attackAnimation = new SpriteAnimation(subtextures.Take(21).ToList());
+            attackAnimation.loop = false;
+            animation.addAnimation(Animations.Attack, attackAnimation);
+            var aIActor = new AIActor<Animations>("Guard", 100, new Faction
+                {
+                    FactionName = "Enemies",
+                    Id = 2
+                },
+                new List<BattleAction<Animations>>
+                {
+                    new BattleAction<Animations>
+                    {
+                        Animation = Animations.Attack,
+                        Description = "Deal 10  Damage",
+                        Effect = new DamageEffect(10),
+                        Name = "Stab",
+                        Speed = 10,
+                        Targeting = Targeting.Enemies
+                    },
+                    new BattleAction<Animations>
+                    {
+                        Animation = Animations.Attack,
+                        Description = "Deal 50  Damage",
+                        Effect = new DamageEffect(50),
+                        Name = "Super Stab",
+                        Speed = 70,
+                        Targeting = Targeting.Enemies
+                    }
+                },
+                new RandomAIDecider()
+            );
             enemyEntity.addComponent(aIActor);
-            var enemySprite = new Sprite(subtextures[0]);
-            enemySprite.originNormalized = new Vector2(0, 0);
-            enemyEntity.addComponent(enemySprite);
 
             return enemyEntity;
         }

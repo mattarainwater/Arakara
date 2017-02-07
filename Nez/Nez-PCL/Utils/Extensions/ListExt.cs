@@ -35,6 +35,13 @@ namespace Nez
 			list.Add( item );
 			return true;
 		}
+
+        public static T RandomElement<T>(this IList<T> list)
+        {
+            int k = Nez.Random.range(0, list.Count);
+
+            return list[k];
+        }
 	}
 }
 

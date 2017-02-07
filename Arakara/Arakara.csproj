@@ -53,11 +53,17 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Battle\AIDecider.cs" />
+    <Compile Include="Battle\BattleAction.cs" />
+    <Compile Include="Battle\ActionEffect.cs" />
+    <Compile Include="Battle\Animations.cs" />
     <Compile Include="Battle\BattleState.cs" />
     <Compile Include="Battle\Card.cs" />
+    <Compile Include="Battle\DamageEffect.cs" />
     <Compile Include="Battle\Effect.cs" />
     <Compile Include="Battle\Faction.cs" />
     <Compile Include="Battle\Grade.cs" />
+    <Compile Include="Battle\RandomAIDecider.cs" />
     <Compile Include="Battle\Targeting.cs" />
     <Compile Include="Common\EntityTags.cs" />
     <Compile Include="Components\AIActor.cs" />
