@@ -1,4 +1,5 @@
 ﻿using Arakara.Battle;
+using Microsoft.Xna.Framework;
 using Nez;
 using Nez.Sprites;
 using System;
@@ -49,6 +50,7 @@ namespace Arakara.Components
         {
             _currentAction = (BattleAction<TEnum>)_decider.ChooseAction(this, _actions.Select(x => (BattleAction)x).ToList(), controller);
             _animator.play(_currentAction.Animation);
+            _animator.originNormalized = Vector2.Zero;
             State = BattleState.AwaitingDecision;
         }
 

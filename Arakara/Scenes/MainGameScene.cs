@@ -57,76 +57,103 @@ namespace Arakara.Scenes
             {
                 new Card
                 {
-                    Delay =  5,
-                    Effect = Battle.Effect.Attack,
-                    Name = "Quick Slash",
-                    Magnitude = 5,
-                    Targeting = Targeting.Enemies,
+                    Action = new BattleAction
+                    {
+                        Name = "Quick Slash",
+                        Effect = new DamageEffect(5),
+                        Speed = 5,
+                        Targeting = Targeting.Enemies
+                    }
                 },
                 new Card
                 {
-                    Delay =  5,
-                    Effect = Battle.Effect.Attack,
-                    Name = "Quick Slash",
-                    Magnitude = 5,
-                    Targeting = Targeting.Enemies,
+                    Action = new BattleAction
+                    {
+                        Name = "Quick Slash",
+                        Effect = new DamageEffect(5),
+                        Speed = 5,
+                        Targeting = Targeting.Enemies
+                    }
                 },
                 new Card
                 {
-                    Delay =  5,
-                    Effect = Battle.Effect.Attack,
-                    Name = "Quick Slash",
-                    Magnitude = 5,
-                    Targeting = Targeting.Enemies,
+                    Action = new BattleAction
+                    {
+                        Name = "Quick Slash",
+                        Effect = new DamageEffect(5),
+                        Speed = 5,
+                        Targeting = Targeting.Enemies
+                    }
                 },
                 new Card
                 {
-                    Delay =  5,
-                    Effect = Battle.Effect.Attack,
-                    Name = "Quick Slash",
-                    Magnitude = 5,
-                    Targeting = Targeting.Enemies,
+                    Action = new BattleAction
+                    {
+                        Name = "Quick Slash",
+                        Effect = new DamageEffect(5),
+                        Speed = 5,
+                        Targeting = Targeting.Enemies
+                    }
                 },
                 new Card
                 {
-                    Delay =  10,
-                    Effect = Battle.Effect.Attack,
-                    Name = "Heavy Slash",
-                    Magnitude = 10,
-                    Targeting = Targeting.Enemies,
+                    Action = new BattleAction
+                    {
+                        Name = "Quick Slash",
+                        Effect = new DamageEffect(5),
+                        Speed = 5,
+                        Targeting = Targeting.Enemies
+                    }
                 },
                 new Card
                 {
-                    Delay =  10,
-                    Effect = Battle.Effect.Attack,
-                    Name = "Heavy Slash",
-                    Magnitude = 10,
-                    Targeting = Targeting.Enemies,
+                    Action = new BattleAction
+                    {
+                        Name = "Quick Slash",
+                        Effect = new DamageEffect(5),
+                        Speed = 5,
+                        Targeting = Targeting.Enemies
+                    }
                 },
                 new Card
                 {
-                    Delay =  20,
-                    Effect = Battle.Effect.Heal,
-                    Name = "Pocket Potion",
-                    Magnitude = 20,
-                    Targeting = Targeting.Self,
+                    Action = new BattleAction
+                    {
+                        Name = "Quick Slash",
+                        Effect = new DamageEffect(5),
+                        Speed = 5,
+                        Targeting = Targeting.Enemies
+                    }
                 },
                 new Card
                 {
-                    Delay =  20,
-                    Effect = Battle.Effect.Heal,
-                    Name = "Pocket Potion",
-                    Magnitude = 20,
-                    Targeting = Targeting.Self
+                    Action = new BattleAction
+                    {
+                        Name = "Heavy Slash",
+                        Effect = new DamageEffect(10),
+                        Speed = 10,
+                        Targeting = Targeting.Enemies
+                    }
                 },
                 new Card
                 {
-
-                    Delay =  5,
-                    Effect = Battle.Effect.Defense,
-                    Name = "Evade",
-                    Magnitude = 10,
-                    Targeting = Targeting.Self,
+                    Action = new BattleAction
+                    {
+                        Name = "Heavy Slash",
+                        Effect = new DamageEffect(10),
+                        Speed = 10,
+                        Targeting = Targeting.Enemies
+                    }
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Heavy Slash",
+                        Effect = new DamageEffect(10),
+                        Speed = 10,
+                        Targeting = Targeting.Enemies
+                    }
                 },
             });
             var mcVerts = new Vector2[4]
@@ -145,10 +172,10 @@ namespace Arakara.Scenes
         private Entity MakeEnemy(Texture2D image)
         {
             var subtextures = Subtexture.subtexturesFromAtlas(image, 98, 40);
+            subtextures.ForEach(x => x.center = Vector2.Zero);
             var enemyEntity = createEntity("enemy");
 
             var animation = enemyEntity.addComponent(new Sprite<Animations>(subtextures[0]));
-            animation.originNormalized = new Vector2(0, 0);
             animation.addAnimation(Animations.Idle, new SpriteAnimation(new List<Subtexture>()
             {
                 subtextures[0],
@@ -156,6 +183,7 @@ namespace Arakara.Scenes
             }));
             var attackAnimation = new SpriteAnimation(subtextures.Take(21).ToList());
             attackAnimation.loop = false;
+            animation.originNormalized = Vector2.Zero;
             animation.addAnimation(Animations.Attack, attackAnimation);
             var aIActor = new AIActor<Animations>("Guard", 100, new Faction
                 {
@@ -167,7 +195,6 @@ namespace Arakara.Scenes
                     new BattleAction<Animations>
                     {
                         Animation = Animations.Attack,
-                        Description = "Deal 10  Damage",
                         Effect = new DamageEffect(10),
                         Name = "Stab",
                         Speed = 10,
@@ -176,7 +203,6 @@ namespace Arakara.Scenes
                     new BattleAction<Animations>
                     {
                         Animation = Animations.Attack,
-                        Description = "Deal 50  Damage",
                         Effect = new DamageEffect(50),
                         Name = "Super Stab",
                         Speed = 70,

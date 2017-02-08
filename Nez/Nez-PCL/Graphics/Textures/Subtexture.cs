@@ -25,7 +25,7 @@ namespace Nez.Textures
 		/// center of the sourceRect if it had a 0,0 origin. This is basically the center in sourceRect-space.
 		/// </summary>
 		/// <value>The center.</value>
-		public readonly Vector2 center;
+		public Vector2 center;
 		
 
 		public Subtexture( Texture2D texture, Rectangle sourceRect )

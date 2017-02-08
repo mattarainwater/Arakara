@@ -23,5 +23,10 @@ namespace Arakara.Battle
                 target.CurrentHP -= Damage;
             }
         }
+
+        public override string GetDescription()
+        {
+            return $"Deal {Damage} Damage";
+        }
     }
 }

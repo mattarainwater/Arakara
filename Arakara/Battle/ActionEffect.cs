@@ -11,6 +11,8 @@ namespace Arakara.Battle
     {
         public abstract void Perform(BattleActor actor, List<BattleActor> targets, BattleController controller);
 
+        public abstract string GetDescription();
+
         public void Perform(BattleActor actor, BattleActor target, BattleController controller)
         {
             Perform(actor, new List<BattleActor> { target }, controller);

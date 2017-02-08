@@ -33,8 +33,8 @@ namespace Arakara.Components
             _screenWidth = entity.scene.sceneRenderTargetSize.X;
             _screenHeight = entity.scene.sceneRenderTargetSize.Y;
 
-            _allyFactionStartingX = 100;
-            _enemyFactionStartingX = (_screenWidth / 2);
+            _allyFactionStartingX = 125;
+            _enemyFactionStartingX = (_screenWidth / 2) + 75;
 
             _entityYPos = _screenHeight / 2;
         }
@@ -47,8 +47,8 @@ namespace Arakara.Components
             }
             Controller.Update();
             _firstInitialized = true;
-            entity.scene.camera.entity.removeComponent<FollowCamera>();
-            entity.scene.camera.entity.addComponent(new FollowCamera(Controller.CurrentActor.entity));
+            //entity.scene.camera.entity.removeComponent<FollowCamera>();
+            //entity.scene.camera.entity.addComponent(new FollowCamera(Controller.CurrentActor.entity));
         }
 
         public void AddBattleEntity(Entity entity)

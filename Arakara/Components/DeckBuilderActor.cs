@@ -59,24 +59,7 @@ namespace Arakara.Components
         {
             if(_selectedTarget != null)
             {
-                switch (_selectedCard.Effect)
-                {
-                    case Effect.Attack:
-                        _selectedTarget.CurrentHP -= _selectedCard.Magnitude;
-                        break;
-                    case Effect.Defense:
-                        Immune = true;
-                        break;
-                    case Effect.Heal:
-                        _selectedTarget.CurrentHP += _selectedCard.Magnitude;
-                        if (_selectedTarget.CurrentHP > _selectedTarget.MaxHP)
-                        {
-                            _selectedTarget.CurrentHP = _selectedTarget.MaxHP;
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                _selectedCard.Action.Effect.Perform(this, _selectedTarget, controller);
                 State = BattleState.EndOfTurn;
             }
         }
@@ -92,22 +75,23 @@ namespace Arakara.Components
             var nonSelectedCards = _hand.Where(x => x == _selectedCard);
             foreach(var card in nonSelectedCards)
             {
-                if(card.Grade == Grade.Bronze)
+                var newDamage = (int)(((DamageEffect)card.Action.Effect).Damage * 1.5);
+                if (card.Grade == Grade.Bronze)
                 {
                     card.Grade = Grade.Silver;
-                    card.Magnitude = (int)(card.Magnitude * 1.5);
+                    ((DamageEffect)card.Action.Effect).Damage = newDamage;
                 }
                 else if(card.Grade == Grade.Silver)
                 {
                     card.Grade = Grade.Gold;
-                    card.Magnitude = (int)(card.Magnitude * 1.5);
+                    ((DamageEffect)card.Action.Effect).Damage = newDamage;
                 }
             }
         }
 
         private void Reset()
         {
-            Delay = _selectedCard.Delay;
+            Delay = _selectedCard.Action.Speed;
             _discardPile.AddRange(_hand);
             _handEntities.ForEach(entity => entity.destroy());
             _handEntities = new List<Entity>();
@@ -145,9 +129,9 @@ namespace Arakara.Components
                 new Vector2(0, 100),
             };
             cardEntity.addComponent(new SimplePolygon(verts, Color.Black));
-            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Name, new Vector2(5, 5), Color.White));
-            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Text, new Vector2(5, 30), Color.White));
-            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Delay, new Vector2(5, 60), Color.White));
+            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Name, new Vector2(5, 5), Color.White));
+            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Effect.GetDescription(), new Vector2(5, 30), Color.White));
+            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Action.Speed, new Vector2(5, 60), Color.White));
             cardEntity.addComponent(new CardClicker(card, this));
             cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 75, 100)));
             _handEntities.Add(cardEntity);
@@ -157,7 +141,7 @@ namespace Arakara.Components
         {
             _targetableEntities.ForEach(entity => entity.destroy());
             _targetableEntities = new List<Entity>();
-            var targetableActors = GetTargetableActors(_selectedCard.Targeting, actors);
+            var targetableActors = GetTargetableActors(_selectedCard.Action.Targeting, actors);
             for (var i = 0; i < targetableActors.Count(); i++)
             {
                 var actor = targetableActors[i];

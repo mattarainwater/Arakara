@@ -12,7 +12,6 @@ namespace Arakara.Battle
         public Targeting Targeting { get; set; }
         public string Name { get; set; }
         public int Speed { get; set; }
-        public string Description { get; set; }
     }
 
     public class BattleAction<TEnum> : BattleAction where TEnum : struct, IComparable, IFormattable
