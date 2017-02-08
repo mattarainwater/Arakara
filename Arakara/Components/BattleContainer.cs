@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Arakara.Battle;
+using Arakara.Common;
 
 namespace Arakara.Components
 {
@@ -15,40 +16,33 @@ namespace Arakara.Components
         private int _screenHeight;
         private int _allyFactionStartingX;
         private int _enemyFactionStartingX;
+        private int _marginLeftRight;
         private int _entityYPos;
-
-        private bool _firstInitialized;
+        private int _halfWayPoint;
+        private int _spacing;
 
         public BattleController Controller { get; set; }
         public List<Entity> BattleEntities { get; set; }
 
-        public BattleContainer()
+        public BattleContainer(int screenWidth, int screenHeight)
         {
             Controller = new BattleController();
             BattleEntities = new List<Entity>();
-        }
+            _screenWidth = screenWidth;
+            _screenHeight = screenHeight;
 
-        public override void onAddedToEntity()
-        {
-            _screenWidth = entity.scene.sceneRenderTargetSize.X;
-            _screenHeight = entity.scene.sceneRenderTargetSize.Y;
+            _halfWayPoint = _screenWidth / 2;
+            _entityYPos = _screenHeight / 3;
+            _marginLeftRight = _screenWidth / 20;
+            _spacing = _screenWidth / 40;
 
-            _allyFactionStartingX = 125;
-            _enemyFactionStartingX = (_screenWidth / 2) + 75;
-
-            _entityYPos = _screenHeight / 2;
+            _allyFactionStartingX = _halfWayPoint - _marginLeftRight - DimensionConstants.CHARACTER_WIDTH;
+            _enemyFactionStartingX = _halfWayPoint + _marginLeftRight;
         }
 
         public void update()
         {
-            if(!_firstInitialized)
-            {
-                InitializeEntitiesPosition();
-            }
             Controller.Update();
-            _firstInitialized = true;
-            //entity.scene.camera.entity.removeComponent<FollowCamera>();
-            //entity.scene.camera.entity.addComponent(new FollowCamera(Controller.CurrentActor.entity));
         }
 
         public void AddBattleEntity(Entity entity)
@@ -56,11 +50,8 @@ namespace Arakara.Components
             var actor = entity.getComponent<BattleActor>();
             if(actor != null)
             {
-                if(_firstInitialized)
-                {
-                    entity.transform.position = GetPositionForEntity(actor.Faction);
-                }
-                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, 50), Color.Red));
+                entity.transform.position = GetPositionForEntity(actor);
+                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT), Color.Red));
                 BattleEntities.Add(entity);
                 Controller.AddActor(actor);
             }
@@ -75,20 +66,24 @@ namespace Arakara.Components
             foreach (var entity in BattleEntities)
             {
                 var actor = entity.getComponent<BattleActor>();
-                entity.transform.position = GetPositionForEntity(actor.Faction);
+                entity.transform.position = GetPositionForEntity(actor);
             }
         }
 
-        private Vector2 GetPositionForEntity(Faction faction)
+        private Vector2 GetPositionForEntity(BattleActor actor)
         {
-            if(faction.Id == 1)
+            if(actor.Faction.Id == 1)
             {
-                return new Vector2(_allyFactionStartingX, _entityYPos);
+                var numAllies = Controller.Actors.Count(x => x.Faction.Id == actor.Faction.Id);
+                _allyFactionStartingX += numAllies * DimensionConstants.CHARACTER_WIDTH + _spacing;
+                var pos = new Vector2(_allyFactionStartingX, _entityYPos);
+                return pos;
             }
             else
             {
+                var numEnemies = Controller.Actors.Count(x => x.Faction.Id == actor.Faction.Id);
+                _enemyFactionStartingX += numEnemies * DimensionConstants.CHARACTER_WIDTH + _spacing;
                 var pos = new Vector2(_enemyFactionStartingX, _entityYPos);
-                _enemyFactionStartingX += 100;
                 return pos;
             }
         }

@@ -18,10 +18,11 @@ namespace Arakara.Components
         public Faction Faction { get; set; }
         public BattleState State { get; set; }
         public bool Immune { get; set; }
+        public int Size { get; set; }
 
         protected BattleActor _selectedTarget;
 
-        public BattleActor(string name, int maxHp, Faction faction)
+        public BattleActor(string name, int maxHp, Faction faction, int size = 1)
         {
             Name = name;
             MaxHP = maxHp;
@@ -30,6 +31,7 @@ namespace Arakara.Components
             Delay = 0;
             Faction = faction;
             State = BattleState.NotTurn;
+            Size = size;
         }
 
         public virtual void ProcessTurn(BattleController controller)

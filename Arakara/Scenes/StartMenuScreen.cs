@@ -16,7 +16,6 @@ namespace Arakara.Scenes
 
         public override void initialize()
         {
-            Screen.setSize(512 * 3, 256 * 3);
             addRenderer(new RenderLayerExcludeRenderer(0));
 
             _canvas = createEntity("ui").addComponent(new UICanvas());

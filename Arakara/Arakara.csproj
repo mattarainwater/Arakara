@@ -65,6 +65,7 @@
     <Compile Include="Battle\Grade.cs" />
     <Compile Include="Battle\RandomAIDecider.cs" />
     <Compile Include="Battle\Targeting.cs" />
+    <Compile Include="Common\DimensionConstants.cs" />
     <Compile Include="Common\EntityTags.cs" />
     <Compile Include="Components\AIActor.cs" />
     <Compile Include="Components\BattleContainer.cs" />

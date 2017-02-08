@@ -31,9 +31,17 @@ namespace Arakara.Components
 
         protected override void OnAwaitingDecision(BattleController controller)
         {
-            if (!_animator.isPlaying)
+            var enemyActor = controller.Actors.First(y => y.Faction.Id != Faction.Id);
+            if (_animator != null)
             {
-                var enemyActor = controller.Actors.First(y => y.Faction.Id != Faction.Id);
+                if (!_animator.isPlaying)
+                {
+                    _currentAction.Effect.Perform(this, enemyActor, controller);
+                    State = BattleState.EndOfTurn;
+                }
+            }
+            else
+            {
                 _currentAction.Effect.Perform(this, enemyActor, controller);
                 State = BattleState.EndOfTurn;
             }
@@ -49,8 +57,11 @@ namespace Arakara.Components
         protected override void OnStartOfTurn(BattleController controller)
         {
             _currentAction = (BattleAction<TEnum>)_decider.ChooseAction(this, _actions.Select(x => (BattleAction)x).ToList(), controller);
-            _animator.play(_currentAction.Animation);
-            _animator.originNormalized = Vector2.Zero;
+            if(_animator != null)
+            {
+                _animator.play(_currentAction.Animation);
+                _animator.originNormalized = Vector2.Zero;
+            }
             State = BattleState.AwaitingDecision;
         }
 

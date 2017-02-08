@@ -1,4 +1,5 @@
 ﻿using Arakara.Battle;
+using Arakara.Common;
 using Arakara.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,14 +25,12 @@ namespace Arakara.Scenes
 
         public override void initialize()
         {
-            setDesignResolution(512, 256, Scene.SceneResolutionPolicy.ShowAllPixelPerfect);
-            Screen.setSize(512 * 3, 256 * 3);
             addRenderer(new RenderLayerExcludeRenderer(0));
 
             clearColor = Color.WhiteSmoke;
 
             var battleEntity = createEntity("battle");
-            _battle = new BattleContainer();
+            _battle = new BattleContainer(Screen.width, Screen.height);
             battleEntity.addComponent(_battle);
         }
 
@@ -159,9 +158,9 @@ namespace Arakara.Scenes
             var mcVerts = new Vector2[4]
             {
                 new Vector2(0, 0),
-                new Vector2(75, 0),
-                new Vector2(75, 40),
-                new Vector2(0, 40),
+                new Vector2(DimensionConstants.CHARACTER_WIDTH, 0),
+                new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT),
+                new Vector2(0, DimensionConstants.CHARACTER_HEIGHT),
             };
             mainCharacterEntity.addComponent(mainCharacterActor);
             mainCharacterEntity.addComponent(new SimplePolygon(mcVerts, Color.Blue));
@@ -171,20 +170,29 @@ namespace Arakara.Scenes
 
         private Entity MakeEnemy(Texture2D image)
         {
-            var subtextures = Subtexture.subtexturesFromAtlas(image, 98, 40);
-            subtextures.ForEach(x => x.center = Vector2.Zero);
+        //    var subtextures = Subtexture.subtexturesFromAtlas(image, 98, 40);
+        //    subtextures.ForEach(x => x.center = Vector2.Zero);
             var enemyEntity = createEntity("enemy");
 
-            var animation = enemyEntity.addComponent(new Sprite<Animations>(subtextures[0]));
-            animation.addAnimation(Animations.Idle, new SpriteAnimation(new List<Subtexture>()
+            //var animation = enemyEntity.addComponent(new Sprite<Animations>(subtextures[0]));
+            //animation.addAnimation(Animations.Idle, new SpriteAnimation(new List<Subtexture>()
+            //{
+            //    subtextures[0],
+            //    subtextures[20],
+            //}));
+            //var attackAnimation = new SpriteAnimation(subtextures.Take(21).ToList());
+            //attackAnimation.loop = false;
+            //animation.originNormalized = Vector2.Zero;
+            //animation.addAnimation(Animations.Attack, attackAnimation);
+
+            var mcVerts = new Vector2[4]
             {
-                subtextures[0],
-                subtextures[20],
-            }));
-            var attackAnimation = new SpriteAnimation(subtextures.Take(21).ToList());
-            attackAnimation.loop = false;
-            animation.originNormalized = Vector2.Zero;
-            animation.addAnimation(Animations.Attack, attackAnimation);
+                new Vector2(0, 0),
+                new Vector2(DimensionConstants.CHARACTER_WIDTH, 0),
+                new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT),
+                new Vector2(0, DimensionConstants.CHARACTER_HEIGHT),
+            };
+            enemyEntity.addComponent(new SimplePolygon(mcVerts, Color.Red));
             var aIActor = new AIActor<Animations>("Guard", 100, new Faction
                 {
                     FactionName = "Enemies",

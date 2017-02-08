@@ -9,8 +9,8 @@ namespace Arakara
 {
     public class GameMain : Core
     {
-        private const int WIDTH = 1280;
-        private const int HEIGHT = 720;
+        private const int WIDTH = 1900;
+        private const int HEIGHT = 1080;
 
         public GameMain()
             : base(width: WIDTH, height: HEIGHT)

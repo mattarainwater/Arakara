@@ -15,7 +15,6 @@ namespace Arakara.Components
         private List<Card> _discardPile;
 
         private List<Entity> _handEntities;
-        private List<Entity> _targetableEntities;
 
         private Card _selectedCard;
 
@@ -28,7 +27,6 @@ namespace Arakara.Components
             _hand = new List<Card>();
             _discardPile = new List<Card>();
             _handEntities = new List<Entity>();
-            _targetableEntities = new List<Entity>();
 
             ShuffleDeck();
         }
@@ -50,7 +48,7 @@ namespace Arakara.Components
         {
             if(_selectedCard != null)
             {
-                MakeTargetables(controller.Actors);
+                controller.MakeTargetables(this, _selectedCard.Action.Targeting);
                 State = BattleState.Targeting;
             }
         }
@@ -95,8 +93,6 @@ namespace Arakara.Components
             _discardPile.AddRange(_hand);
             _handEntities.ForEach(entity => entity.destroy());
             _handEntities = new List<Entity>();
-            _targetableEntities.ForEach(entity => entity.destroy());
-            _targetableEntities = new List<Entity>();
             UpgradeCards();
             _hand = new List<Card>();
             _selectedCard = null;
@@ -135,45 +131,6 @@ namespace Arakara.Components
             cardEntity.addComponent(new CardClicker(card, this));
             cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 75, 100)));
             _handEntities.Add(cardEntity);
-        }
-
-        private void MakeTargetables(List<BattleActor> actors)
-        {
-            _targetableEntities.ForEach(entity => entity.destroy());
-            _targetableEntities = new List<Entity>();
-            var targetableActors = GetTargetableActors(_selectedCard.Action.Targeting, actors);
-            for (var i = 0; i < targetableActors.Count(); i++)
-            {
-                var actor = targetableActors[i];
-                var actorEntity = actor.entity;
-                var targetableEntity = entity.scene.createEntity("target " + i, new Vector2(actorEntity.transform.position.X -  20, actorEntity.transform.position.Y - 20));
-                targetableEntity.tag = EntityTags.TARGETABLE_TAG;
-                var verts = new Vector2[3]
-                {
-                    new Vector2(65, 0),
-                    new Vector2(85, 0),
-                    new Vector2(75, 10),
-                };
-                targetableEntity.addComponent(new SimplePolygon(verts, Color.LightPink));
-                targetableEntity.addCollider(new BoxCollider(new Rectangle(0, 25, 98, 40)));
-                targetableEntity.addComponent(new Targetable(actor, this));
-                _targetableEntities.Add(targetableEntity);
-            }
-        }
-
-        private List<BattleActor> GetTargetableActors(Targeting targeting, List<BattleActor> actors)
-        {
-            switch (targeting)
-            {
-                case Targeting.Allies:
-                    return actors.Where(x => x.Faction.Id == Faction.Id).ToList();
-                case Targeting.Enemies:
-                    return actors.Where(x => x.Faction.Id != Faction.Id).ToList();
-                case Targeting.Self:
-                    return actors.Where(x => x == this).ToList();
-                default:
-                    return null;
-            }
         }
 
         private void ShuffleDeck()
