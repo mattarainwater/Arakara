@@ -59,10 +59,12 @@
     <Compile Include="Battle\Animations.cs" />
     <Compile Include="Battle\BattleState.cs" />
     <Compile Include="Battle\Card.cs" />
+    <Compile Include="Battle\CardUpgrader.cs" />
     <Compile Include="Battle\DamageEffect.cs" />
     <Compile Include="Battle\Effect.cs" />
     <Compile Include="Battle\Faction.cs" />
     <Compile Include="Battle\Grade.cs" />
+    <Compile Include="Battle\HealEffect.cs" />
     <Compile Include="Battle\RandomAIDecider.cs" />
     <Compile Include="Battle\Targeting.cs" />
     <Compile Include="Common\DimensionConstants.cs" />

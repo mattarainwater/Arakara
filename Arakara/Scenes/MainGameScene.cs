@@ -148,10 +148,10 @@ namespace Arakara.Scenes
                 {
                     Action = new BattleAction
                     {
-                        Name = "Heavy Slash",
-                        Effect = new DamageEffect(10),
+                        Name = "Potion",
+                        Effect = new HealEffect(40),
                         Speed = 10,
-                        Targeting = Targeting.Enemies
+                        Targeting = Targeting.Self
                     }
                 },
             });
@@ -163,27 +163,14 @@ namespace Arakara.Scenes
                 new Vector2(0, DimensionConstants.CHARACTER_HEIGHT),
             };
             mainCharacterEntity.addComponent(mainCharacterActor);
-            mainCharacterEntity.addComponent(new SimplePolygon(mcVerts, Color.Blue));
+            mainCharacterEntity.addComponent(new SimplePolygon(mcVerts, Color.LightSkyBlue));
 
             return mainCharacterEntity;
         }
 
         private Entity MakeEnemy(Texture2D image)
         {
-        //    var subtextures = Subtexture.subtexturesFromAtlas(image, 98, 40);
-        //    subtextures.ForEach(x => x.center = Vector2.Zero);
             var enemyEntity = createEntity("enemy");
-
-            //var animation = enemyEntity.addComponent(new Sprite<Animations>(subtextures[0]));
-            //animation.addAnimation(Animations.Idle, new SpriteAnimation(new List<Subtexture>()
-            //{
-            //    subtextures[0],
-            //    subtextures[20],
-            //}));
-            //var attackAnimation = new SpriteAnimation(subtextures.Take(21).ToList());
-            //attackAnimation.loop = false;
-            //animation.originNormalized = Vector2.Zero;
-            //animation.addAnimation(Animations.Attack, attackAnimation);
 
             var mcVerts = new Vector2[4]
             {
@@ -192,7 +179,7 @@ namespace Arakara.Scenes
                 new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT),
                 new Vector2(0, DimensionConstants.CHARACTER_HEIGHT),
             };
-            enemyEntity.addComponent(new SimplePolygon(mcVerts, Color.Red));
+            enemyEntity.addComponent(new SimplePolygon(mcVerts, Color.LightGreen));
             var aIActor = new AIActor<Animations>("Guard", 100, new Faction
                 {
                     FactionName = "Enemies",

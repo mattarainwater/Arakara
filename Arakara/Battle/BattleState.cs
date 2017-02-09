@@ -9,8 +9,7 @@ namespace Arakara.Battle
     public enum BattleState
     {
         StartOfTurn,
-        AwaitingDecision,
-        Targeting,
+        DuringTurn,
         EndOfTurn,
         NotTurn
     }

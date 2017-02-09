@@ -51,7 +51,8 @@ namespace Arakara.Components
             if(actor != null)
             {
                 entity.transform.position = GetPositionForEntity(actor);
-                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT), Color.Red));
+                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, -15), Color.Red));
+                entity.addCollider(new BoxCollider(0, 0, DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT));
                 BattleEntities.Add(entity);
                 Controller.AddActor(actor);
             }

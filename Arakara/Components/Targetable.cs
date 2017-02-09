@@ -13,19 +13,13 @@ namespace Arakara.Components
     {
         private SimplePolygon _simplePolygon;
         private BattleActor _target;
-        private BattleActor _actor;
 
         public bool Selected { get; set; }
 
-        public Targetable(BattleActor target, BattleActor actor)
+        public Targetable(BattleActor target, SimplePolygon polygon)
         {
             _target = target;
-            _actor = actor;
-        }
-
-        public override void onAddedToEntity()
-        {
-            _simplePolygon = entity.getComponent<SimplePolygon>();
+            _simplePolygon = polygon;
         }
 
         public void update()
@@ -49,7 +43,7 @@ namespace Arakara.Components
                         }
 
                         Selected = true;
-                        _actor.SelectTarget(_target);
+                        _target.Controller.CurrentActor.SelectTarget(_target);
                     }
                     else
                     {

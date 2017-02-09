@@ -13,12 +13,10 @@ namespace Arakara.Components
         private List<Card> _deck;
         private List<Card> _hand;
         private List<Card> _discardPile;
-
         private List<Entity> _handEntities;
-
         private Card _selectedCard;
-
         private int _handSize = 3;
+        private CardUpgrader _cardUpgrader;
 
         public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card> cards) :
             base(name, maxHP, faction)
@@ -29,40 +27,33 @@ namespace Arakara.Components
             _handEntities = new List<Entity>();
 
             ShuffleDeck();
+
+            _cardUpgrader = new CardUpgrader();
         }
 
         public void PlayCard(Card card)
         {
             _selectedCard = card;
-            State = BattleState.AwaitingDecision;
+            Controller.MakeTargetables(this, _selectedCard.Action.Targeting);
         }
 
-        protected override void OnStartOfTurn(BattleController controller)
+        protected override void OnStartOfTurn()
         {
             DrawCards();
-            State = BattleState.AwaitingDecision;
+            State = BattleState.DuringTurn;
             Immune = false;
         }
 
-        protected override void OnAwaitingDecision(BattleController controller)
+        protected override void DuringTurn()
         {
-            if(_selectedCard != null)
+            if(_selectedCard != null && _selectedTargets != null)
             {
-                controller.MakeTargetables(this, _selectedCard.Action.Targeting);
-                State = BattleState.Targeting;
-            }
-        }
-
-        protected override void OnTargeting(BattleController controller)
-        {
-            if(_selectedTarget != null)
-            {
-                _selectedCard.Action.Effect.Perform(this, _selectedTarget, controller);
+                _selectedCard.Action.Effect.Perform(this, _selectedTargets, Controller);
                 State = BattleState.EndOfTurn;
             }
         }
 
-        protected override void OnEndOfTurn(BattleController controller)
+        protected override void OnEndOfTurn()
         {
             Reset();
             State = BattleState.NotTurn;
@@ -71,20 +62,7 @@ namespace Arakara.Components
         private void UpgradeCards()
         {
             var nonSelectedCards = _hand.Where(x => x == _selectedCard);
-            foreach(var card in nonSelectedCards)
-            {
-                var newDamage = (int)(((DamageEffect)card.Action.Effect).Damage * 1.5);
-                if (card.Grade == Grade.Bronze)
-                {
-                    card.Grade = Grade.Silver;
-                    ((DamageEffect)card.Action.Effect).Damage = newDamage;
-                }
-                else if(card.Grade == Grade.Silver)
-                {
-                    card.Grade = Grade.Gold;
-                    ((DamageEffect)card.Action.Effect).Damage = newDamage;
-                }
-            }
+            _cardUpgrader.UpgradeCards(nonSelectedCards);
         }
 
         private void Reset()
@@ -96,7 +74,7 @@ namespace Arakara.Components
             UpgradeCards();
             _hand = new List<Card>();
             _selectedCard = null;
-            _selectedTarget = null;
+            _selectedTargets = null;
         }
 
         private void DrawCards()
@@ -136,16 +114,7 @@ namespace Arakara.Components
         private void ShuffleDeck()
         {
             var deckList = _discardPile.Concat(_deck).ToArray();
-
-            for (var i = 0; i < deckList.Length; i++)
-            {
-                var j = Nez.Random.range(0, i);
-                var entryI = deckList[i];
-                var entryJ = deckList[j];
-                deckList[i] = entryJ;
-                deckList[j] = entryI;
-            }
-
+            deckList.shuffle();
             _deck = deckList.ToList();
             _discardPile = new List<Card>();
         }

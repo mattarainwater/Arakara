@@ -1,4 +1,6 @@
 ﻿using Arakara.Battle;
+using Arakara.Common;
+using Microsoft.Xna.Framework;
 using Nez;
 using System;
 using System.Collections.Generic;
@@ -8,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Arakara.Components
 {
-    public abstract class BattleActor : Component
+    public abstract class BattleActor : Component, IUpdatable
     {
         public string Name { get; set; }
         public int MaxHP { get; set; }
@@ -19,8 +21,13 @@ namespace Arakara.Components
         public BattleState State { get; set; }
         public bool Immune { get; set; }
         public int Size { get; set; }
+        public bool Targetable { get; set; }
+        public BattleController Controller { get; set; }
 
-        protected BattleActor _selectedTarget;
+        protected List<BattleActor> _selectedTargets;
+
+        private Targetable _targetable;
+        private SimplePolygon _targetablePolygon;
 
         public BattleActor(string name, int maxHp, Faction faction, int size = 1)
         {
@@ -34,36 +41,62 @@ namespace Arakara.Components
             Size = size;
         }
 
-        public virtual void ProcessTurn(BattleController controller)
+        public void update()
+        {
+            if(Targetable)
+            {
+                if(_targetable == null)
+                {
+                    var verts = new Vector2[4]
+                    {
+                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 5),
+                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 5),
+                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 10),
+                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 10),
+                    };
+                    var polygon = new SimplePolygon(verts, Color.LightPink);
+                    _targetablePolygon = entity.addComponent(polygon);
+                    _targetable = entity.addComponent(new Targetable(this, polygon));
+                }
+            }
+            else if(_targetable != null)
+            {
+                entity.removeComponent(_targetablePolygon);
+                entity.removeComponent(_targetable);
+                _targetable = null;
+            }
+        }
+
+        public virtual void ProcessTurn()
         {
             switch (State)
             {
                 case BattleState.StartOfTurn:
-                    OnStartOfTurn(controller);
+                    OnStartOfTurn();
                     break;
-                case BattleState.AwaitingDecision:
-                    OnAwaitingDecision(controller);
-                    break;
-                case BattleState.Targeting:
-                    OnTargeting(controller);
+                case BattleState.DuringTurn:
+                    DuringTurn();
                     break;
                 case BattleState.EndOfTurn:
-                    OnEndOfTurn(controller);
+                    OnEndOfTurn();
                     break;
             }
         }
 
         public void SelectTarget(BattleActor target)
         {
-            _selectedTarget = target;
+            SelectTargets(new List<BattleActor> { target });
         }
 
-        protected abstract void OnStartOfTurn(BattleController controller);
+        public void SelectTargets(List<BattleActor> targets)
+        {
+            _selectedTargets = targets;
+        }
 
-        protected abstract void OnAwaitingDecision(BattleController controller);
+        protected abstract void OnStartOfTurn();
 
-        protected abstract void OnTargeting(BattleController controller);
+        protected abstract void DuringTurn();
 
-        protected abstract void OnEndOfTurn(BattleController controller);
+        protected abstract void OnEndOfTurn();
     }
 }
