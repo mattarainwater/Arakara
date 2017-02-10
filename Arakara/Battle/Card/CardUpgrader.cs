@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Arakara.Battle.Effects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arakara.Battle
+namespace Arakara.Battle.Card
 {
     public class CardUpgrader
     {
@@ -20,16 +21,19 @@ namespace Arakara.Battle
         {
             if(card.Action.Effect.GetType() == typeof(DamageEffect))
             {
-                var newDamage = (int)(((DamageEffect)card.Action.Effect).Damage * 1.5);
+                var newMinDamage = (int)(((DamageEffect)card.Action.Effect).MinDamage * 1.5);
+                var newMaxDamage = (int)(((DamageEffect)card.Action.Effect).MaxDamage * 1.5);
                 if (card.Grade == Grade.Bronze)
                 {
                     card.Grade = Grade.Silver;
-                    ((DamageEffect)card.Action.Effect).Damage = newDamage;
+                    ((DamageEffect)card.Action.Effect).MinDamage = newMinDamage;
+                    ((DamageEffect)card.Action.Effect).MaxDamage = newMaxDamage;
                 }
                 else if (card.Grade == Grade.Silver)
                 {
                     card.Grade = Grade.Gold;
-                    ((DamageEffect)card.Action.Effect).Damage = newDamage;
+                    ((DamageEffect)card.Action.Effect).MinDamage = newMinDamage;
+                    ((DamageEffect)card.Action.Effect).MaxDamage = newMaxDamage;
                 }
             }
             else if (card.Action.Effect.GetType() == typeof(HealEffect))

@@ -23,13 +23,16 @@ namespace Arakara.Components
         public int Size { get; set; }
         public bool Targetable { get; set; }
         public BattleController Controller { get; set; }
+        public float DodgeChance { get; set; }
+        public float CriticalHitChance { get; set; }
+        public BattleStatusCollection Statuses { get; set; }
 
         protected List<BattleActor> _selectedTargets;
 
         private Targetable _targetable;
         private SimplePolygon _targetablePolygon;
 
-        public BattleActor(string name, int maxHp, Faction faction, int size = 1)
+        public BattleActor(string name, int maxHp, Faction faction, float dodgeChance, float critChance, int size = 1)
         {
             Name = name;
             MaxHP = maxHp;
@@ -39,6 +42,9 @@ namespace Arakara.Components
             Faction = faction;
             State = BattleState.NotTurn;
             Size = size;
+            DodgeChance = dodgeChance;
+            CriticalHitChance = critChance;
+            Statuses = new BattleStatusCollection();
         }
 
         public void update()
@@ -72,6 +78,7 @@ namespace Arakara.Components
             switch (State)
             {
                 case BattleState.StartOfTurn:
+                    Statuses.ApplyStatuses(this, Controller);
                     OnStartOfTurn();
                     break;
                 case BattleState.DuringTurn:

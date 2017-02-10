@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Arakara.Components;
 using Nez;
 
-namespace Arakara.Battle
+namespace Arakara.Battle.AI
 {
     public class RandomAIDecider : AIDecider
     {

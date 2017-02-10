@@ -1,4 +1,5 @@
 ﻿using Arakara.Battle;
+using Arakara.Battle.Card;
 using Arakara.Common;
 using Microsoft.Xna.Framework;
 using Nez;

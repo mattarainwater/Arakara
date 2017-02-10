@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arakara.Battle
+namespace Arakara.Battle.Card
 {
-    public enum Effect
+    public enum Grade
     {
-        Attack,
-        Heal,
-        Defense
+        Bronze,
+        Silver,
+        Gold
     }
 }

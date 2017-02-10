@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Arakara.Battle.Effects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

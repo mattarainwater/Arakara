@@ -4,29 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Arakara.Components;
+using Arakara.Battle.Statuses;
 
-namespace Arakara.Battle
+namespace Arakara.Battle.Effects
 {
-    public class DamageEffect : ActionEffect
+    public class ApplyStatusEffect : ActionEffect
     {
-        public int Damage { get; set; }
+        public BattleStatus Status { get; set; }
 
-        public DamageEffect(int damage)
+        public ApplyStatusEffect(BattleStatus status)
         {
-            Damage = damage;
+            Status = status;
         }
 
         public override void Perform(BattleActor actor, List<BattleActor> targets, BattleController controller)
         {
             foreach(var target in targets)
             {
-                target.CurrentHP -= Damage;
+                target.Statuses.Add(Status, Status.Duration);
             }
         }
 
         public override string GetDescription()
         {
-            return $"Deal {Damage} Damage";
+            return $"Apply {Status.GetDescription()}";
         }
     }
 }

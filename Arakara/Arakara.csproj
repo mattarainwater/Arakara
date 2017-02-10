@@ -53,20 +53,23 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Battle\AIDecider.cs" />
+    <Compile Include="Battle\AI\AIDecider.cs" />
+    <Compile Include="Battle\Effects\ApplyStatusEffect.cs" />
     <Compile Include="Battle\BattleAction.cs" />
-    <Compile Include="Battle\ActionEffect.cs" />
+    <Compile Include="Battle\Effects\ActionEffect.cs" />
     <Compile Include="Battle\Animations.cs" />
     <Compile Include="Battle\BattleState.cs" />
-    <Compile Include="Battle\Card.cs" />
-    <Compile Include="Battle\CardUpgrader.cs" />
-    <Compile Include="Battle\DamageEffect.cs" />
-    <Compile Include="Battle\Effect.cs" />
+    <Compile Include="Battle\Statuses\BattleStatus.cs" />
+    <Compile Include="Battle\BattleStatusCollection.cs" />
+    <Compile Include="Battle\Card\Card.cs" />
+    <Compile Include="Battle\Card\CardUpgrader.cs" />
+    <Compile Include="Battle\Effects\DamageEffect.cs" />
     <Compile Include="Battle\Faction.cs" />
-    <Compile Include="Battle\Grade.cs" />
-    <Compile Include="Battle\HealEffect.cs" />
-    <Compile Include="Battle\LifeDrainEffect.cs" />
-    <Compile Include="Battle\RandomAIDecider.cs" />
+    <Compile Include="Battle\Card\Grade.cs" />
+    <Compile Include="Battle\Effects\HealEffect.cs" />
+    <Compile Include="Battle\Effects\LifeDrainEffect.cs" />
+    <Compile Include="Battle\Statuses\PoisonStatus.cs" />
+    <Compile Include="Battle\AI\RandomAIDecider.cs" />
     <Compile Include="Battle\Targeting.cs" />
     <Compile Include="Common\DimensionConstants.cs" />
     <Compile Include="Common\EntityTags.cs" />
@@ -137,6 +140,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

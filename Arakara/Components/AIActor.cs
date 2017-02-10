@@ -1,4 +1,5 @@
 ﻿using Arakara.Battle;
+using Arakara.Battle.AI;
 using Microsoft.Xna.Framework;
 using Nez;
 using Nez.Sprites;
@@ -17,8 +18,8 @@ namespace Arakara.Components
         private BattleAction<TEnum> _currentAction;
         private AIDecider _decider;
 
-        public AIActor(string name, int maxHP, Faction faction, List<BattleAction<TEnum>> actions, AIDecider decider) :
-            base(name, maxHP, faction)
+        public AIActor(string name, int maxHP, Faction faction, List<BattleAction<TEnum>> actions, AIDecider decider, float dodgeChance, float critChance) :
+            base(name, maxHP, faction, dodgeChance, critChance)
         {
             _actions = actions;
             _decider = decider;

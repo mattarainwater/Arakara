@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arakara.Battle
+namespace Arakara.Battle.Effects
 {
     public abstract class ActionEffect
     {

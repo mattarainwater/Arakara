@@ -5,6 +5,7 @@ using System.Linq;
 using Nez;
 using Microsoft.Xna.Framework;
 using Arakara.Common;
+using Arakara.Battle.Card;
 
 namespace Arakara.Components
 {
@@ -18,8 +19,8 @@ namespace Arakara.Components
         private int _handSize = 3;
         private CardUpgrader _cardUpgrader;
 
-        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card> cards) :
-            base(name, maxHP, faction)
+        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card> cards, float dodgeChance, float critChance) :
+            base(name, maxHP, faction, dodgeChance, critChance)
         {
             _deck = cards;
             _hand = new List<Card>();

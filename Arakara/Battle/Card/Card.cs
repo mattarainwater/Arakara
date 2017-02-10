@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arakara.Battle
+namespace Arakara.Battle.Card
 {
     public class Card
     {
