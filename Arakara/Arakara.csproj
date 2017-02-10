@@ -65,6 +65,7 @@
     <Compile Include="Battle\Faction.cs" />
     <Compile Include="Battle\Grade.cs" />
     <Compile Include="Battle\HealEffect.cs" />
+    <Compile Include="Battle\LifeDrainEffect.cs" />
     <Compile Include="Battle\RandomAIDecider.cs" />
     <Compile Include="Battle\Targeting.cs" />
     <Compile Include="Common\DimensionConstants.cs" />

@@ -39,8 +39,10 @@ namespace Arakara.Scenes
             var knight = contentManager.Load<Texture2D>("Knight");
 
             _battle.AddBattleEntity(MakeMC());
-            _battle.AddBattleEntity(MakeEnemy(knight));
-            _battle.AddBattleEntity(MakeEnemy(knight));
+
+            _battle.AddBattleEntity(MakeKnight());
+            _battle.AddBattleEntity(MakeKnight());
+            _battle.AddBattleEntity(MakeNecromancer());
 
             _battle.ToggleBattleActive();
         }
@@ -168,7 +170,7 @@ namespace Arakara.Scenes
             return mainCharacterEntity;
         }
 
-        private Entity MakeEnemy(Texture2D image)
+        private Entity MakeKnight()
         {
             var enemyEntity = createEntity("enemy");
 
@@ -203,6 +205,41 @@ namespace Arakara.Scenes
                         Speed = 70,
                         Targeting = Targeting.Enemies
                     }
+                },
+                new RandomAIDecider()
+            );
+            enemyEntity.addComponent(aIActor);
+
+            return enemyEntity;
+        }
+
+        private Entity MakeNecromancer()
+        {
+            var enemyEntity = createEntity("enemy");
+
+            var mcVerts = new Vector2[4]
+            {
+                new Vector2(0, 0),
+                new Vector2(DimensionConstants.CHARACTER_WIDTH, 0),
+                new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT),
+                new Vector2(0, DimensionConstants.CHARACTER_HEIGHT),
+            };
+            enemyEntity.addComponent(new SimplePolygon(mcVerts, Color.DarkGray));
+            var aIActor = new AIActor<Animations>("Necromancer", 200, new Faction
+            {
+                FactionName = "Enemies",
+                Id = 2
+            },
+                new List<BattleAction<Animations>>
+                {
+                    new BattleAction<Animations>
+                    {
+                        Animation = Animations.Attack,
+                        Effect = new LifeDrainEffect(10),
+                        Name = "Necro Bolt",
+                        Speed = 10,
+                        Targeting = Targeting.Enemies
+                    },
                 },
                 new RandomAIDecider()
             );

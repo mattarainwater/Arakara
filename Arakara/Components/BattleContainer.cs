@@ -76,15 +76,15 @@ namespace Arakara.Components
             if(actor.Faction.Id == 1)
             {
                 var numAllies = Controller.Actors.Count(x => x.Faction.Id == actor.Faction.Id);
-                _allyFactionStartingX += numAllies * DimensionConstants.CHARACTER_WIDTH + _spacing;
                 var pos = new Vector2(_allyFactionStartingX, _entityYPos);
+                _allyFactionStartingX += DimensionConstants.CHARACTER_WIDTH + _spacing;
                 return pos;
             }
             else
             {
                 var numEnemies = Controller.Actors.Count(x => x.Faction.Id == actor.Faction.Id);
-                _enemyFactionStartingX += numEnemies * DimensionConstants.CHARACTER_WIDTH + _spacing;
                 var pos = new Vector2(_enemyFactionStartingX, _entityYPos);
+                _enemyFactionStartingX += DimensionConstants.CHARACTER_WIDTH + _spacing;
                 return pos;
             }
         }
