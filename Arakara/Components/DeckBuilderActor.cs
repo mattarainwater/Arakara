@@ -94,7 +94,7 @@ namespace Arakara.Components
 
         private void CreateCardEntity(int index, Card card)
         {
-            var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (100 * (index - 1)), transform.position.Y - 125));
+            var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (100 * (index - 1)), transform.position.Y - 200));
             cardEntity.tag = EntityTags.CARDCLICKER_TAG;
             var verts = new Vector2[4]
             {

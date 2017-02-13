@@ -53,12 +53,11 @@ namespace Arakara.Components
             {
                 if(_targetable == null)
                 {
-                    var verts = new Vector2[4]
+                    var verts = new Vector2[3]
                     {
-                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 5),
-                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 5),
-                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 10),
-                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 10),
+                        new Vector2(DimensionConstants.CHARACTER_WIDTH / 2f - 10, -35),
+                        new Vector2(DimensionConstants.CHARACTER_WIDTH / 2f + 10, -35),
+                        new Vector2(DimensionConstants.CHARACTER_WIDTH / 2f, -25),
                     };
                     var polygon = new SimplePolygon(verts, Color.LightPink);
                     _targetablePolygon = entity.addComponent(polygon);

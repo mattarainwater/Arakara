@@ -22,12 +22,10 @@ namespace Arakara.Components
         private int _spacing;
 
         public BattleController Controller { get; set; }
-        public List<Entity> BattleEntities { get; set; }
 
         public BattleContainer(int screenWidth, int screenHeight)
         {
             Controller = new BattleController();
-            BattleEntities = new List<Entity>();
             _screenWidth = screenWidth;
             _screenHeight = screenHeight;
 
@@ -51,9 +49,10 @@ namespace Arakara.Components
             if(actor != null)
             {
                 entity.transform.position = GetPositionForEntity(actor);
-                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, -15), Color.Red));
+                //entity.addComponent(new HealthBar(actor));
+                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 10), Color.Red, () => "Current HP: " + actor.CurrentHP));
+                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 20), Color.Red, () => "Time Until Turn: " + actor.TimeUntilTurn));
                 entity.addCollider(new BoxCollider(0, 0, DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT));
-                BattleEntities.Add(entity);
                 Controller.AddActor(actor);
             }
             else
@@ -64,9 +63,9 @@ namespace Arakara.Components
 
         private void InitializeEntitiesPosition()
         {
-            foreach (var entity in BattleEntities)
+            foreach (var actor in Controller.Actors)
             {
-                var actor = entity.getComponent<BattleActor>();
+                var entity = actor.entity;
                 entity.transform.position = GetPositionForEntity(actor);
             }
         }

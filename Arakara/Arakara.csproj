@@ -79,6 +79,8 @@
     <Compile Include="Components\BattleController.cs" />
     <Compile Include="Components\CardClicker.cs" />
     <Compile Include="Components\DeckBuilderActor.cs" />
+    <Compile Include="Components\EffectDisplay.cs" />
+    <Compile Include="Components\HealthBar.cs" />
     <Compile Include="Components\Targetable.cs" />
     <Compile Include="Components\UpdatableText.cs" />
     <Compile Include="GameMain.cs" />
