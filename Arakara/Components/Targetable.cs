@@ -39,7 +39,7 @@ namespace Arakara.Components
                         {
                             var targetable = targetableEntity.getComponent<Targetable>();
                             targetable.Selected = false;
-                            targetable._simplePolygon.changeColor(mainColor);
+                            targetable._simplePolygon.setColor(mainColor);
                         }
 
                         Selected = true;
@@ -47,12 +47,12 @@ namespace Arakara.Components
                     }
                     else
                     {
-                        _simplePolygon.changeColor(hoverColor);
+                        _simplePolygon.setColor(hoverColor);
                     }
                 }
                 else
                 {
-                    _simplePolygon.changeColor(mainColor);
+                    _simplePolygon.setColor(mainColor);
                 }
             }
         }

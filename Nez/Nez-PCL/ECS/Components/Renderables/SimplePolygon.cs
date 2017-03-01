@@ -107,8 +107,7 @@ namespace Nez
 			// we need to make tris from the points so it is 3 verts for every tri and we share the first and last points
 			_verts = new VertexPositionColor[( _points.Length - 2 ) * 3];
 
-			for( var i = 0; i < _verts.Length; i++ )
-				_verts[i].Color = color;
+            setColor(color);
 		}
 
 
@@ -120,17 +119,17 @@ namespace Nez
 			_basicEffect.VertexColorEnabled = true;
 		}
 
-        public void changeColor(Color color)
+        public new void setColor(Color color)
         {
             for (var i = 0; i < _verts.Length; i++)
                 _verts[i].Color = color;
         }
 
-		public override void render( Graphics graphics, Camera camera )
+        public override void render( Graphics graphics, Camera camera )
 		{
 			_basicEffect.Projection = camera.projectionMatrix;
 			_basicEffect.View = camera.transformMatrix;
-			_basicEffect.CurrentTechnique.Passes[0].Apply();
+            _basicEffect.CurrentTechnique.Passes[0].Apply();
 
 			// TODO: set the _basicEffect.World = entity.transform.localToWorldTransform instead of manualy mucking with verts and a local matrix
 			// see the deferred lighting PolygonMesh class for details.

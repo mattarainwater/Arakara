@@ -49,21 +49,21 @@ namespace Arakara.Components
                             var clicker = card.getComponent<CardClicker>();
                             clicker.Selected = false;
                             var mainColorForRest = GetMainColor(clicker._card.Grade);
-                            clicker._simplePolygon.changeColor(mainColorForRest);
+                            clicker._simplePolygon.setColor(mainColorForRest);
                         }
 
                         Selected = true;
-                        _simplePolygon.changeColor(selectedColor);
+                        _simplePolygon.setColor(selectedColor);
                         _actor.PlayCard(_card);
                     }
                     else
                     {
-                        _simplePolygon.changeColor(hoverColor);
+                        _simplePolygon.setColor(hoverColor);
                     }
                 }
                 else
                 {
-                    _simplePolygon.changeColor(mainColor);
+                    _simplePolygon.setColor(mainColor);
                 }
             }
         }
