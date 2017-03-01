@@ -10,15 +10,17 @@ namespace Arakara.Components
 {
     public class UpdatableText : Text, IUpdatable
     {
-        public UpdatableText(IFont font, Vector2 position, Color color) 
+        public Func<string> TextFunc { get; set; }
+
+        public UpdatableText(IFont font, Vector2 position, Color color, Func<string> func) 
             : base(font, "", position, color)
         {
+            TextFunc = func;
         }
 
         public void update()
         {
-            var actor = entity.getComponent<BattleActor>();
-            setText("Current HP: " + actor.CurrentHP);
+            setText(TextFunc());
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Arakara.Components;
 using Nez;
+using Microsoft.Xna.Framework;
 
 namespace Arakara.Battle.Effects
 {
@@ -30,6 +31,11 @@ namespace Arakara.Battle.Effects
                 var dodge = Nez.Random.nextFloat() <= target.DodgeChance ? 0 : 1;
                 DamageDealt *= dodge;
                 target.CurrentHP -= DamageDealt;
+                if(target.CurrentHP <= 0)
+                {
+                    controller.Kill(target);
+                }
+                controller.MakeEffectDisplay(target, DamageDealt.ToString(), Color.Red);
             }
         }
 

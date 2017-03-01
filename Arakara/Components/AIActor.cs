@@ -43,10 +43,18 @@ namespace Arakara.Components
 
         protected override void DuringTurn()
         {
-            var enemyActor = Controller.Actors.First(y => y.Faction.Id != Faction.Id);
-            if (_animator != null)
+            var enemyActor = Controller.Actors.FirstOrDefault(y => y.Faction.Id != Faction.Id);
+            if(enemyActor != null)
             {
-                if (!_animator.isPlaying)
+                if (_animator != null)
+                {
+                    if (!_animator.isPlaying)
+                    {
+                        _currentAction.Effect.Perform(this, enemyActor, Controller);
+                        State = BattleState.EndOfTurn;
+                    }
+                }
+                else
                 {
                     _currentAction.Effect.Perform(this, enemyActor, Controller);
                     State = BattleState.EndOfTurn;
@@ -54,8 +62,7 @@ namespace Arakara.Components
             }
             else
             {
-                _currentAction.Effect.Perform(this, enemyActor, Controller);
-                State = BattleState.EndOfTurn;
+                State = BattleState.NotTurn;
             }
         }
 
