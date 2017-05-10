@@ -9,19 +9,20 @@ namespace Arakara
 {
     public class GameMain : Core
     {
-        private const int WIDTH = 1900;
-        private const int HEIGHT = 1080;
+        private const int WIDTH = 1920;
+        private const int HEIGHT = 1200;
 
         public GameMain()
-            : base(width: WIDTH, height: HEIGHT)
+            : base(width: WIDTH, height: HEIGHT, isFullScreen: true, windowTitle: "Arakara")
         {
             Core.defaultSamplerState = SamplerState.PointClamp;
+            
         }
 
         protected override void Initialize()
         {
             base.Initialize();
-            scene = new StartMenuScreen();
+            scene = new MainGameScene();
         }
     }
 }

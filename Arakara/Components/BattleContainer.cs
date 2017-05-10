@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Arakara.Battle;
 using Arakara.Common;
+using Arakara.Scenes;
 
 namespace Arakara.Components
 {
@@ -30,7 +31,7 @@ namespace Arakara.Components
             _screenHeight = screenHeight;
 
             _halfWayPoint = _screenWidth / 2;
-            _entityYPos = _screenHeight / 3;
+            _entityYPos = _screenHeight / 2;
             _marginLeftRight = _screenWidth / 20;
             _spacing = _screenWidth / 40;
 
@@ -40,19 +41,31 @@ namespace Arakara.Components
 
         public void update()
         {
+            if(Input.isKeyReleased(Microsoft.Xna.Framework.Input.Keys.Q))
+            {
+                Core.startSceneTransition(new FadeTransition(LoadStartScene) { fadeInDuration = 0f, fadeOutDuration = 0f, delayBeforeFadeInDuration = 0f, fadeToColor = Color.WhiteSmoke });
+            }
             Controller.Update();
         }
 
-        public void AddBattleEntity(Entity entity)
+        private Scene LoadStartScene()
+        {
+            return new MainGameScene();
+        }
+
+        public void AddBattleEntity(Entity entity, Scene scene)
         {
             var actor = entity.getComponent<BattleActor>();
             if(actor != null)
             {
                 entity.transform.position = GetPositionForEntity(actor);
+
                 //entity.addComponent(new HealthBar(actor));
-                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 10), Color.Red, () => "Current HP: " + actor.CurrentHP));
-                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 20), Color.Red, () => "Time Until Turn: " + actor.TimeUntilTurn));
+
+                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 20), Color.Red, () => "HP: " + actor.CurrentHP + " / " + actor.MaxHP));
+                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 40), Color.DarkGray, () => "Delay: " + actor.TimeUntilTurn));
                 entity.addCollider(new BoxCollider(0, 0, DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT));
+                entity.addComponent(new EffectDisplayContainer());
                 Controller.AddActor(actor);
             }
             else

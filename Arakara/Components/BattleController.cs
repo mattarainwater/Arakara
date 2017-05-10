@@ -75,15 +75,6 @@ namespace Arakara.Components
             targetable.ForEach(x => x.Targetable = true);
         }
 
-        public void MakeEffectDisplay(BattleActor target, string text, Color color)
-        {
-            var scene = target.entity.scene;
-            var display = scene.addEntity(new Entity());
-            var xPos = target.entity.transform.position.X + (DimensionConstants.CHARACTER_WIDTH / 2);
-            var yPos = target.entity.transform.position.Y + 30;
-            display.addComponent(new EffectDisplay(Graphics.instance.bitmapFont, text, new Vector2(xPos, yPos), color, 3));
-        }
-
         private List<BattleActor> GetTargetableActors(BattleActor targerter, Targeting targeting)
         {
             switch (targeting)

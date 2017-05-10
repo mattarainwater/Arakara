@@ -27,6 +27,7 @@ namespace Arakara.Components
 
         public override void onAddedToEntity()
         {
+            base.onAddedToEntity();
             _animator = entity.getComponent<Sprite<TEnum>>();
         }
 
@@ -68,9 +69,14 @@ namespace Arakara.Components
 
         protected override void OnEndOfTurn()
         {
-            Delay = _currentAction.Speed;
-            State = BattleState.NotTurn;
-            _currentAction = null;
+            if(_currentAction != null)
+            {
+                Delay = _currentAction.Speed;
+                _currentAction = null;
+            }
+            Core.schedule(1f, t => {
+                State = BattleState.NotTurn;
+            });
         }
     }
 }

@@ -73,6 +73,7 @@
     <Compile Include="Battle\Targeting.cs" />
     <Compile Include="Common\DimensionConstants.cs" />
     <Compile Include="Common\EntityTags.cs" />
+    <Compile Include="Common\StringExtensions.cs" />
     <Compile Include="Components\AIActor.cs" />
     <Compile Include="Components\BattleContainer.cs" />
     <Compile Include="Components\BattleActor.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Components\CardClicker.cs" />
     <Compile Include="Components\DeckBuilderActor.cs" />
     <Compile Include="Components\EffectDisplay.cs" />
+    <Compile Include="Components\EffectDisplayContainer.cs" />
     <Compile Include="Components\HealthBar.cs" />
     <Compile Include="Components\Targetable.cs" />
     <Compile Include="Components\UpdatableText.cs" />
@@ -104,7 +106,25 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icon.ico" />
+    <Content Include="Content\guard.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\guard_big.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\Knight.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\necromancer.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\necromancer_big.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\prisca.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\prisca_big.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="External DLLs\Ionic.ZLib.dll" />

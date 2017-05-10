@@ -18,6 +18,7 @@ namespace Arakara.Components
         private Card _selectedCard;
         private int _handSize = 3;
         private CardUpgrader _cardUpgrader;
+        private bool _drawing;
 
         public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card> cards, float dodgeChance, float critChance) :
             base(name, maxHP, faction, dodgeChance, critChance)
@@ -40,9 +41,16 @@ namespace Arakara.Components
 
         protected override void OnStartOfTurn()
         {
-            DrawCards();
-            State = BattleState.DuringTurn;
-            Immune = false;
+            if(!_drawing)
+            {
+                _drawing = true;
+                DrawCards();
+                Core.schedule(_handSize * .25f, t => {
+                    _drawing = false;
+                    State = BattleState.DuringTurn;
+                    Immune = false;
+                });
+            }
         }
 
         protected override void DuringTurn()
@@ -82,33 +90,39 @@ namespace Arakara.Components
         {
             for (var i = 0; i < _handSize; i++)
             {
-                if (!_deck.Any())
-                {
-                    ShuffleDeck();
-                }
-                _hand.Add(_deck.First());
-                CreateCardEntity(i, _deck.First());
-                _deck.Remove(_deck.First());
+                var index = i;
+                Core.schedule(i * .25f, t => DrawCard(index));
             }
+        }
+
+        private void DrawCard(int index)
+        {
+            if (!_deck.Any())
+            {
+                ShuffleDeck();
+            }
+            _hand.Add(_deck.First());
+            CreateCardEntity(index, _deck.First());
+            _deck.Remove(_deck.First());
         }
 
         private void CreateCardEntity(int index, Card card)
         {
-            var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (100 * (index - 1)), transform.position.Y - 200));
+            var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (125 * (index - 1)), transform.position.Y - 175));
             cardEntity.tag = EntityTags.CARDCLICKER_TAG;
             var verts = new Vector2[4]
             {
                 new Vector2(0, 0),
-                new Vector2(75, 0),
-                new Vector2(75, 100),
+                new Vector2(100, 0),
+                new Vector2(100, 100),
                 new Vector2(0, 100),
             };
             cardEntity.addComponent(new SimplePolygon(verts, Color.Black));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Name, new Vector2(5, 5), Color.White));
-            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Effect.GetDescription(), new Vector2(5, 30), Color.White));
-            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Action.Speed, new Vector2(5, 60), Color.White));
+            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Effect.FormatDescription(), new Vector2(5, 30), Color.White));
+            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Action.Speed, new Vector2(5, 85), Color.White));
             cardEntity.addComponent(new CardClicker(card, this));
-            cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 75, 100)));
+            cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 100, 100)));
             _handEntities.Add(cardEntity);
         }
 

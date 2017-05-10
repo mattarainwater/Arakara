@@ -1,4 +1,6 @@
 ﻿using Arakara.Components;
+using Microsoft.Xna.Framework;
+using Nez;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +26,11 @@ namespace Arakara.Battle.Effects
                 if(target.CurrentHP > target.MaxHP)
                 {
                     target.CurrentHP = target.MaxHP;
+                }
+                var effectDisplayContainer = target.getComponent<EffectDisplayContainer>();
+                if(Healing > 0)
+                {
+                    effectDisplayContainer.MakeEffectDisplay("+" + Healing, Color.LimeGreen);
                 }
             }
         }

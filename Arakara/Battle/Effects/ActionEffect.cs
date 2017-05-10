@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Arakara.Common;
 
 namespace Arakara.Battle.Effects
 {
@@ -12,6 +14,11 @@ namespace Arakara.Battle.Effects
         public abstract void Perform(BattleActor actor, List<BattleActor> targets, BattleController controller);
 
         public abstract string GetDescription();
+
+        public string FormatDescription()
+        {
+            return GetDescription().WrapText(18);
+        }
 
         public void Perform(BattleActor actor, BattleActor target, BattleController controller)
         {

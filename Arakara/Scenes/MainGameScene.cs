@@ -30,23 +30,21 @@ namespace Arakara.Scenes
         public override void initialize()
         {
             addRenderer(new RenderLayerExcludeRenderer(0));
-
+            setDesignResolution(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT, SceneResolutionPolicy.NoBorderPixelPerfect);
             clearColor = Color.WhiteSmoke;
 
             var battleEntity = createEntity("battle");
-            _battle = new BattleContainer(Screen.width, Screen.height);
+            _battle = new BattleContainer(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT);
             battleEntity.addComponent(_battle);
         }
 
         public override void onStart()
         {
-            var knight = contentManager.Load<Texture2D>("Knight");
+            _battle.AddBattleEntity(MakeMC(), this);
 
-            _battle.AddBattleEntity(MakeMC());
-
-            _battle.AddBattleEntity(MakeKnight());
-            _battle.AddBattleEntity(MakeKnight());
-            _battle.AddBattleEntity(MakeNecromancer());
+            _battle.AddBattleEntity(MakeKnight(), this);
+            _battle.AddBattleEntity(MakeKnight(), this);
+            _battle.AddBattleEntity(MakeNecromancer(), this);
 
             _battle.ToggleBattleActive();
         }
@@ -54,7 +52,7 @@ namespace Arakara.Scenes
         private Entity MakeMC()
         {
             var mainCharacterEntity = createEntity("mc");
-            var mainCharacterActor = new DeckBuilderActor("Main Character", 100, new Faction
+            var mainCharacterActor = new DeckBuilderActor("Prisca", 100, new Faction
             {
                 FactionName = "PC",
                 Id = 1
@@ -160,16 +158,14 @@ namespace Arakara.Scenes
                         Targeting = Targeting.Self
                     }
                 },
-            }, .5f, .5f);
-            var mcVerts = new Vector2[4]
-            {
-                new Vector2(0, 0),
-                new Vector2(DimensionConstants.CHARACTER_WIDTH, 0),
-                new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT),
-                new Vector2(0, DimensionConstants.CHARACTER_HEIGHT),
-            };
+            }, .25f, .25f);
+
             mainCharacterEntity.addComponent(mainCharacterActor);
-            mainCharacterEntity.addComponent(new SimplePolygon(mcVerts, Color.LightSkyBlue));
+            var subtexture = new Subtexture(contentManager.Load<Texture2D>("prisca_big"), new Rectangle(0, 0, 64, 64));
+            var sprite = new Sprite(subtexture);
+            sprite.flipX = true;
+            sprite.setOrigin(Vector2.Zero);
+            mainCharacterEntity.addComponent(sprite);
 
             return mainCharacterEntity;
         }
@@ -178,14 +174,10 @@ namespace Arakara.Scenes
         {
             var enemyEntity = createEntity("enemy");
 
-            var mcVerts = new Vector2[4]
-            {
-                new Vector2(0, 0),
-                new Vector2(DimensionConstants.CHARACTER_WIDTH, 0),
-                new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT),
-                new Vector2(0, DimensionConstants.CHARACTER_HEIGHT),
-            };
-            enemyEntity.addComponent(new SimplePolygon(mcVerts, Color.LightGreen));
+            var sprite = new Sprite(contentManager.Load<Texture2D>("guard_big"));
+            sprite.setOrigin(Vector2.Zero);
+            enemyEntity.addComponent(sprite);
+
             var aIActor = new AIActor<Animations>("Guard", 100, new Faction
                 {
                     FactionName = "Enemies",
@@ -213,22 +205,17 @@ namespace Arakara.Scenes
                 new RandomAIDecider(), 0f, 0f
             );
             enemyEntity.addComponent(aIActor);
-
             return enemyEntity;
         }
 
         private Entity MakeNecromancer()
         {
             var enemyEntity = createEntity("enemy");
+            
+            var sprite = new Sprite(contentManager.Load<Texture2D>("necromancer_big"));
+            sprite.setOrigin(Vector2.Zero);
+            enemyEntity.addComponent(sprite);
 
-            var mcVerts = new Vector2[4]
-            {
-                new Vector2(0, 0),
-                new Vector2(DimensionConstants.CHARACTER_WIDTH, 0),
-                new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT),
-                new Vector2(0, DimensionConstants.CHARACTER_HEIGHT),
-            };
-            enemyEntity.addComponent(new SimplePolygon(mcVerts, Color.DarkGray));
             var aIActor = new AIActor<Animations>("Necromancer", 200, new Faction
             {
                 FactionName = "Enemies",

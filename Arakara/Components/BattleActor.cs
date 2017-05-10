@@ -32,6 +32,8 @@ namespace Arakara.Components
         private Targetable _targetable;
         private SimplePolygon _targetablePolygon;
 
+        private SimplePolygon _turnMarkerPolygon;
+
         public BattleActor(string name, int maxHp, Faction faction, float dodgeChance, float critChance, int size = 1)
         {
             Name = name;
@@ -47,17 +49,23 @@ namespace Arakara.Components
             Statuses = new BattleStatusCollection();
         }
 
+        public override void onAddedToEntity()
+        {
+            entity.addComponent(new Text(Graphics.instance.bitmapFont, Name, new Vector2(0f, -5), Color.Gray));
+        }
+
         public void update()
         {
             if(Targetable)
             {
                 if(_targetable == null)
                 {
-                    var verts = new Vector2[3]
+                    var verts = new Vector2[4]
                     {
-                        new Vector2(DimensionConstants.CHARACTER_WIDTH / 2f - 10, -35),
-                        new Vector2(DimensionConstants.CHARACTER_WIDTH / 2f + 10, -35),
-                        new Vector2(DimensionConstants.CHARACTER_WIDTH / 2f, -25),
+                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 3),
+                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 3),
+                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 5),
+                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 5),
                     };
                     var polygon = new SimplePolygon(verts, Color.LightPink);
                     _targetablePolygon = entity.addComponent(polygon);
@@ -69,6 +77,27 @@ namespace Arakara.Components
                 entity.removeComponent(_targetablePolygon);
                 entity.removeComponent(_targetable);
                 _targetable = null;
+            }
+
+            if(State != BattleState.NotTurn)
+            {
+                if (_turnMarkerPolygon == null)
+                {
+                    var verts = new Vector2[4]
+                    {
+                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 7),
+                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 7),
+                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 9),
+                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 9),
+                    };
+                    var polygon = new SimplePolygon(verts, Color.Gold);
+                    _turnMarkerPolygon = entity.addComponent(polygon);
+                }
+            }
+            else if(_turnMarkerPolygon != null)
+            {
+                entity.removeComponent(_turnMarkerPolygon);
+                _turnMarkerPolygon = null;
             }
         }
 

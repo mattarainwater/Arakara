@@ -35,7 +35,10 @@ namespace Arakara.Battle.Effects
                 {
                     controller.Kill(target);
                 }
-                controller.MakeEffectDisplay(target, DamageDealt.ToString(), Color.Red);
+                var displayText = DamageDealt == 0 ? "Miss" : crit == 2 ? "Crit! " + DamageDealt.ToString() : DamageDealt.ToString();
+                var displayColor = DamageDealt == 0 ? Color.DarkGray : crit == 2 ? Color.DarkViolet : Color.Red;
+                var effectDisplayContainer = target.getComponent<EffectDisplayContainer>();
+                effectDisplayContainer.MakeEffectDisplay(displayText, displayColor);
             }
         }
 

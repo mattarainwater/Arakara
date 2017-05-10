@@ -13,11 +13,13 @@ namespace Arakara.Components
         public int TimeToLive { get; set; }
 
         private float _elapsedTIme;
+        private EffectDisplayContainer _container;
 
-        public EffectDisplay(IFont font, string text, Vector2 position, Color color, int timeToLive) 
+        public EffectDisplay(EffectDisplayContainer container, IFont font, string text, Vector2 position, Color color, int timeToLive) 
             : base(font, text, position, color)
         {
             TimeToLive = timeToLive;
+            _container = container;
         }
 
         public void update()
@@ -26,6 +28,7 @@ namespace Arakara.Components
             if (_elapsedTIme >= TimeToLive)
             {
                 entity.destroy();
+                _container.Remove(this);
             }
         }
     }
