@@ -70,7 +70,7 @@ namespace Nez.Sprites
 		/// <param name="subtexture">Subtexture.</param>
 		public Sprite( TEnum animationKey, SpriteAnimation animation ) : this( null, animation.frames[0].subtexture )
 		{
-			addAnimation( animationKey, animation, Vector2.Zero );
+			addAnimation( animationKey, animation );
 		}
 
 
@@ -194,7 +194,7 @@ namespace Nez.Sprites
 		#endregion
 
 
-		public Sprite<TEnum> addAnimation( TEnum key, SpriteAnimation animation, Vector2 origin )
+		public Sprite<TEnum> addAnimation( TEnum key, SpriteAnimation animation, Vector2? origin = null )
 		{
 			// if we have no subtexture use the first frame we find
 			if( subtexture == null && animation.frames.Count > 0 )
@@ -203,9 +203,12 @@ namespace Nez.Sprites
             }
 			_animations[key] = animation;
 
-            foreach(var frame in animation.frames)
+            if(origin.HasValue)
             {
-                frame.origin = origin;
+                foreach (var frame in animation.frames)
+                {
+                    frame.origin = origin.Value;
+                }
             }
 
 			return this;

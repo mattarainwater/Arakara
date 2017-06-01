@@ -23,10 +23,12 @@ namespace Arakara.Components
         private int _spacing;
 
         public BattleController Controller { get; set; }
+        public TurnOrderDisplay TurnOrderDisplay { get; set; }
 
         public BattleContainer(int screenWidth, int screenHeight)
         {
             Controller = new BattleController();
+            TurnOrderDisplay = new TurnOrderDisplay();
             _screenWidth = screenWidth;
             _screenHeight = screenHeight;
 
@@ -67,6 +69,9 @@ namespace Arakara.Components
                 entity.addCollider(new BoxCollider(0, 0, DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT));
                 entity.addComponent(new EffectDisplayContainer());
                 Controller.AddActor(actor);
+
+                var turnOrderEntity = scene.createEntity("turnorder" + actor.Name);
+                TurnOrderDisplay.AddActor(actor);
             }
             else
             {

@@ -78,7 +78,7 @@
     <Compile Include="Components\AIActor.cs" />
     <Compile Include="Components\BattleContainer.cs" />
     <Compile Include="Components\BattleActor.cs" />
-    <Compile Include="Components\BattleController.cs" />
+    <Compile Include="Battle\BattleController.cs" />
     <Compile Include="Battle\BattleEvent.cs" />
     <Compile Include="Components\CardClicker.cs" />
     <Compile Include="Components\DeckBuilderActor.cs" />
@@ -86,6 +86,7 @@
     <Compile Include="Components\EffectDisplayContainer.cs" />
     <Compile Include="Components\HealthBar.cs" />
     <Compile Include="Components\Targetable.cs" />
+    <Compile Include="Battle\TurnOrderDisplay.cs" />
     <Compile Include="Components\UpdatableText.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="Program.cs" />

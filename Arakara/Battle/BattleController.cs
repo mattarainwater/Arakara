@@ -1,5 +1,6 @@
 ﻿using Arakara.Battle;
 using Arakara.Common;
+using Arakara.Components;
 using Microsoft.Xna.Framework;
 using Nez;
 using System;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arakara.Components
+namespace Arakara.Battle
 {
     public class BattleController
     {
