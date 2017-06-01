@@ -14,6 +14,7 @@ namespace Arakara.Components
     {
         public List<BattleActor> Actors { get; set; }
         public BattleActor CurrentActor { get; set; }
+        public BattleEvent CurrentEvent { get; set; }
 
         public bool IsActive { get; set; }
 
@@ -26,7 +27,11 @@ namespace Arakara.Components
         {
             if(IsActive)
             {
-                if (CurrentActor != null)
+                if(CurrentEvent != null)
+                {
+                    CurrentEvent.Perform();
+                }
+                else if (CurrentActor != null)
                 {
                     CurrentActor.ProcessTurn();
                     if(CurrentActor == null)

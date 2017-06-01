@@ -101,7 +101,7 @@ namespace Arakara.Components
             }
         }
 
-        public virtual void ProcessTurn()
+        public void ProcessTurn()
         {
             switch (State)
             {

@@ -174,9 +174,12 @@ namespace Arakara.Scenes
         {
             var enemyEntity = createEntity("enemy");
 
-            var sprite = new Sprite(contentManager.Load<Texture2D>("guard_big"));
-            sprite.setOrigin(Vector2.Zero);
+            var texture = contentManager.Load<Texture2D>("guard_big");
+            var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
+            var sprite = new Sprite<Animations>(subtextures[0]);
             enemyEntity.addComponent(sprite);
+            sprite.addAnimation(Animations.Attack, new SpriteAnimation(subtextures.Take(2).ToList()), Vector2.Zero);
+            sprite.setOrigin(Vector2.Zero);
 
             var aIActor = new AIActor<Animations>("Guard", 100, new Faction
                 {

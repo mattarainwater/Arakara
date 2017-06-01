@@ -59,6 +59,7 @@
     <Compile Include="Battle\Effects\ActionEffect.cs" />
     <Compile Include="Battle\Animations.cs" />
     <Compile Include="Battle\BattleState.cs" />
+    <Compile Include="Battle\EventState.cs" />
     <Compile Include="Battle\Statuses\BattleStatus.cs" />
     <Compile Include="Battle\BattleStatusCollection.cs" />
     <Compile Include="Battle\Card\Card.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Components\BattleContainer.cs" />
     <Compile Include="Components\BattleActor.cs" />
     <Compile Include="Components\BattleController.cs" />
+    <Compile Include="Battle\BattleEvent.cs" />
     <Compile Include="Components\CardClicker.cs" />
     <Compile Include="Components\DeckBuilderActor.cs" />
     <Compile Include="Components\EffectDisplay.cs" />
