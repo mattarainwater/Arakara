@@ -74,9 +74,7 @@ namespace Arakara.Components
                 Delay = _currentAction.Speed;
                 _currentAction = null;
             }
-            Core.schedule(1f, t => {
-                State = BattleState.NotTurn;
-            });
+            State = BattleState.NotTurn;
         }
     }
 }

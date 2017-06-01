@@ -178,7 +178,13 @@ namespace Arakara.Scenes
             var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
             var sprite = new Sprite<Animations>(subtextures[0]);
             enemyEntity.addComponent(sprite);
-            sprite.addAnimation(Animations.Attack, new SpriteAnimation(subtextures.Take(2).ToList()), Vector2.Zero);
+            var animationFrames = new List<Subtexture>
+            {
+                subtextures[0],
+                subtextures[1],
+                subtextures[0]
+            };
+            sprite.addAnimation(Animations.Attack, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
             sprite.setOrigin(Vector2.Zero);
 
             var aIActor = new AIActor<Animations>("Guard", 100, new Faction
