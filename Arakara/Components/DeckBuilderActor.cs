@@ -6,26 +6,28 @@ using Nez;
 using Microsoft.Xna.Framework;
 using Arakara.Common;
 using Arakara.Battle.Card;
+using Nez.Sprites;
 
 namespace Arakara.Components
 {
-    public class DeckBuilderActor : BattleActor
+    public class DeckBuilderActor<TEnum> : BattleActor where TEnum : struct, IComparable, IFormattable
     {
-        private List<Card> _deck;
-        private List<Card> _hand;
-        private List<Card> _discardPile;
+        private List<Card<TEnum>> _deck;
+        private List<Card<TEnum>> _hand;
+        private List<Card<TEnum>> _discardPile;
         private List<Entity> _handEntities;
-        private Card _selectedCard;
+        private Card<TEnum> _selectedCard;
         private int _handSize = 3;
         private CardUpgrader _cardUpgrader;
         private bool _drawing;
+        private Sprite<TEnum> _animator;
 
-        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card> cards, float dodgeChance, float critChance) :
+        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance) :
             base(name, maxHP, faction, dodgeChance, critChance)
         {
             _deck = cards;
-            _hand = new List<Card>();
-            _discardPile = new List<Card>();
+            _hand = new List<Card<TEnum>>();
+            _discardPile = new List<Card<TEnum>>();
             _handEntities = new List<Entity>();
 
             ShuffleDeck();
@@ -33,7 +35,13 @@ namespace Arakara.Components
             _cardUpgrader = new CardUpgrader();
         }
 
-        public void PlayCard(Card card)
+        public override void onAddedToEntity()
+        {
+            base.onAddedToEntity();
+            _animator = entity.getComponent<Sprite<TEnum>>();
+        }
+
+        public void PlayCard(Card<TEnum> card)
         {
             _selectedCard = card;
             Controller.MakeTargetables(this, _selectedCard.Action.Targeting);
@@ -57,8 +65,23 @@ namespace Arakara.Components
         {
             if(_selectedCard != null && _selectedTargets != null)
             {
-                _selectedCard.Action.Effect.Perform(this, _selectedTargets, Controller);
-                State = BattleState.EndOfTurn;
+                if (_animator != null)
+                {
+                    if (!_animator.isPlaying)
+                    {
+                        _animator.play(_selectedCard.Animation);
+                        _animator.originNormalized = Vector2.Zero;
+                        _animator.onAnimationCompletedEvent = (t) => {
+                            _selectedCard.Action.Effect.Perform(this, _selectedTargets, Controller);
+                            State = BattleState.EndOfTurn;
+                        };
+                    }
+                }
+                else
+                {
+                    _selectedCard.Action.Effect.Perform(this, _selectedTargets, Controller);
+                    State = BattleState.EndOfTurn;
+                }
             }
         }
 
@@ -81,7 +104,7 @@ namespace Arakara.Components
             _handEntities.ForEach(entity => entity.destroy());
             _handEntities = new List<Entity>();
             UpgradeCards();
-            _hand = new List<Card>();
+            _hand = new List<Card<TEnum>>();
             _selectedCard = null;
             _selectedTargets = null;
         }
@@ -106,7 +129,7 @@ namespace Arakara.Components
             _deck.Remove(_deck.First());
         }
 
-        private void CreateCardEntity(int index, Card card)
+        private void CreateCardEntity(int index, Card<TEnum> card)
         {
             var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (125 * (index - 1)), transform.position.Y - 175));
             cardEntity.tag = EntityTags.CARDCLICKER_TAG;
@@ -121,7 +144,7 @@ namespace Arakara.Components
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Name, new Vector2(5, 5), Color.White));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Effect.FormatDescription(), new Vector2(5, 30), Color.White));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Action.Speed, new Vector2(5, 85), Color.White));
-            cardEntity.addComponent(new CardClicker(card, this));
+            cardEntity.addComponent(new CardClicker<TEnum>(card, this));
             cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 100, 100)));
             _handEntities.Add(cardEntity);
         }
@@ -131,7 +154,7 @@ namespace Arakara.Components
             var deckList = _discardPile.Concat(_deck).ToArray();
             deckList.shuffle();
             _deck = deckList.ToList();
-            _discardPile = new List<Card>();
+            _discardPile = new List<Card<TEnum>>();
         }
     }
 }

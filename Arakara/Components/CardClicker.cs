@@ -11,15 +11,15 @@ using System.Threading.Tasks;
 
 namespace Arakara.Components
 {
-    public class CardClicker : Component, IUpdatable
+    public class CardClicker<TEnum> : Component, IUpdatable where TEnum : struct, IComparable, IFormattable
     {
         private SimplePolygon _simplePolygon;
-        private Card _card;
-        private DeckBuilderActor _actor;
+        private Card<TEnum> _card;
+        private DeckBuilderActor<TEnum> _actor;
 
         public bool Selected { get; set; }
 
-        public CardClicker(Card card, DeckBuilderActor actor)
+        public CardClicker(Card<TEnum> card, DeckBuilderActor<TEnum> actor)
         {
             _card = card;
             _actor = actor;
@@ -46,7 +46,7 @@ namespace Arakara.Components
                         var cards = entity.scene.findEntitiesWithTag(EntityTags.CARDCLICKER_TAG);
                         foreach(var card in cards)
                         {
-                            var clicker = card.getComponent<CardClicker>();
+                            var clicker = card.getComponent<CardClicker<TEnum>>();
                             clicker.Selected = false;
                             var mainColorForRest = GetMainColor(clicker._card.Grade);
                             clicker._simplePolygon.setColor(mainColorForRest);

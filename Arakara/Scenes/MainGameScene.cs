@@ -52,13 +52,13 @@ namespace Arakara.Scenes
         private Entity MakeMC()
         {
             var mainCharacterEntity = createEntity("mc");
-            var mainCharacterActor = new DeckBuilderActor("Prisca", 100, new Faction
+            var mainCharacterActor = new DeckBuilderActor<Animations>("Prisca", 100, new Faction
             {
                 FactionName = "PC",
                 Id = 1
-            }, new List<Card>()
+            }, new List<Card<Animations>>()
             {
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -66,9 +66,10 @@ namespace Arakara.Scenes
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Speed = 5,
                         Targeting = Targeting.Enemies
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -76,9 +77,10 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(5, 10),
                         Speed = 5,
                         Targeting = Targeting.Enemies
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -86,9 +88,10 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(5, 10),
                         Speed = 5,
                         Targeting = Targeting.Enemies
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -96,9 +99,10 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(5, 10),
                         Speed = 5,
                         Targeting = Targeting.Enemies
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -106,9 +110,10 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(5, 10),
                         Speed = 5,
                         Targeting = Targeting.Enemies
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -116,9 +121,10 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(5, 10),
                         Speed = 5,
                         Targeting = Targeting.Enemies
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -126,9 +132,10 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(5, 10),
                         Speed = 5,
                         Targeting = Targeting.Enemies
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -136,9 +143,10 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(10, 20),
                         Speed = 10,
                         Targeting = Targeting.Enemies
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -146,9 +154,10 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(10, 20),
                         Speed = 10,
                         Targeting = Targeting.Enemies
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
-                new Card
+                new Card<Animations>
                 {
                     Action = new BattleAction
                     {
@@ -156,16 +165,28 @@ namespace Arakara.Scenes
                         Effect = new HealEffect(40),
                         Speed = 10,
                         Targeting = Targeting.Self
-                    }
+                    },
+                    Animation = Animations.Attack
                 },
             }, .25f, .25f);
 
             mainCharacterEntity.addComponent(mainCharacterActor);
-            var subtexture = new Subtexture(contentManager.Load<Texture2D>("prisca_big"), new Rectangle(0, 0, 64, 64));
-            var sprite = new Sprite(subtexture);
+
+            var texture = contentManager.Load<Texture2D>("prisca_big");
+            var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
+            var sprite = new Sprite<Animations>(subtextures[0]);
+            mainCharacterEntity.addComponent(sprite);
+            var animationFrames = new List<Subtexture>
+            {
+                subtextures[0],
+                subtextures[1],
+                subtextures[1],
+                subtextures[1],
+                subtextures[0]
+            };
+            sprite.addAnimation(Animations.Attack, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
             sprite.flipX = true;
             sprite.setOrigin(Vector2.Zero);
-            mainCharacterEntity.addComponent(sprite);
 
             return mainCharacterEntity;
         }
@@ -181,6 +202,8 @@ namespace Arakara.Scenes
             var animationFrames = new List<Subtexture>
             {
                 subtextures[0],
+                subtextures[1],
+                subtextures[1],
                 subtextures[1],
                 subtextures[0]
             };

@@ -34,11 +34,6 @@ namespace Arakara.Components
         protected override void OnStartOfTurn()
         {
             _currentAction = (BattleAction<TEnum>)_decider.ChooseAction(this, _actions.Select(x => (BattleAction)x).ToList(), Controller);
-            if (_animator != null)
-            {
-                _animator.play(_currentAction.Animation);
-                _animator.originNormalized = Vector2.Zero;
-            }
             State = BattleState.DuringTurn;
         }
 
@@ -51,8 +46,12 @@ namespace Arakara.Components
                 {
                     if (!_animator.isPlaying)
                     {
-                        _currentAction.Effect.Perform(this, enemyActor, Controller);
-                        State = BattleState.EndOfTurn;
+                        _animator.play(_currentAction.Animation);
+                        _animator.originNormalized = Vector2.Zero;
+                        _animator.onAnimationCompletedEvent = (t) => {
+                            _currentAction.Effect.Perform(this, enemyActor, Controller);
+                            State = BattleState.EndOfTurn;
+                        };
                     }
                 }
                 else
