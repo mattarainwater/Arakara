@@ -13,7 +13,7 @@ namespace Arakara
         private const int HEIGHT = 1200;
 
         public GameMain()
-            : base(width: WIDTH, height: HEIGHT, isFullScreen: true, windowTitle: "Arakara")
+            : base(width: WIDTH, height: HEIGHT, isFullScreen: false, windowTitle: "Arakara")
         {
             Core.defaultSamplerState = SamplerState.PointClamp;
             

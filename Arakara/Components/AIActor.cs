@@ -18,8 +18,8 @@ namespace Arakara.Components
         private BattleAction<TEnum> _currentAction;
         private AIDecider _decider;
 
-        public AIActor(string name, int maxHP, Faction faction, List<BattleAction<TEnum>> actions, AIDecider decider, float dodgeChance, float critChance) :
-            base(name, maxHP, faction, dodgeChance, critChance)
+        public AIActor(string name, int maxHP, Faction faction, List<BattleAction<TEnum>> actions, AIDecider decider, float dodgeChance, float critChance, float speed) :
+            base(name, maxHP, faction, dodgeChance, critChance, speed)
         {
             _actions = actions;
             _decider = decider;
@@ -70,7 +70,6 @@ namespace Arakara.Components
         {
             if(_currentAction != null)
             {
-                Delay = _currentAction.Speed;
                 _currentAction = null;
             }
             State = BattleState.NotTurn;

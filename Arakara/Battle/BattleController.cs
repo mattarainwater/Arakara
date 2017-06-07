@@ -1,4 +1,7 @@
 ﻿using Arakara.Battle;
+using Arakara.Battle.Events;
+using Arakara.Battle.Events.Effects;
+using Arakara.Battle.Events.Triggers;
 using Arakara.Common;
 using Arakara.Components;
 using Microsoft.Xna.Framework;
@@ -15,6 +18,7 @@ namespace Arakara.Battle
     {
         public List<BattleActor> Actors { get; set; }
         public BattleActor CurrentActor { get; set; }
+        public List<BattleEvent> Events { get; set; }
         public BattleEvent CurrentEvent { get; set; }
 
         public bool IsActive { get; set; }
@@ -22,6 +26,7 @@ namespace Arakara.Battle
         public BattleController()
         {
             Actors = new List<BattleActor>();
+            Events = new List<BattleEvent>();
         }
 
         public void Update()
@@ -35,25 +40,20 @@ namespace Arakara.Battle
                 else if (CurrentActor != null)
                 {
                     CurrentActor.ProcessTurn();
-                    if(CurrentActor == null)
+                    if (CurrentActor.State == BattleState.NotTurn)
                     {
-                        CurrentActor = Actors.OrderBy(x => x.TimeUntilTurn).First();
-                    }
-                    else if (CurrentActor.State == BattleState.NotTurn)
-                    {
-                        CurrentActor.TimeUntilTurn = CurrentActor.Delay;
-                        while (Actors.Any(x => x.TimeUntilTurn == CurrentActor.TimeUntilTurn && x != CurrentActor))
+                        var triggeredEvent = GetTriggeredEvent();
+                        if(triggeredEvent != null)
                         {
-                            CurrentActor.TimeUntilTurn++;
+                            CurrentEvent = triggeredEvent;
                         }
-                        CurrentActor = Actors.OrderBy(x => x.TimeUntilTurn).First();
-                        var timeUntilTurn = CurrentActor.TimeUntilTurn;
-                        foreach (var actor in Actors)
+                        else
                         {
-                            actor.TimeUntilTurn -= timeUntilTurn;
+                            var indexOfNextActor = Actors.IndexOf(CurrentActor) + 1 == Actors.Count() ? 0 : Actors.IndexOf(CurrentActor) + 1;
+                            CurrentActor = Actors.ElementAt(indexOfNextActor);
+                            Actors.ForEach(x => x.Targetable = false);
+                            CurrentActor.State = BattleState.StartOfTurn;
                         }
-                        Actors.ForEach(x => x.Targetable = false);
-                        CurrentActor.State = BattleState.StartOfTurn;
                     }
                 }
                 else
@@ -81,6 +81,26 @@ namespace Arakara.Battle
             targetable.ForEach(x => x.Targetable = true);
         }
 
+        public void AddEvent(BattleEvent battleEvent)
+        {
+            battleEvent.Controller = this;
+            Events.Add(battleEvent);
+        }
+
+        public void AddActor(BattleActor actor)
+        {
+            actor.Controller = this;
+            Actors.Add(actor);
+            Actors.Sort();
+            var battleEvent = new BattleEvent(new OnDeathTrigger(actor));
+            battleEvent.AddEffect(new KillEffect(0, actor));
+        }
+
+        private BattleEvent GetTriggeredEvent()
+        {
+            return Events.FirstOrDefault(x => x.Trigger.IsTriggered());
+        }
+
         private List<BattleActor> GetTargetableActors(BattleActor targerter, Targeting targeting)
         {
             switch (targeting)
@@ -94,12 +114,6 @@ namespace Arakara.Battle
                 default:
                     return null;
             }
-        }
-
-        public void AddActor(BattleActor actor)
-        {
-            actor.Controller = this;
-            Actors.Add(actor);
         }
     }
 }

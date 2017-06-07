@@ -10,13 +10,11 @@ using System.Threading.Tasks;
 
 namespace Arakara.Components
 {
-    public abstract class BattleActor : Component, IUpdatable
+    public abstract class BattleActor : Component, IUpdatable, IComparable<BattleActor>
     {
         public string Name { get; set; }
         public int MaxHP { get; set; }
         public int CurrentHP { get; set; }
-        public int TimeUntilTurn { get; set; }
-        public int Delay { get; set; }
         public Faction Faction { get; set; }
         public BattleState State { get; set; }
         public bool Immune { get; set; }
@@ -25,6 +23,7 @@ namespace Arakara.Components
         public BattleController Controller { get; set; }
         public float DodgeChance { get; set; }
         public float CriticalHitChance { get; set; }
+        public float Speed { get; set; }
         public BattleStatusCollection Statuses { get; set; }
 
         protected List<BattleActor> _selectedTargets;
@@ -34,13 +33,12 @@ namespace Arakara.Components
 
         private SimplePolygon _turnMarkerPolygon;
 
-        public BattleActor(string name, int maxHp, Faction faction, float dodgeChance, float critChance, int size = 1)
+        public BattleActor(string name, int maxHp, Faction faction, float dodgeChance, float critChance, float speed, int size = 1)
         {
             Name = name;
             MaxHP = maxHp;
             CurrentHP = maxHp;
-            TimeUntilTurn = 0;
-            Delay = 0;
+            Speed = speed;
             Faction = faction;
             State = BattleState.NotTurn;
             Size = size;
@@ -133,5 +131,10 @@ namespace Arakara.Components
         protected abstract void DuringTurn();
 
         protected abstract void OnEndOfTurn();
+
+        public int CompareTo(BattleActor other)
+        {
+            return -Speed.CompareTo(other.Speed);
+        }
     }
 }

@@ -64,7 +64,6 @@ namespace Arakara.Scenes
                     {
                         Name = "Poison",
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
-                        Speed = 5,
                         Targeting = Targeting.Enemies
                     },
                     Animation = Animations.Attack
@@ -75,7 +74,6 @@ namespace Arakara.Scenes
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Speed = 5,
                         Targeting = Targeting.Enemies
                     },
                     Animation = Animations.Attack
@@ -86,7 +84,6 @@ namespace Arakara.Scenes
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Speed = 5,
                         Targeting = Targeting.Enemies
                     },
                     Animation = Animations.Attack
@@ -97,7 +94,6 @@ namespace Arakara.Scenes
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Speed = 5,
                         Targeting = Targeting.Enemies
                     },
                     Animation = Animations.Attack
@@ -108,7 +104,6 @@ namespace Arakara.Scenes
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Speed = 5,
                         Targeting = Targeting.Enemies
                     },
                     Animation = Animations.Attack
@@ -119,7 +114,6 @@ namespace Arakara.Scenes
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Speed = 5,
                         Targeting = Targeting.Enemies
                     },
                     Animation = Animations.Attack
@@ -130,7 +124,6 @@ namespace Arakara.Scenes
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Speed = 5,
                         Targeting = Targeting.Enemies
                     },
                     Animation = Animations.Attack
@@ -141,7 +134,6 @@ namespace Arakara.Scenes
                     {
                         Name = "Heavy Slash",
                         Effect = new DamageEffect(10, 20),
-                        Speed = 10,
                         Targeting = Targeting.Enemies
                     },
                     Animation = Animations.Attack
@@ -152,7 +144,6 @@ namespace Arakara.Scenes
                     {
                         Name = "Heavy Slash",
                         Effect = new DamageEffect(10, 20),
-                        Speed = 10,
                         Targeting = Targeting.Enemies
                     },
                     Animation = Animations.Attack
@@ -163,12 +154,11 @@ namespace Arakara.Scenes
                     {
                         Name = "Potion",
                         Effect = new HealEffect(40),
-                        Speed = 10,
                         Targeting = Targeting.Self
                     },
                     Animation = Animations.Attack
                 },
-            }, .25f, .25f);
+            }, .25f, .25f, 200f);
 
             mainCharacterEntity.addComponent(mainCharacterActor);
 
@@ -210,7 +200,7 @@ namespace Arakara.Scenes
             sprite.addAnimation(Animations.Attack, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
             sprite.setOrigin(Vector2.Zero);
 
-            var aIActor = new AIActor<Animations>("Guard", 100, new Faction
+            var aIActor = new AIActor<Animations>("Guard", 1, new Faction
                 {
                     FactionName = "Enemies",
                     Id = 2
@@ -222,7 +212,6 @@ namespace Arakara.Scenes
                         Animation = Animations.Attack,
                         Effect = new DamageEffect(10,  15),
                         Name = "Stab",
-                        Speed = 10,
                         Targeting = Targeting.Enemies
                     },
                     new BattleAction<Animations>
@@ -230,11 +219,10 @@ namespace Arakara.Scenes
                         Animation = Animations.Attack,
                         Effect = new DamageEffect(20, 30),
                         Name = "Super Stab",
-                        Speed = 70,
                         Targeting = Targeting.Enemies
                     }
                 },
-                new RandomAIDecider(), 0f, 0f
+                new RandomAIDecider(), 0f, 0f, 100f
             );
             enemyEntity.addComponent(aIActor);
             return enemyEntity;
@@ -260,11 +248,10 @@ namespace Arakara.Scenes
                         Animation = Animations.Attack,
                         Effect = new LifeDrainEffect(10, 20),
                         Name = "Necro Bolt",
-                        Speed = 10,
                         Targeting = Targeting.Enemies
                     },
                 },
-                new RandomAIDecider(), 0f, 0f
+                new RandomAIDecider(), 0f, 0f, 50f
             );
             enemyEntity.addComponent(aIActor);
 

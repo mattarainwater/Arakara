@@ -62,10 +62,7 @@ namespace Arakara.Components
             {
                 entity.transform.position = GetPositionForEntity(actor);
 
-                //entity.addComponent(new HealthBar(actor));
-
                 entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 20), Color.Red, () => "HP: " + actor.CurrentHP + " / " + actor.MaxHP));
-                entity.addComponent(new UpdatableText(Graphics.instance.bitmapFont, new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 40), Color.DarkGray, () => "Delay: " + actor.TimeUntilTurn));
                 entity.addCollider(new BoxCollider(0, 0, DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT));
                 entity.addComponent(new EffectDisplayContainer());
                 Controller.AddActor(actor);

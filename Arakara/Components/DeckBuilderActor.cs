@@ -22,8 +22,8 @@ namespace Arakara.Components
         private bool _drawing;
         private Sprite<TEnum> _animator;
 
-        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance) :
-            base(name, maxHP, faction, dodgeChance, critChance)
+        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance, float speed) :
+            base(name, maxHP, faction, dodgeChance, critChance, speed)
         {
             _deck = cards;
             _hand = new List<Card<TEnum>>();
@@ -99,7 +99,6 @@ namespace Arakara.Components
 
         private void Reset()
         {
-            Delay = _selectedCard.Action.Speed;
             _discardPile.AddRange(_hand);
             _handEntities.ForEach(entity => entity.destroy());
             _handEntities = new List<Entity>();
@@ -143,7 +142,6 @@ namespace Arakara.Components
             cardEntity.addComponent(new SimplePolygon(verts, Color.Black));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Name, new Vector2(5, 5), Color.White));
             cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Effect.FormatDescription(), new Vector2(5, 30), Color.White));
-            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, "Delay: " + card.Action.Speed, new Vector2(5, 85), Color.White));
             cardEntity.addComponent(new CardClicker<TEnum>(card, this));
             cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 100, 100)));
             _handEntities.Add(cardEntity);
