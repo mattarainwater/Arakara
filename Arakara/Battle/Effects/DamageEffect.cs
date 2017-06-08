@@ -31,10 +31,6 @@ namespace Arakara.Battle.Effects
                 var dodge = Nez.Random.nextFloat() <= target.DodgeChance ? 0 : 1;
                 DamageDealt *= dodge;
                 target.CurrentHP -= DamageDealt;
-                if(target.CurrentHP <= 0)
-                {
-                    controller.Kill(target);
-                }
                 var displayText = DamageDealt == 0 ? "Miss" : crit == 2 ? "Crit! " + DamageDealt.ToString() : DamageDealt.ToString();
                 var displayColor = DamageDealt == 0 ? Color.DarkGray : crit == 2 ? Color.DarkViolet : Color.Red;
                 var effectDisplayContainer = target.getComponent<EffectDisplayContainer>();

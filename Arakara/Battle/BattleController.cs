@@ -21,7 +21,10 @@ namespace Arakara.Battle
         public List<BattleEvent> Events { get; set; }
         public BattleEvent CurrentEvent { get; set; }
 
+        private int CurrentActorIndex { get; set; }
+
         public bool IsActive { get; set; }
+        private bool IsInitialized { get; set; }
 
         public BattleController()
         {
@@ -33,6 +36,12 @@ namespace Arakara.Battle
         {
             if(IsActive)
             {
+                if(!IsInitialized)
+                {
+                    IsInitialized = true;
+                    CurrentActor = Actors.First();
+                    CurrentActor.State = BattleState.StartOfTurn;
+                }
                 if(CurrentEvent != null)
                 {
                     CurrentEvent.Perform();
@@ -50,7 +59,8 @@ namespace Arakara.Battle
                         else
                         {
                             var indexOfNextActor = Actors.IndexOf(CurrentActor) + 1 == Actors.Count() ? 0 : Actors.IndexOf(CurrentActor) + 1;
-                            CurrentActor = Actors.ElementAt(indexOfNextActor);
+                            CurrentActorIndex = indexOfNextActor;
+                            CurrentActor = Actors[CurrentActorIndex];
                             Actors.ForEach(x => x.Targetable = false);
                             CurrentActor.State = BattleState.StartOfTurn;
                         }
@@ -58,20 +68,11 @@ namespace Arakara.Battle
                 }
                 else
                 {
-                    CurrentActor = Actors.First();
+                    CurrentActorIndex++;
+                    CurrentActor = Actors[CurrentActorIndex];
                     CurrentActor.State = BattleState.StartOfTurn;
                 }
             }
-        }
-
-        public void Kill(BattleActor target)
-        {
-            Actors.Remove(target);
-            if(CurrentActor == target)
-            {
-                CurrentActor = null;
-            }
-            target.entity.destroy();
         }
 
         public void MakeTargetables(BattleActor targerter, Targeting targeting)
@@ -93,6 +94,7 @@ namespace Arakara.Battle
             Actors.Add(actor);
             Actors.Sort();
             var battleEvent = new BattleEvent(new OnDeathTrigger(actor));
+            AddEvent(battleEvent);
             battleEvent.AddEffect(new KillEffect(0, actor));
         }
 

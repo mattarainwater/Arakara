@@ -25,14 +25,17 @@ namespace Arakara.Battle.Events.Effects
                 Controller.CurrentActor = null;
             }
             Target.entity.destroy();
+            State = BattleEventEffectState.EndOfEventEffect;
         }
 
         protected override void OnEndOfEvent()
         {
+            State = BattleEventEffectState.Done;
         }
 
         protected override void OnStartOfEvent()
         {
+            State = BattleEventEffectState.DuringEventEffect;
         }
     }
 }

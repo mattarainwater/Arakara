@@ -5,5 +5,6 @@
         StartOfEventEffect,
         DuringEventEffect,
         EndOfEventEffect,
+        Done
     }
 }

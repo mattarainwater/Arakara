@@ -25,7 +25,7 @@ namespace Arakara.Battle.Events
             {
                 CurrentEffect = Effects.First();
             }
-            if(CurrentEffect.State == BattleEventEffectState.EndOfEventEffect)
+            if(CurrentEffect.State == BattleEventEffectState.Done)
             {
                 var indexOfNextEffect = Effects.IndexOf(CurrentEffect) + 1 == Effects.Count() ? 0 : Effects.IndexOf(CurrentEffect) + 1;
                 if(indexOfNextEffect == 0)
@@ -47,7 +47,7 @@ namespace Arakara.Battle.Events
 
         public void AddEffect(BattleEventEffect effect)
         {
-            effect.Controller = effect.Controller;
+            effect.Controller = Controller;
             Effects.Add(effect);
             Effects.Sort();
         }
