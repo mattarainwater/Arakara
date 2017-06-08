@@ -231,10 +231,22 @@ namespace Arakara.Scenes
         private Entity MakeNecromancer()
         {
             var enemyEntity = createEntity("enemy");
-            
-            var sprite = new Sprite(contentManager.Load<Texture2D>("necromancer_big"));
-            sprite.setOrigin(Vector2.Zero);
+
+            var texture = contentManager.Load<Texture2D>("necromancer_big");
+            var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
+            var sprite = new Sprite<Animations>(subtextures[0]);
             enemyEntity.addComponent(sprite);
+            var animationFrames = new List<Subtexture>
+            {
+                subtextures[0],
+                subtextures[1],
+                subtextures[2],
+                subtextures[2],
+                subtextures[1],
+                subtextures[0]
+            };
+            sprite.addAnimation(Animations.Attack, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
+            sprite.setOrigin(Vector2.Zero);
 
             var aIActor = new AIActor<Animations>("Necromancer", 200, new Faction
             {
