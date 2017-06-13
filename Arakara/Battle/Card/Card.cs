@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace Arakara.Battle.Card
 {
-    public class Card
+    public class Card<TEnum> where TEnum : struct, IComparable, IFormattable
     {
-        public BattleAction Action { get; set; }
+        public BattleAction<TEnum> Action { get; set; }
         public Grade Grade { get; set; }
-    }
-
-    public class Card<TEnum> : Card where TEnum : struct, IComparable, IFormattable
-    {
-        public TEnum Animation { get; set; }
     }
 }

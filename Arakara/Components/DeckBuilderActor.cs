@@ -12,27 +12,27 @@ namespace Arakara.Components
 {
     public class DeckBuilderActor<TEnum> : BattleActor where TEnum : struct, IComparable, IFormattable
     {
-        private List<Card<TEnum>> _deck;
+        public List<Card<TEnum>> Deck { get; set; }
         private List<Card<TEnum>> _hand;
         private List<Card<TEnum>> _discardPile;
         private List<Entity> _handEntities;
         private Card<TEnum> _selectedCard;
         private int _handSize = 3;
-        private CardUpgrader _cardUpgrader;
+        private CardUpgrader<TEnum> _cardUpgrader;
         private bool _drawing;
         private Sprite<TEnum> _animator;
 
         public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance, float speed) :
             base(name, maxHP, faction, dodgeChance, critChance, speed)
         {
-            _deck = cards;
+            Deck = cards;
             _hand = new List<Card<TEnum>>();
             _discardPile = new List<Card<TEnum>>();
             _handEntities = new List<Entity>();
 
             ShuffleDeck();
 
-            _cardUpgrader = new CardUpgrader();
+            _cardUpgrader = new CardUpgrader<TEnum>();
         }
 
         public override void onAddedToEntity()
@@ -69,7 +69,7 @@ namespace Arakara.Components
                 {
                     if (!_animator.isPlaying)
                     {
-                        _animator.play(_selectedCard.Animation);
+                        _animator.play(_selectedCard.Action.Animation);
                         _animator.originNormalized = Vector2.Zero;
                         _animator.onAnimationCompletedEvent = (t) => {
                             _selectedCard.Action.Effect.Perform(this, _selectedTargets, Controller);
@@ -119,13 +119,13 @@ namespace Arakara.Components
 
         private void DrawCard(int index)
         {
-            if (!_deck.Any())
+            if (!Deck.Any())
             {
                 ShuffleDeck();
             }
-            _hand.Add(_deck.First());
-            CreateCardEntity(index, _deck.First());
-            _deck.Remove(_deck.First());
+            _hand.Add(Deck.First());
+            CreateCardEntity(index, Deck.First());
+            Deck.Remove(Deck.First());
         }
 
         private void CreateCardEntity(int index, Card<TEnum> card)
@@ -149,9 +149,9 @@ namespace Arakara.Components
 
         private void ShuffleDeck()
         {
-            var deckList = _discardPile.Concat(_deck).ToArray();
+            var deckList = _discardPile.Concat(Deck).ToArray();
             deckList.shuffle();
-            _deck = deckList.ToList();
+            Deck = deckList.ToList();
             _discardPile = new List<Card<TEnum>>();
         }
     }

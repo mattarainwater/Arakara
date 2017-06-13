@@ -54,6 +54,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Battle\AI\AIDecider.cs" />
+    <Compile Include="Battle\Effects\Condition.cs" />
+    <Compile Include="Battle\Effects\ConditionalEffect.cs" />
+    <Compile Include="Battle\Effects\Conditions\TargetHasStatusCondition.cs" />
     <Compile Include="Battle\Events\BattleEventEffect.cs" />
     <Compile Include="Battle\Events\BattleEventTrigger.cs" />
     <Compile Include="Battle\Effects\ApplyStatusEffect.cs" />
@@ -73,11 +76,14 @@
     <Compile Include="Battle\Card\Grade.cs" />
     <Compile Include="Battle\Effects\HealEffect.cs" />
     <Compile Include="Battle\Effects\LifeDrainEffect.cs" />
+    <Compile Include="Battle\Statuses\DefenseUpStatus.cs" />
     <Compile Include="Battle\Statuses\PoisonStatus.cs" />
     <Compile Include="Battle\AI\RandomAIDecider.cs" />
+    <Compile Include="Battle\Statuses\StunStatus.cs" />
     <Compile Include="Battle\Targeting.cs" />
     <Compile Include="Common\DimensionConstants.cs" />
     <Compile Include="Common\EntityTags.cs" />
+    <Compile Include="Common\JSONReader.cs" />
     <Compile Include="Common\StringExtensions.cs" />
     <Compile Include="Components\AIActor.cs" />
     <Compile Include="Components\BattleContainer.cs" />
@@ -99,6 +105,10 @@
     <Compile Include="Scenes\StartMenuScreen.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>External DLLs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\OpenTK.dll</HintPath>
     </Reference>
@@ -147,6 +157,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Content\Content.mgcb" />
+    <Content Include="Content\prisca.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

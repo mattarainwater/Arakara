@@ -20,8 +20,7 @@ namespace Arakara.Battle
         public BattleActor CurrentActor { get; set; }
         public List<BattleEvent> Events { get; set; }
         public BattleEvent CurrentEvent { get; set; }
-
-        private int CurrentActorIndex { get; set; }
+        public int CurrentActorIndex { get; set; }
 
         public bool IsActive { get; set; }
         private bool IsInitialized { get; set; }
@@ -42,28 +41,25 @@ namespace Arakara.Battle
                     CurrentActor = Actors.First();
                     CurrentActor.State = BattleState.StartOfTurn;
                 }
-                if(CurrentEvent != null)
+                var triggeredEvent = GetTriggeredEvent();
+                if (CurrentEvent != null)
                 {
                     CurrentEvent.Perform();
+                }
+                else if (triggeredEvent != null)
+                {
+                    CurrentEvent = triggeredEvent;
                 }
                 else if (CurrentActor != null)
                 {
                     CurrentActor.ProcessTurn();
                     if (CurrentActor.State == BattleState.NotTurn)
                     {
-                        var triggeredEvent = GetTriggeredEvent();
-                        if(triggeredEvent != null)
-                        {
-                            CurrentEvent = triggeredEvent;
-                        }
-                        else
-                        {
-                            var indexOfNextActor = Actors.IndexOf(CurrentActor) + 1 == Actors.Count() ? 0 : Actors.IndexOf(CurrentActor) + 1;
-                            CurrentActorIndex = indexOfNextActor;
-                            CurrentActor = Actors[CurrentActorIndex];
-                            Actors.ForEach(x => x.Targetable = false);
-                            CurrentActor.State = BattleState.StartOfTurn;
-                        }
+                        var indexOfNextActor = Actors.IndexOf(CurrentActor) + 1 == Actors.Count() ? 0 : Actors.IndexOf(CurrentActor) + 1;
+                        CurrentActorIndex = indexOfNextActor;
+                        CurrentActor = Actors[CurrentActorIndex];
+                        Actors.ForEach(x => x.Targetable = false);
+                        CurrentActor.State = BattleState.StartOfTurn;
                     }
                 }
                 else

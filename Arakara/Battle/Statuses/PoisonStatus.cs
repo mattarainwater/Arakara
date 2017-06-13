@@ -27,5 +27,10 @@ namespace Arakara.Battle.Statuses
         {
             return $"Deal {DamageEffect.MinDamage}-{DamageEffect.MaxDamage} every turn for {Duration} turns.";
         }
+
+        public override string GetCode()
+        {
+            return "Poison";
+        }
     }
 }

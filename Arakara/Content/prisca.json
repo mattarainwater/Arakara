@@ -1,0 +1,24 @@
+{
+  "Name": "Prisca",
+  "MaxHP": 100,
+  "Faction": {
+    "FactionName": "MC",
+    "Id": 1
+  },
+  "DodgeChance": 0.25,
+  "CriticalHitChance": 0.25,
+  "Speed": 200,
+  "Deck": [
+    {
+      "Grade": "Bronze",
+      "Action": {
+        "Name": "Slash",
+        "Targeting": "Enemies",
+        "Animation": "Attack",
+        "Effect": {
+
+        }
+      }
+    }
+  ]
+}

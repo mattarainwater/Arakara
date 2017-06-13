@@ -60,103 +60,103 @@ namespace Arakara.Scenes
             {
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Poison",
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
-                        Targeting = Targeting.Enemies
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
                 },
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Targeting = Targeting.Enemies
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
                 },
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Targeting = Targeting.Enemies
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
                 },
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Targeting = Targeting.Enemies
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
                 },
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Targeting = Targeting.Enemies
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
                 },
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Targeting = Targeting.Enemies
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
                 },
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
-                        Targeting = Targeting.Enemies
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
                 },
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Heavy Slash",
                         Effect = new DamageEffect(10, 20),
-                        Targeting = Targeting.Enemies
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
                 },
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Heavy Slash",
                         Effect = new DamageEffect(10, 20),
-                        Targeting = Targeting.Enemies
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
                 },
                 new Card<Animations>
                 {
-                    Action = new BattleAction
+                    Action = new BattleAction<Animations>
                     {
                         Name = "Potion",
                         Effect = new HealEffect(40),
-                        Targeting = Targeting.Self
-                    },
-                    Animation = Animations.Attack
+                        Targeting = Targeting.Self,
+                        Animation = Animations.Attack
+                    }
                 },
             }, .25f, .25f, 200f);
 

@@ -15,5 +15,6 @@ namespace Arakara.Battle.Statuses
 
         public abstract void Apply(BattleActor actor, BattleController controller);
         public abstract string GetDescription();
+        public abstract string GetCode();
     }
 }

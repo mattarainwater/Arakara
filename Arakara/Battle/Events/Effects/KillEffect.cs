@@ -23,6 +23,7 @@ namespace Arakara.Battle.Events.Effects
             if (Controller.CurrentActor == Target)
             {
                 Controller.CurrentActor = null;
+                Controller.CurrentActorIndex--;
             }
             Target.entity.destroy();
             State = BattleEventEffectState.EndOfEventEffect;

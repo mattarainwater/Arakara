@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Arakara.Battle.Card
 {
-    public class CardUpgrader
+    public class CardUpgrader<TEnum> where TEnum : struct, IComparable, IFormattable
     {
-        public void UpgradeCards(IEnumerable<Card> cards)
+        public void UpgradeCards(IEnumerable<Card<TEnum>> cards)
         {
             foreach (var card in cards)
             {
@@ -17,7 +17,7 @@ namespace Arakara.Battle.Card
             }
         }
 
-        private void UpgradeCard(Card card)
+        private void UpgradeCard(Card<TEnum> card)
         {
             if(card.Action.Effect.GetType() == typeof(DamageEffect))
             {
