@@ -1,8 +1,8 @@
 
 #----------------------------- Global Properties ----------------------------#
 
-/outputDir:bin/$(Platform)
-/intermediateDir:obj/$(Platform)
+/outputDir:..\bin\DesktopGL\x86\Debug\Content
+/intermediateDir:..\obj\x86\Debug
 /platform:Windows
 /config:
 /profile:Reach
@@ -16,13 +16,6 @@
 /reference:..\External DLLs\Nez.dll
 
 #---------------------------------- Content ---------------------------------#
-
-#begin Nez/NezDefaultBMFont.xnb
-/importer:BitmapFontImporter
-/processor:BitmapFontProcessor
-/processorParam:packTexturesIntoXnb=True
-/processorParam:compressTextures=False
-/build:Nez/NezDefaultBMFont.xnb
 
 #begin Knight.png
 /importer:TextureImporter
@@ -108,4 +101,39 @@
 /processorParam:TextureFormat=Color
 /build:necromancer_big.png
 
+#begin fantasy.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:fantasy.png
+
+#begin background.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:background.tmx
+
+#begin Nez/NezDefaultBMFont.fnt
+/importer:BitmapFontImporter
+/processor:BitmapFontProcessor
+/processorParam:packTexturesIntoXnb=True
+/processorParam:compressTextures=False
+/build:Nez/NezDefaultBMFont.fnt
+
+#begin Nez/NezDefaultBMFont.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Nez/NezDefaultBMFont.png
 

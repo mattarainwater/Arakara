@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Nez;
 using Nez.Sprites;
 using Nez.Textures;
+using Nez.Tiled;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,12 @@ namespace Arakara.Scenes
             var battleEntity = createEntity("battle");
             _battle = new BattleContainer(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT);
             battleEntity.addComponent(_battle);
+
+            var tiledEntity = createEntity("tiled-map-entity");
+            var tiledmap = contentManager.Load<TiledMap>("background");
+            var tiledMapComponent = tiledEntity.addComponent(new TiledMapComponent(tiledmap));
+            tiledMapComponent.renderLayer = 10;
+            tiledEntity.transform.scale = new Vector2(.5f, .5f);
         }
 
         public override void onStart()
