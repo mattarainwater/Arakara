@@ -65,6 +65,7 @@ namespace Arakara.Battle
                 else
                 {
                     CurrentActorIndex++;
+                    CurrentActorIndex = CurrentActorIndex == Actors.Count() ? 0 : CurrentActorIndex;
                     CurrentActor = Actors[CurrentActorIndex];
                     CurrentActor.State = BattleState.StartOfTurn;
                 }

@@ -79,8 +79,8 @@ namespace Arakara.Scenes
                 {
                     Action = new BattleAction<Animations>
                     {
-                        Name = "Quick Slash",
-                        Effect = new DamageEffect(5, 10),
+                        Name = "Poison",
+                        Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack
                     }
@@ -89,8 +89,8 @@ namespace Arakara.Scenes
                 {
                     Action = new BattleAction<Animations>
                     {
-                        Name = "Quick Slash",
-                        Effect = new DamageEffect(5, 10),
+                        Name = "Poison",
+                        Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack
                     }
@@ -99,8 +99,18 @@ namespace Arakara.Scenes
                 {
                     Action = new BattleAction<Animations>
                     {
-                        Name = "Quick Slash",
-                        Effect = new DamageEffect(5, 10),
+                        Name = "Poison",
+                        Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack
+                    }
+                },
+                new Card<Animations>
+                {
+                    Action = new BattleAction<Animations>
+                    {
+                        Name = "Poison",
+                        Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack
                     }
@@ -255,7 +265,7 @@ namespace Arakara.Scenes
             sprite.addAnimation(Animations.Attack, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
             sprite.setOrigin(Vector2.Zero);
 
-            var aIActor = new AIActor<Animations>("Necromancer", 200, new Faction
+            var aIActor = new AIActor<Animations>("Necromancer", 1, new Faction
             {
                 FactionName = "Enemies",
                 Id = 2
@@ -265,7 +275,7 @@ namespace Arakara.Scenes
                     new BattleAction<Animations>
                     {
                         Animation = Animations.Attack,
-                        Effect = new LifeDrainEffect(10, 20),
+                        Effect = new DamageEffect(10, 20),
                         Name = "Necro Bolt",
                         Targeting = Targeting.Enemies
                     },
