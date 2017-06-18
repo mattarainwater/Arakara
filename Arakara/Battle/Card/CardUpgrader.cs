@@ -1,4 +1,5 @@
 ﻿using Arakara.Battle.Effects;
+using Arakara.Battle.Statuses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +49,25 @@ namespace Arakara.Battle.Card
                 {
                     card.Grade = Grade.Gold;
                     ((HealEffect)card.Action.Effect).Healing = newHealing;
+                }
+            }
+            else if(card.Action.Effect.GetType() == typeof(ApplyStatusEffect))
+            {
+                var applyStatusEffect = (ApplyStatusEffect)card.Action.Effect;
+                var status = (PoisonStatus)applyStatusEffect.Status;
+                var newMinDamage = (int)(status.DamageEffect.MinDamage * 1.5);
+                var newMaxDamage = (int)(status.DamageEffect.MaxDamage * 1.5);
+                if (card.Grade == Grade.Bronze)
+                {
+                    card.Grade = Grade.Silver;
+                    status.DamageEffect.MinDamage = newMinDamage;
+                    status.DamageEffect.MaxDamage = newMaxDamage;
+                }
+                else if (card.Grade == Grade.Silver)
+                {
+                    card.Grade = Grade.Gold;
+                    status.DamageEffect.MinDamage = newMinDamage;
+                    status.DamageEffect.MaxDamage = newMaxDamage;
                 }
             }
         }

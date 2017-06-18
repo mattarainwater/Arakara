@@ -49,7 +49,10 @@ namespace Arakara.Components
                             var clicker = card.getComponent<CardClicker<TEnum>>();
                             clicker.Selected = false;
                             var mainColorForRest = GetMainColor(clicker._card.Grade);
-                            clicker._simplePolygon.setColor(mainColorForRest);
+                            if(clicker._simplePolygon != null)
+                            {
+                                clicker._simplePolygon.setColor(mainColorForRest);
+                            }
                         }
 
                         Selected = true;

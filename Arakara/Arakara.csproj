@@ -133,6 +133,8 @@
     <None Include="Content\prisca.png" />
     <None Include="Content\prisca_big.png" />
     <None Include="Content\Nez\NezDefaultBMFont.png" />
+    <Content Include="Content\background2.png" />
+    <Content Include="Content\DarkHouseTiles.png" />
     <Content Include="External DLLs\Ionic.ZLib.dll" />
     <Content Include="External DLLs\Newtonsoft.Json.dll" />
     <Content Include="External DLLs\Nez.dll" />
@@ -142,7 +144,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Content\background.tmx" />
+    <None Include="Content\background.tmx">
+      <SubType>Designer</SubType>
+    </None>
     <MonoGameContentReference Include="Content\Content.mgcb" />
     <None Include="Content\prisca.json" />
     <None Include="packages.config">

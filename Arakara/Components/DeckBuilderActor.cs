@@ -21,8 +21,9 @@ namespace Arakara.Components
         private CardUpgrader<TEnum> _cardUpgrader;
         private bool _drawing;
         private Sprite<TEnum> _animator;
+        private TEnum _idleAnimation;
 
-        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance, float speed) :
+        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance, float speed, TEnum idleAnimation) :
             base(name, maxHP, faction, dodgeChance, critChance, speed)
         {
             Deck = cards;
@@ -33,12 +34,14 @@ namespace Arakara.Components
             ShuffleDeck();
 
             _cardUpgrader = new CardUpgrader<TEnum>();
+            _idleAnimation = idleAnimation;
         }
 
         public override void onAddedToEntity()
         {
             base.onAddedToEntity();
             _animator = entity.getComponent<Sprite<TEnum>>();
+            _animator.play(_idleAnimation);
         }
 
         public void PlayCard(Card<TEnum> card)
@@ -65,28 +68,21 @@ namespace Arakara.Components
         {
             if(_selectedCard != null && _selectedTargets != null)
             {
-                if (_animator != null)
+                if(!EqualityComparer<TEnum>.Default.Equals(_animator.currentAnimation, _selectedCard.Action.Animation))
                 {
-                    if (!_animator.isPlaying)
-                    {
-                        _animator.play(_selectedCard.Action.Animation);
-                        _animator.originNormalized = Vector2.Zero;
-                        _animator.onAnimationCompletedEvent = (t) => {
-                            _selectedCard.Action.Effect.Perform(this, _selectedTargets, Controller);
-                            State = BattleState.EndOfTurn;
-                        };
-                    }
-                }
-                else
-                {
-                    _selectedCard.Action.Effect.Perform(this, _selectedTargets, Controller);
-                    State = BattleState.EndOfTurn;
+                    _animator.play(_selectedCard.Action.Animation);
+                    _animator.onAnimationCompletedEvent = (t) => {
+                        _selectedCard.Action.Effect.Perform(this, _selectedTargets, Controller);
+                        _animator.onAnimationCompletedEvent = null;
+                        State = BattleState.EndOfTurn;
+                    };
                 }
             }
         }
 
         protected override void OnEndOfTurn()
         {
+            _animator.play(_idleAnimation);
             Reset();
             State = BattleState.NotTurn;
         }

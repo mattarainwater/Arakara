@@ -38,11 +38,11 @@ namespace Arakara.Scenes
             _battle = new BattleContainer(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT);
             battleEntity.addComponent(_battle);
 
-            var tiledEntity = createEntity("tiled-map-entity");
-            var tiledmap = contentManager.Load<TiledMap>("background");
-            var tiledMapComponent = tiledEntity.addComponent(new TiledMapComponent(tiledmap));
-            tiledMapComponent.renderLayer = 10;
-            tiledEntity.transform.scale = new Vector2(.5f, .5f);
+            //var tiledEntity = createEntity("tiled-map-entity");
+            //var tiledmap = contentManager.Load<TiledMap>("background");
+            //var tiledMapComponent = tiledEntity.addComponent(new TiledMapComponent(tiledmap));
+            //tiledMapComponent.renderLayer = 10;
+            //tiledEntity.transform.scale = new Vector2(.5f, .5f);
         }
 
         public override void onStart()
@@ -59,7 +59,7 @@ namespace Arakara.Scenes
         private Entity MakeMC()
         {
             var mainCharacterEntity = createEntity("mc");
-            var mainCharacterActor = new DeckBuilderActor<Animations>("Prisca", 100, new Faction
+            var mainCharacterActor = new DeckBuilderActor<Animations>("Prisca", 10000, new Faction
             {
                 FactionName = "PC",
                 Id = 1
@@ -72,7 +72,7 @@ namespace Arakara.Scenes
                         Name = "Poison",
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -82,7 +82,7 @@ namespace Arakara.Scenes
                         Name = "Poison",
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -92,7 +92,7 @@ namespace Arakara.Scenes
                         Name = "Poison",
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -102,7 +102,7 @@ namespace Arakara.Scenes
                         Name = "Poison",
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -112,7 +112,7 @@ namespace Arakara.Scenes
                         Name = "Poison",
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -122,7 +122,7 @@ namespace Arakara.Scenes
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -132,7 +132,7 @@ namespace Arakara.Scenes
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -142,7 +142,7 @@ namespace Arakara.Scenes
                         Name = "Quick Slash",
                         Effect = new DamageEffect(5, 10),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -152,7 +152,7 @@ namespace Arakara.Scenes
                         Name = "Heavy Slash",
                         Effect = new DamageEffect(10, 20),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -162,7 +162,7 @@ namespace Arakara.Scenes
                         Name = "Heavy Slash",
                         Effect = new DamageEffect(10, 20),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack
+                        Animation = Animations.Attack1
                     }
                 },
                 new Card<Animations>
@@ -172,10 +172,10 @@ namespace Arakara.Scenes
                         Name = "Potion",
                         Effect = new HealEffect(40),
                         Targeting = Targeting.Self,
-                        Animation = Animations.Attack
+                        Animation = Animations.Support1
                     }
                 },
-            }, .25f, .25f, 200f);
+            }, .25f, .25f, 200f, Animations.Idle);
 
             mainCharacterEntity.addComponent(mainCharacterActor);
 
@@ -183,15 +183,39 @@ namespace Arakara.Scenes
             var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
             var sprite = new Sprite<Animations>(subtextures[0]);
             mainCharacterEntity.addComponent(sprite);
-            var animationFrames = new List<Subtexture>
+            var attackAnimationFrames = new List<Subtexture>
             {
                 subtextures[0],
                 subtextures[1],
+                subtextures[2],
+                subtextures[2],
+                subtextures[2],
+                subtextures[3],
+                subtextures[3],
+                subtextures[3],
+                subtextures[4],
+            };
+            var idleAnimationFrames = new List<Subtexture>
+            {
+                subtextures[0],
                 subtextures[1],
+                subtextures[2],
                 subtextures[1],
                 subtextures[0]
             };
-            sprite.addAnimation(Animations.Attack, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
+            var potionAnimationFrames = new List<Subtexture>
+            {
+                subtextures[0],
+                subtextures[5],
+                subtextures[6],
+                subtextures[6],
+                subtextures[6],
+                subtextures[7],
+                subtextures[0]
+            };
+            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames) { loop = false, fps = 30 }, Vector2.Zero);
+            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true }, Vector2.Zero);
+            sprite.addAnimation(Animations.Support1, new SpriteAnimation(potionAnimationFrames) { loop = false }, Vector2.Zero);
             sprite.flipX = true;
             sprite.setOrigin(Vector2.Zero);
 
@@ -214,7 +238,7 @@ namespace Arakara.Scenes
                 subtextures[1],
                 subtextures[0]
             };
-            sprite.addAnimation(Animations.Attack, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
+            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
             sprite.setOrigin(Vector2.Zero);
 
             var aIActor = new AIActor<Animations>("Guard", 1, new Faction
@@ -226,14 +250,14 @@ namespace Arakara.Scenes
                 {
                     new BattleAction<Animations>
                     {
-                        Animation = Animations.Attack,
+                        Animation = Animations.Attack1,
                         Effect = new DamageEffect(10,  15),
                         Name = "Stab",
                         Targeting = Targeting.Enemies
                     },
                     new BattleAction<Animations>
                     {
-                        Animation = Animations.Attack,
+                        Animation = Animations.Attack1,
                         Effect = new DamageEffect(20, 30),
                         Name = "Super Stab",
                         Targeting = Targeting.Enemies
@@ -262,10 +286,10 @@ namespace Arakara.Scenes
                 subtextures[1],
                 subtextures[0]
             };
-            sprite.addAnimation(Animations.Attack, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
+            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
             sprite.setOrigin(Vector2.Zero);
 
-            var aIActor = new AIActor<Animations>("Necromancer", 1, new Faction
+            var aIActor = new AIActor<Animations>("Necromancer", 10000, new Faction
             {
                 FactionName = "Enemies",
                 Id = 2
@@ -274,7 +298,7 @@ namespace Arakara.Scenes
                 {
                     new BattleAction<Animations>
                     {
-                        Animation = Animations.Attack,
+                        Animation = Animations.Attack1,
                         Effect = new DamageEffect(10, 20),
                         Name = "Necro Bolt",
                         Targeting = Targeting.Enemies
