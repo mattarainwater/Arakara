@@ -134,6 +134,7 @@
     <None Include="Content\prisca_big.png" />
     <None Include="Content\Nez\NezDefaultBMFont.png" />
     <Content Include="Content\background2.png" />
+    <Content Include="Content\card.png" />
     <Content Include="Content\DarkHouseTiles.png" />
     <Content Include="External DLLs\Ionic.ZLib.dll" />
     <Content Include="External DLLs\Newtonsoft.Json.dll" />
