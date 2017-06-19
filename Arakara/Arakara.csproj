@@ -122,6 +122,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="x86\SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="x86\soft_oal.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <EmbeddedResource Include="Icon.ico" />
     <None Include="Content\fantasy.png" />
     <None Include="Content\guard.png" />
@@ -140,6 +146,12 @@
     <Content Include="External DLLs\Newtonsoft.Json.dll" />
     <Content Include="External DLLs\Nez.dll" />
     <Content Include="External DLLs\Nez.PipelineImporter.dll" />
+    <None Include="x64\SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="x64\soft_oal.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Content Include="OpenTK.dll.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

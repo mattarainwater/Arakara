@@ -299,7 +299,7 @@ namespace Nez
 			if( !DebugConsole.instance.isOpen )
 				TimeRuler.instance.render();
 
-			drawCalls = graphicsDevice.Metrics.DrawCount;
+			//drawCalls = (ulong)graphicsDevice.Metrics.DrawCount;
 			#endif
 		}
 
