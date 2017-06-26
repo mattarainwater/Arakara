@@ -72,8 +72,10 @@ namespace Arakara.Scenes
                         Name = "Poison",
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    }
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 5,
+                    Cost = 2
                 },
                 new Card<Animations>
                 {
@@ -83,7 +85,9 @@ namespace Arakara.Scenes
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1
-                    }
+                    },
+                    BuyValue = 5,
+                    Cost = 2
                 },
                 new Card<Animations>
                 {
@@ -93,7 +97,9 @@ namespace Arakara.Scenes
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1
-                    }
+                    },
+                    BuyValue = 5,
+                    Cost = 2
                 },
                 new Card<Animations>
                 {
@@ -103,7 +109,9 @@ namespace Arakara.Scenes
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1
-                    }
+                    },
+                    BuyValue = 5,
+                    Cost = 2
                 },
                 new Card<Animations>
                 {
@@ -113,7 +121,9 @@ namespace Arakara.Scenes
                         Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1
-                    }
+                    },
+                    BuyValue = 5,
+                    Cost = 2
                 },
                 new Card<Animations>
                 {
@@ -123,7 +133,9 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(5, 10),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1
-                    }
+                    },
+                    BuyValue = 4,
+                    Cost = 4
                 },
                 new Card<Animations>
                 {
@@ -133,7 +145,9 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(5, 10),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1
-                    }
+                    },
+                    BuyValue = 4,
+                    Cost = 4
                 },
                 new Card<Animations>
                 {
@@ -143,7 +157,9 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(5, 10),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1
-                    }
+                    },
+                    BuyValue = 4,
+                    Cost = 4
                 },
                 new Card<Animations>
                 {
@@ -153,7 +169,9 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(10, 20),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1
-                    }
+                    },
+                    BuyValue = 3,
+                    Cost = 3
                 },
                 new Card<Animations>
                 {
@@ -163,7 +181,9 @@ namespace Arakara.Scenes
                         Effect = new DamageEffect(10, 20),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1
-                    }
+                    },
+                    BuyValue = 3,
+                    Cost = 3
                 },
                 new Card<Animations>
                 {
@@ -173,7 +193,9 @@ namespace Arakara.Scenes
                         Effect = new HealEffect(40),
                         Targeting = Targeting.Self,
                         Animation = Animations.Support1
-                    }
+                    },
+                    BuyValue = 2,
+                    Cost = 1
                 },
             }, .25f, .25f, 200f, Animations.Idle);
 

@@ -70,10 +70,8 @@
     <Compile Include="Battle\Statuses\BattleStatus.cs" />
     <Compile Include="Battle\BattleStatusCollection.cs" />
     <Compile Include="Battle\Card\Card.cs" />
-    <Compile Include="Battle\Card\CardUpgrader.cs" />
     <Compile Include="Battle\Effects\DamageEffect.cs" />
     <Compile Include="Battle\Faction.cs" />
-    <Compile Include="Battle\Card\Grade.cs" />
     <Compile Include="Battle\Effects\HealEffect.cs" />
     <Compile Include="Battle\Effects\LifeDrainEffect.cs" />
     <Compile Include="Battle\Statuses\DefenseUpStatus.cs" />
@@ -81,6 +79,7 @@
     <Compile Include="Battle\AI\RandomAIDecider.cs" />
     <Compile Include="Battle\Statuses\StunStatus.cs" />
     <Compile Include="Battle\Targeting.cs" />
+    <Compile Include="Common\CommonResources.cs" />
     <Compile Include="Common\DimensionConstants.cs" />
     <Compile Include="Common\EntityTags.cs" />
     <Compile Include="Common\JSONReader.cs" />
@@ -90,7 +89,7 @@
     <Compile Include="Components\BattleActor.cs" />
     <Compile Include="Battle\BattleController.cs" />
     <Compile Include="Battle\Events\BattleEvent.cs" />
-    <Compile Include="Components\CardClicker.cs" />
+    <Compile Include="Components\CardSelector.cs" />
     <Compile Include="Components\DeckBuilderActor.cs" />
     <Compile Include="Components\EffectDisplay.cs" />
     <Compile Include="Components\EffectDisplayContainer.cs" />
@@ -122,6 +121,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Content\default.fnt" />
     <None Include="x86\SDL2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -141,7 +141,9 @@
     <None Include="Content\Nez\NezDefaultBMFont.png" />
     <Content Include="Content\background2.png" />
     <Content Include="Content\card.png" />
+    <None Include="Content\card_dark.png" />
     <Content Include="Content\DarkHouseTiles.png" />
+    <None Include="Content\default_0.png" />
     <Content Include="External DLLs\Ionic.ZLib.dll" />
     <Content Include="External DLLs\Newtonsoft.Json.dll" />
     <Content Include="External DLLs\Nez.dll" />

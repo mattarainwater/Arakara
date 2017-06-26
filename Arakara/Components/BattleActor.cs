@@ -49,7 +49,7 @@ namespace Arakara.Components
 
         public override void onAddedToEntity()
         {
-            entity.addComponent(new Text(Graphics.instance.bitmapFont, Name, new Vector2(0f, -5), Color.Gray));
+            entity.addComponent(new Text(CommonResources.DefaultBitmapFont, Name, new Vector2(0f, -5), Color.Gray));
         }
 
         public void update()

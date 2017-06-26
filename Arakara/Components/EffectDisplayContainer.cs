@@ -24,7 +24,7 @@ namespace Arakara.Components
             var display = scene.addEntity(new Entity());
             var xPos = entity.transform.position.X + (DimensionConstants.CHARACTER_WIDTH / 2);
             var yPos = entity.transform.position.Y - 13 - (EffectDisplays.Count * 15);
-            var effectDisplay = new EffectDisplay(this, Graphics.instance.bitmapFont, text, new Vector2(xPos, yPos), color, 3);
+            var effectDisplay = new EffectDisplay(this, CommonResources.DefaultBitmapFont, text, new Vector2(xPos, yPos), color, 3);
             display.addComponent(effectDisplay);
             EffectDisplays.Add(effectDisplay);
         }

@@ -1,8 +1,10 @@
-﻿using Arakara.Scenes;
+﻿using Arakara.Common;
+using Arakara.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Nez;
+using Nez.BitmapFonts;
 using System.Collections.Generic;
 
 namespace Arakara
@@ -13,7 +15,7 @@ namespace Arakara
         private const int HEIGHT = 1200;
 
         public GameMain()
-            : base(width: WIDTH, height: HEIGHT, isFullScreen: true, windowTitle: "Arakara")
+            : base(width: WIDTH, height: HEIGHT, isFullScreen: false, windowTitle: "Arakara")
         {
             Core.defaultSamplerState = SamplerState.PointClamp;
             
@@ -22,6 +24,8 @@ namespace Arakara
         protected override void Initialize()
         {
             base.Initialize();
+            //CommonResources.DefaultBitmapFont = contentManager.Load<BitmapFont>("default");
+            CommonResources.DefaultBitmapFont = Graphics.instance.bitmapFont;
             scene = new MainGameScene();
         }
     }

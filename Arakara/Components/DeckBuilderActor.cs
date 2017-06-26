@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Arakara.Common;
 using Arakara.Battle.Card;
 using Nez.Sprites;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Arakara.Components
 {
@@ -18,10 +19,12 @@ namespace Arakara.Components
         private List<Entity> _handEntities;
         private Card<TEnum> _selectedCard;
         private int _handSize = 3;
-        private CardUpgrader<TEnum> _cardUpgrader;
         private bool _drawing;
         private Sprite<TEnum> _animator;
         private TEnum _idleAnimation;
+
+        private Texture2D _defaultCardTexture;
+        private Texture2D _hoverCardTexture;
 
         public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance, float speed, TEnum idleAnimation) :
             base(name, maxHP, faction, dodgeChance, critChance, speed)
@@ -33,7 +36,6 @@ namespace Arakara.Components
 
             ShuffleDeck();
 
-            _cardUpgrader = new CardUpgrader<TEnum>();
             _idleAnimation = idleAnimation;
         }
 
@@ -42,6 +44,8 @@ namespace Arakara.Components
             base.onAddedToEntity();
             _animator = entity.getComponent<Sprite<TEnum>>();
             _animator.play(_idleAnimation);
+            _defaultCardTexture = entity.scene.contentManager.Load<Texture2D>("card");
+            _hoverCardTexture = entity.scene.contentManager.Load<Texture2D>("card_dark");
         }
 
         public void PlayCard(Card<TEnum> card)
@@ -60,6 +64,10 @@ namespace Arakara.Components
                     _drawing = false;
                     State = BattleState.DuringTurn;
                     Immune = false;
+                    var firstCardEntity = _handEntities.First();
+                    var cardSelector = firstCardEntity.getComponent<CardSelector<TEnum>>();
+                    cardSelector.Selected = true;
+                    PlayCard(cardSelector.Card);
                 });
             }
         }
@@ -87,18 +95,11 @@ namespace Arakara.Components
             State = BattleState.NotTurn;
         }
 
-        private void UpgradeCards()
-        {
-            var nonSelectedCards = _hand.Where(x => x == _selectedCard);
-            _cardUpgrader.UpgradeCards(nonSelectedCards);
-        }
-
         private void Reset()
         {
             _discardPile.AddRange(_hand);
             _handEntities.ForEach(entity => entity.destroy());
             _handEntities = new List<Entity>();
-            UpgradeCards();
             _hand = new List<Card<TEnum>>();
             _selectedCard = null;
             _selectedTargets = null;
@@ -128,18 +129,27 @@ namespace Arakara.Components
         {
             var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (125 * (index - 1)), transform.position.Y - 175));
             cardEntity.tag = EntityTags.CARDCLICKER_TAG;
-            var verts = new Vector2[4]
-            {
-                new Vector2(0, 0),
-                new Vector2(100, 0),
-                new Vector2(100, 100),
-                new Vector2(0, 100),
-            };
-            cardEntity.addComponent(new SimplePolygon(verts, Color.Black));
-            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Name, new Vector2(5, 5), Color.White));
-            cardEntity.addComponent(new Text(Graphics.instance.bitmapFont, card.Action.Effect.FormatDescription(), new Vector2(5, 30), Color.White));
-            cardEntity.addComponent(new CardClicker<TEnum>(card, this));
-            cardEntity.addCollider(new BoxCollider(new Rectangle(0, 0, 100, 100)));
+
+            var sprite = new Sprite(_defaultCardTexture);
+            sprite.origin = Vector2.Zero;
+            sprite.setRenderLayer(100);
+            cardEntity.addComponent(sprite);
+
+            var nameText = new Text(CommonResources.DefaultBitmapFont, card.Action.Name, new Vector2(20, 7), Color.White);
+            nameText.setRenderLayer(50);
+            cardEntity.addComponent(nameText);
+
+            var cardText = new Text(CommonResources.DefaultBitmapFont, card.Action.Effect.FormatDescription(), new Vector2(20, 40), Color.White);
+            cardText.setRenderLayer(50);
+            cardEntity.addComponent(cardText);
+
+            var buyValueText = new Text(CommonResources.DefaultBitmapFont, card.BuyValue.ToString(), new Vector2(97, 107), Color.White);
+            buyValueText.setRenderLayer(50);
+            cardEntity.addComponent(buyValueText);
+
+            cardEntity.addComponent(new CardSelector<TEnum>(card, _defaultCardTexture, _hoverCardTexture));
+            cardEntity.addCollider(new BoxCollider(new Rectangle(10, 0, 100, 125)));
+
             _handEntities.Add(cardEntity);
         }
 
