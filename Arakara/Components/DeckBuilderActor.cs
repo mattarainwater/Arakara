@@ -5,10 +5,10 @@ using System.Linq;
 using Nez;
 using Microsoft.Xna.Framework;
 using Arakara.Common;
-using Arakara.Battle.Card;
 using Nez.Sprites;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Nez.Textures;
 
 namespace Arakara.Components
 {
@@ -242,7 +242,7 @@ namespace Arakara.Components
             buyValueText.setRenderLayer(50);
             cardEntity.addComponent(buyValueText);
 
-            cardEntity.addComponent(new CardSelector<TEnum>(card, _defaultCardTexture, _hoverCardTexture));
+            cardEntity.addComponent(card);
             cardEntity.addCollider(new BoxCollider(new Rectangle(10, 0, 100, 125)));
 
             _handEntities.Add(cardEntity);
@@ -259,38 +259,36 @@ namespace Arakara.Components
 
         private void OnCardFocus(Entity entity)
         {
-            var cardSelector = entity.getComponent<CardSelector<TEnum>>();
-            cardSelector.Selected = true;
+            entity.getComponent<Sprite>().subtexture = new Subtexture(_hoverCardTexture);
         }
 
         private void OnCardBlur(Entity entity)
         {
-            var cardSelector = entity.getComponent<CardSelector<TEnum>>();
-            cardSelector.Selected = false;
+            entity.getComponent<Sprite>().subtexture = new Subtexture(_defaultCardTexture);
         }
 
         private void OnCardSelect(Entity entity)
         {
-            var card = entity.getComponent<CardSelector<TEnum>>().Card;
+            var card = entity.getComponent<Card<TEnum>>();
             PlayCard(card);
         }
 
         private void OnTargetFocus(Entity entity)
         {
-            var targetable = entity.getComponent<Targetable>();
-            targetable.Selected = true;
+            var simplePolygon = entity.getComponent<TargetPolygon>();
+            simplePolygon.setColor(Color.Red);
         }
 
         private void OnTargetBlur(Entity entity)
         {
-            var targetable = entity.getComponent<Targetable>();
-            targetable.Selected = false;
+            var simplePolygon = entity.getComponent<TargetPolygon>();
+            simplePolygon.setColor(Color.LightPink);
         }
 
         private void OnTargetSelect(Entity entity)
         {
-            var targetable = entity.getComponent<Targetable>();
-            targetable.Target.Controller.CurrentActor.SelectTarget(targetable.Target);
+            var battleActor = entity.getComponent<BattleActor>();
+            Controller.CurrentActor.SelectTarget(battleActor);
         }
     }
 }

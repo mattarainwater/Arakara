@@ -1,6 +1,5 @@
 ﻿using Arakara.Battle;
 using Arakara.Battle.AI;
-using Arakara.Battle.Card;
 using Arakara.Battle.Effects;
 using Arakara.Battle.Statuses;
 using Arakara.Common;

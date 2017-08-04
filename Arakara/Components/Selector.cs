@@ -82,10 +82,11 @@ namespace Arakara.Components
 
         public void SelectHoveredEntity()
         {
-            if (SelectableEntities.Count() < 1)
+            if (FocusedEntity == null)
             {
                 return;
             }
+            SelectableEntities.ForEach(x => _onBlur?.Invoke(x));
             _onSelect?.Invoke(FocusedEntity);
         }
     }

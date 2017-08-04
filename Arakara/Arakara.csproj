@@ -69,7 +69,7 @@
     <Compile Include="Battle\Events\Triggers\OnDeathTrigger.cs" />
     <Compile Include="Battle\Statuses\BattleStatus.cs" />
     <Compile Include="Battle\BattleStatusCollection.cs" />
-    <Compile Include="Battle\Card\Card.cs" />
+    <Compile Include="Components\Card.cs" />
     <Compile Include="Battle\Effects\DamageEffect.cs" />
     <Compile Include="Battle\Faction.cs" />
     <Compile Include="Battle\Effects\HealEffect.cs" />
@@ -89,14 +89,13 @@
     <Compile Include="Components\BattleActor.cs" />
     <Compile Include="Battle\BattleController.cs" />
     <Compile Include="Battle\Events\BattleEvent.cs" />
-    <Compile Include="Components\CardSelector.cs" />
     <Compile Include="Components\DeckBuilderActor.cs" />
     <Compile Include="Components\EffectDisplay.cs" />
     <Compile Include="Components\EffectDisplayContainer.cs" />
     <Compile Include="Components\HealthBar.cs" />
     <Compile Include="Components\Selector.cs" />
-    <Compile Include="Components\Targetable.cs" />
     <Compile Include="Battle\TurnOrderDisplay.cs" />
+    <Compile Include="Components\TargetPolygon.cs" />
     <Compile Include="Components\UpdatableText.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="Program.cs" />

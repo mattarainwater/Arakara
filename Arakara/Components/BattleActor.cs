@@ -28,8 +28,7 @@ namespace Arakara.Components
 
         protected List<BattleActor> _selectedTargets;
 
-        private Targetable _targetable;
-        private SimplePolygon _targetablePolygon;
+        private TargetPolygon _targetablePolygon;
 
         private SimplePolygon _turnMarkerPolygon;
 
@@ -50,29 +49,19 @@ namespace Arakara.Components
         public override void onAddedToEntity()
         {
             entity.addComponent(new Text(CommonResources.DefaultBitmapFont, Name, new Vector2(0f, -5), Color.Gray));
-            var verts = new Vector2[4]
-            {
-                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 3),
-                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 3),
-                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 5),
-                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 5),
-            };
-            var polygon = new SimplePolygon(verts, Color.LightPink);
+            var polygon = new TargetPolygon();
             _targetablePolygon = entity.addComponent(polygon);
             _targetablePolygon.enabled = false;
-            _targetable = entity.addComponent(new Targetable(this, polygon));
         }
 
         public void update()
         {
             if(Targetable)
             {
-                _targetable.Visible = true;
                 _targetablePolygon.enabled = true;
             }
             else
             {
-                _targetable.Visible = false;
                 _targetablePolygon.enabled = false;
             }
 
