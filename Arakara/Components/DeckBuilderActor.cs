@@ -32,6 +32,9 @@ namespace Arakara.Components
         private VirtualButton _leftInput;
         private VirtualButton _rightInput;
 
+        private Selector _cardSelector;
+        private Entity _targeter;
+
         private int _selectedCardIndex = 0;
 
         public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance, float speed, TEnum idleAnimation) :
@@ -54,6 +57,12 @@ namespace Arakara.Components
             _animator.play(_idleAnimation);
             _defaultCardTexture = entity.scene.contentManager.Load<Texture2D>("card");
             _hoverCardTexture = entity.scene.contentManager.Load<Texture2D>("card_dark");
+
+            var cardSelectorEntity = entity.scene.createEntity("cardSelector");
+            _cardSelector = cardSelectorEntity.addComponent(new Selector(
+                onFocus: OnCardFocus,
+                onBlur: OnCardBlur,
+                onSelect: OnCardSelect));
 
             SetupInput();
         }
@@ -124,33 +133,29 @@ namespace Arakara.Components
                     };
                 }
             }
-            else if(_rightInput.isPressed)
+            if(_selectedCard == null)
             {
-                _selectedCardIndex = _selectedCardIndex == _handSize - 1 ? _handSize - 1 : _selectedCardIndex + 1;
+                if (_rightInput.isPressed)
+                {
+                    _cardSelector.MoveNext();
+                }
+                else if (_leftInput.isPressed)
+                {
+                    _cardSelector.MoveBack();
+                }
+                else if (_selectInput.isPressed)
+                {
+                    _cardSelector.SelectHoveredEntity();
+                }
             }
-            else if(_leftInput.isPressed)
+            else
             {
-                _selectedCardIndex = _selectedCardIndex == 0 ? 0 : _selectedCardIndex - 1;
+                if(_backInput.isPressed)
+                {
+                    _selectedCard = null;
+                    Controller.RemoveTargetables();
+                }
             }
-            else if(_selectInput.isPressed)
-            {
-                var card = _handEntities[_selectedCardIndex].getComponent<CardSelector<TEnum>>().Card;
-                PlayCard(card);
-            }
-            SelectCard(_selectedCardIndex);
-        }
-
-        private void SelectCard(int selectIndex)
-        {
-            foreach(var handEntity in _handEntities)
-            {
-                var tempCardSelector = handEntity.getComponent<CardSelector<TEnum>>();
-                tempCardSelector.Selected = false;
-            }
-
-            var selectedCardEntity = _handEntities[selectIndex];
-            var cardSelector = selectedCardEntity.getComponent<CardSelector<TEnum>>();
-            cardSelector.Selected = true;
         }
 
         protected override void OnEndOfTurn()
@@ -168,6 +173,7 @@ namespace Arakara.Components
             _hand = new List<Card<TEnum>>();
             _selectedCard = null;
             _selectedTargets = null;
+            _cardSelector.Reset();
         }
 
         private void DrawCards()
@@ -216,6 +222,7 @@ namespace Arakara.Components
             cardEntity.addCollider(new BoxCollider(new Rectangle(10, 0, 100, 125)));
 
             _handEntities.Add(cardEntity);
+            _cardSelector.AddEntity(cardEntity);
         }
 
         private void ShuffleDeck()
@@ -224,6 +231,24 @@ namespace Arakara.Components
             deckList.shuffle();
             Deck = deckList.ToList();
             _discardPile = new List<Card<TEnum>>();
+        }
+
+        private void OnCardFocus(Entity entity)
+        {
+            var cardSelector = entity.getComponent<CardSelector<TEnum>>();
+            cardSelector.Selected = true;
+        }
+
+        private void OnCardBlur(Entity entity)
+        {
+            var cardSelector = entity.getComponent<CardSelector<TEnum>>();
+            cardSelector.Selected = false;
+        }
+
+        private void OnCardSelect(Entity entity)
+        {
+            var card = entity.getComponent<CardSelector<TEnum>>().Card;
+            PlayCard(card);
         }
     }
 }

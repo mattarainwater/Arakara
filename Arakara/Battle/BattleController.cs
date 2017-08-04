@@ -74,9 +74,14 @@ namespace Arakara.Battle
 
         public void MakeTargetables(BattleActor targerter, Targeting targeting)
         {
-            Actors.ForEach(x => x.Targetable = false);
+            RemoveTargetables();
             var targetable = GetTargetableActors(targerter, targeting);
             targetable.ForEach(x => x.Targetable = true);
+        }
+
+        public void RemoveTargetables()
+        {
+            Actors.ForEach(x => x.Targetable = false);
         }
 
         public void AddEvent(BattleEvent battleEvent)

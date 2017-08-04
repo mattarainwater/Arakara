@@ -94,6 +94,7 @@
     <Compile Include="Components\EffectDisplay.cs" />
     <Compile Include="Components\EffectDisplayContainer.cs" />
     <Compile Include="Components\HealthBar.cs" />
+    <Compile Include="Components\Selector.cs" />
     <Compile Include="Components\Targetable.cs" />
     <Compile Include="Battle\TurnOrderDisplay.cs" />
     <Compile Include="Components\UpdatableText.cs" />
