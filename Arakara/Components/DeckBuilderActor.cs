@@ -8,6 +8,7 @@ using Arakara.Common;
 using Arakara.Battle.Card;
 using Nez.Sprites;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace Arakara.Components
 {
@@ -25,6 +26,13 @@ namespace Arakara.Components
 
         private Texture2D _defaultCardTexture;
         private Texture2D _hoverCardTexture;
+
+        private VirtualButton _selectInput;
+        private VirtualButton _backInput;
+        private VirtualButton _leftInput;
+        private VirtualButton _rightInput;
+
+        private int _selectedCardIndex = 0;
 
         public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance, float speed, TEnum idleAnimation) :
             base(name, maxHP, faction, dodgeChance, critChance, speed)
@@ -46,6 +54,39 @@ namespace Arakara.Components
             _animator.play(_idleAnimation);
             _defaultCardTexture = entity.scene.contentManager.Load<Texture2D>("card");
             _hoverCardTexture = entity.scene.contentManager.Load<Texture2D>("card_dark");
+
+            SetupInput();
+        }
+
+        public override void onRemovedFromEntity()
+        {
+            _selectInput.deregister();
+            _backInput.deregister();
+            _leftInput.deregister();
+            _rightInput.deregister();
+        }
+
+        private void SetupInput()
+        {
+            _selectInput = new VirtualButton();
+            _selectInput.nodes.Add(new Nez.VirtualButton.KeyboardKey(Keys.J));
+            _selectInput.nodes.Add(new Nez.VirtualButton.GamePadButton(0, Buttons.A));
+
+            _backInput = new VirtualButton();
+            _backInput.nodes.Add(new Nez.VirtualButton.KeyboardKey(Keys.L));
+            _backInput.nodes.Add(new Nez.VirtualButton.GamePadButton(0, Buttons.B));
+
+            _leftInput = new VirtualButton();
+            _leftInput.nodes.Add(new Nez.VirtualButton.KeyboardKey(Keys.A));
+            _leftInput.nodes.Add(new Nez.VirtualButton.KeyboardKey(Keys.Left));
+            _leftInput.nodes.Add(new Nez.VirtualButton.GamePadButton(0, Buttons.DPadLeft));
+            _leftInput.nodes.Add(new Nez.VirtualButton.GamePadButton(0, Buttons.LeftThumbstickLeft));
+
+            _rightInput = new VirtualButton();
+            _rightInput.nodes.Add(new Nez.VirtualButton.KeyboardKey(Keys.D));
+            _rightInput.nodes.Add(new Nez.VirtualButton.KeyboardKey(Keys.Right));
+            _rightInput.nodes.Add(new Nez.VirtualButton.GamePadButton(0, Buttons.DPadRight));
+            _rightInput.nodes.Add(new Nez.VirtualButton.GamePadButton(0, Buttons.LeftThumbstickRight));
         }
 
         public void PlayCard(Card<TEnum> card)
@@ -56,7 +97,8 @@ namespace Arakara.Components
 
         protected override void OnStartOfTurn()
         {
-            if(!_drawing)
+            _selectedCardIndex = 0;
+            if (!_drawing)
             {
                 _drawing = true;
                 DrawCards();
@@ -64,10 +106,6 @@ namespace Arakara.Components
                     _drawing = false;
                     State = BattleState.DuringTurn;
                     Immune = false;
-                    var firstCardEntity = _handEntities.First();
-                    var cardSelector = firstCardEntity.getComponent<CardSelector<TEnum>>();
-                    cardSelector.Selected = true;
-                    PlayCard(cardSelector.Card);
                 });
             }
         }
@@ -86,6 +124,33 @@ namespace Arakara.Components
                     };
                 }
             }
+            else if(_rightInput.isPressed)
+            {
+                _selectedCardIndex = _selectedCardIndex == _handSize - 1 ? _handSize - 1 : _selectedCardIndex + 1;
+            }
+            else if(_leftInput.isPressed)
+            {
+                _selectedCardIndex = _selectedCardIndex == 0 ? 0 : _selectedCardIndex - 1;
+            }
+            else if(_selectInput.isPressed)
+            {
+                var card = _handEntities[_selectedCardIndex].getComponent<CardSelector<TEnum>>().Card;
+                PlayCard(card);
+            }
+            SelectCard(_selectedCardIndex);
+        }
+
+        private void SelectCard(int selectIndex)
+        {
+            foreach(var handEntity in _handEntities)
+            {
+                var tempCardSelector = handEntity.getComponent<CardSelector<TEnum>>();
+                tempCardSelector.Selected = false;
+            }
+
+            var selectedCardEntity = _handEntities[selectIndex];
+            var cardSelector = selectedCardEntity.getComponent<CardSelector<TEnum>>();
+            cardSelector.Selected = true;
         }
 
         protected override void OnEndOfTurn()

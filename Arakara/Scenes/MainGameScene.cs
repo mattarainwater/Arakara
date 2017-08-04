@@ -221,7 +221,10 @@ namespace Arakara.Scenes
             {
                 subtextures[0],
                 subtextures[1],
+                subtextures[1],
                 subtextures[2],
+                subtextures[2],
+                subtextures[1],
                 subtextures[1],
                 subtextures[0]
             };
