@@ -53,6 +53,9 @@ namespace Arakara.Components
         public override void onAddedToEntity()
         {
             base.onAddedToEntity();
+
+            SetupInput();
+
             _animator = entity.getComponent<Sprite<TEnum>>();
             _animator.play(_idleAnimation);
             _defaultCardTexture = entity.scene.contentManager.Load<Texture2D>("card");
@@ -60,17 +63,23 @@ namespace Arakara.Components
 
             var cardSelectorEntity = entity.scene.createEntity("cardSelector");
             _cardSelector = cardSelectorEntity.addComponent(new Selector(
+                _selectInput,
+                _leftInput,
+                _rightInput,
                 onFocus: OnCardFocus,
                 onBlur: OnCardBlur,
                 onSelect: OnCardSelect));
+            _cardSelector.enabled = false;
 
             var targetSelectorEntity = entity.scene.createEntity("targetSelector");
             _targetSelector = targetSelectorEntity.addComponent(new Selector(
+                _selectInput,
+                _leftInput,
+                _rightInput,
                 onFocus: OnTargetFocus,
                 onBlur: OnTargetBlur,
                 onSelect: OnTargetSelect));
-
-            SetupInput();
+            _targetSelector.enabled = false;
         }
 
         public override void onRemovedFromEntity()
@@ -125,6 +134,7 @@ namespace Arakara.Components
                     _drawing = false;
                     State = BattleState.DuringTurn;
                     Immune = false;
+                    _cardSelector.enabled = true;
                 });
             }
         }
@@ -143,40 +153,17 @@ namespace Arakara.Components
                     };
                 }
             }
-            if(_selectedCard == null)
+            if(_selectedCard != null)
             {
-                if (_rightInput.isPressed)
-                {
-                    _cardSelector.MoveNext();
-                }
-                else if (_leftInput.isPressed)
-                {
-                    _cardSelector.MoveBack();
-                }
-                else if (_selectInput.isPressed)
-                {
-                    _cardSelector.SelectHoveredEntity();
-                }
-            }
-            else
-            {
-                if (_rightInput.isPressed)
-                {
-                    _targetSelector.MoveNext();
-                }
-                else if (_leftInput.isPressed)
-                {
-                    _targetSelector.MoveBack();
-                }
-                else if (_selectInput.isPressed)
-                {
-                    _targetSelector.SelectHoveredEntity();
-                }
-                else if (_backInput.isPressed)
+                _cardSelector.enabled = false;
+                _targetSelector.enabled = true;
+                if (_backInput.isPressed)
                 {
                     _selectedCard = null;
                     Controller.RemoveTargetables();
                     _targetSelector.Reset();
+                    _cardSelector.enabled = true;
+                    _targetSelector.enabled = false;
                 }
             }
         }
@@ -197,7 +184,9 @@ namespace Arakara.Components
             _selectedCard = null;
             _selectedTargets = null;
             _cardSelector.Reset();
+            _cardSelector.enabled = false;
             _targetSelector.Reset();
+            _targetSelector.enabled = false;
         }
 
         private void DrawCards()
@@ -276,13 +265,19 @@ namespace Arakara.Components
         private void OnTargetFocus(Entity entity)
         {
             var simplePolygon = entity.getComponent<TargetPolygon>();
-            simplePolygon.setColor(Color.Red);
+            if (simplePolygon != null)
+            {
+                simplePolygon.setColor(Color.Red);
+            }
         }
 
         private void OnTargetBlur(Entity entity)
         {
             var simplePolygon = entity.getComponent<TargetPolygon>();
-            simplePolygon.setColor(Color.LightPink);
+            if(simplePolygon != null)
+            {
+                simplePolygon.setColor(Color.LightPink);
+            }
         }
 
         private void OnTargetSelect(Entity entity)

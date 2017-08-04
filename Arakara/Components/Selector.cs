@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Arakara.Components
 {
-    public class Selector : Component
+    public class Selector : Component, IUpdatable
     {
         public List<Entity> SelectableEntities { get; private set; }
         public Entity FocusedEntity { get; private set; }
@@ -17,13 +17,41 @@ namespace Arakara.Components
         private Action<Entity> _onBlur;
         private int _hoveredIndex;
 
-        public Selector(Action<Entity> onSelect = null, Action<Entity> onBlur = null, Action<Entity> onFocus = null)
+        private VirtualButton _selectInput;
+        private VirtualButton _leftInput;
+        private VirtualButton _rightInput;
+
+        public Selector(VirtualButton selectInput,
+            VirtualButton leftInput,
+            VirtualButton rightInput,
+            Action<Entity> onSelect = null, 
+            Action<Entity> onBlur = null, 
+            Action<Entity> onFocus = null)
         {
             SelectableEntities = new List<Entity>();
             _hoveredIndex = 0;
             _onSelect = onSelect;
             _onBlur = onBlur;
             _onFocus = onFocus;
+            _selectInput = selectInput;
+            _leftInput = leftInput;
+            _rightInput = rightInput;
+        }
+
+        public void update()
+        {
+            if (_rightInput.isPressed)
+            {
+                MoveNext();
+            }
+            else if (_leftInput.isPressed)
+            {
+                MoveBack();
+            }
+            else if (_selectInput.isPressed)
+            {
+                SelectHoveredEntity();
+            }
         }
 
         public void AddEntity(Entity entity)
@@ -38,6 +66,7 @@ namespace Arakara.Components
 
         public void Reset()
         {
+            SelectableEntities.ForEach(x => _onBlur?.Invoke(x));
             SelectableEntities.Clear();
             _hoveredIndex = 0;
         }
@@ -86,7 +115,6 @@ namespace Arakara.Components
             {
                 return;
             }
-            SelectableEntities.ForEach(x => _onBlur?.Invoke(x));
             _onSelect?.Invoke(FocusedEntity);
         }
     }

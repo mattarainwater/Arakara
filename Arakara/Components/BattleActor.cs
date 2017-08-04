@@ -29,8 +29,7 @@ namespace Arakara.Components
         protected List<BattleActor> _selectedTargets;
 
         private TargetPolygon _targetablePolygon;
-
-        private SimplePolygon _turnMarkerPolygon;
+        private TurnMarkerPolygon _turnMarkerPolygon;
 
         public BattleActor(string name, int maxHp, Faction faction, float dodgeChance, float critChance, float speed, int size = 1)
         {
@@ -49,9 +48,14 @@ namespace Arakara.Components
         public override void onAddedToEntity()
         {
             entity.addComponent(new Text(CommonResources.DefaultBitmapFont, Name, new Vector2(0f, -5), Color.Gray));
-            var polygon = new TargetPolygon();
-            _targetablePolygon = entity.addComponent(polygon);
+
+            var targetPolygon = new TargetPolygon();
+            _targetablePolygon = entity.addComponent(targetPolygon);
             _targetablePolygon.enabled = false;
+
+            var turnMarkerPolygon = new TurnMarkerPolygon();
+            _turnMarkerPolygon = entity.addComponent(turnMarkerPolygon);
+            _turnMarkerPolygon.enabled = false;
         }
 
         public void update()
@@ -67,23 +71,11 @@ namespace Arakara.Components
 
             if(State != BattleState.NotTurn)
             {
-                if (_turnMarkerPolygon == null)
-                {
-                    var verts = new Vector2[4]
-                    {
-                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 7),
-                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 7),
-                        new Vector2(DimensionConstants.CHARACTER_WIDTH, DimensionConstants.CHARACTER_HEIGHT + 9),
-                        new Vector2(0, DimensionConstants.CHARACTER_HEIGHT + 9),
-                    };
-                    var polygon = new SimplePolygon(verts, Color.Gold);
-                    _turnMarkerPolygon = entity.addComponent(polygon);
-                }
+                _turnMarkerPolygon.enabled = true;
             }
-            else if(_turnMarkerPolygon != null)
+            else
             {
-                entity.removeComponent(_turnMarkerPolygon);
-                _turnMarkerPolygon = null;
+                _turnMarkerPolygon.enabled = false;
             }
         }
 

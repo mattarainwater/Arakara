@@ -95,6 +95,7 @@
     <Compile Include="Components\HealthBar.cs" />
     <Compile Include="Components\Selector.cs" />
     <Compile Include="Battle\TurnOrderDisplay.cs" />
+    <Compile Include="Components\TurnMarkerPolygon.cs" />
     <Compile Include="Components\TargetPolygon.cs" />
     <Compile Include="Components\UpdatableText.cs" />
     <Compile Include="GameMain.cs" />
