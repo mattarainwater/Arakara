@@ -72,11 +72,12 @@ namespace Arakara.Battle
             }
         }
 
-        public void MakeTargetables(BattleActor targerter, Targeting targeting)
+        public IEnumerable<Entity> MakeTargetables(BattleActor targerter, Targeting targeting)
         {
             RemoveTargetables();
             var targetable = GetTargetableActors(targerter, targeting);
             targetable.ForEach(x => x.Targetable = true);
+            return targetable.Select(x => x.entity);
         }
 
         public void RemoveTargetables()

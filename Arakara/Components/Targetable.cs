@@ -11,14 +11,15 @@ namespace Arakara.Components
 {
     public class Targetable : Component, IUpdatable
     {
-        private SimplePolygon _simplePolygon;
-        private BattleActor _target;
-
+        public BattleActor Target { get; set; }
         public bool Selected { get; set; }
+        public bool Visible { get; set; }
+
+        private SimplePolygon _simplePolygon;
 
         public Targetable(BattleActor target, SimplePolygon polygon)
         {
-            _target = target;
+            Target = target;
             _simplePolygon = polygon;
         }
 
@@ -26,34 +27,13 @@ namespace Arakara.Components
         {
             var mainColor = Color.LightPink;
             var hoverColor = Color.Red;
-
-            var mousePosition = entity.scene.camera.screenToWorldPoint(Input.mousePosition);
             if (!Selected)
             {
-                if (entity.colliders.mainCollider.bounds.contains(mousePosition))
-                {
-                    if (Input.leftMouseButtonReleased)
-                    {
-                        var targetables = entity.scene.findEntitiesWithTag(EntityTags.TARGETABLE_TAG);
-                        foreach (var targetableEntity in targetables)
-                        {
-                            var targetable = targetableEntity.getComponent<Targetable>();
-                            targetable.Selected = false;
-                            targetable._simplePolygon.setColor(mainColor);
-                        }
-
-                        Selected = true;
-                        _target.Controller.CurrentActor.SelectTarget(_target);
-                    }
-                    else
-                    {
-                        _simplePolygon.setColor(hoverColor);
-                    }
-                }
-                else
-                {
-                    _simplePolygon.setColor(mainColor);
-                }
+                _simplePolygon.setColor(mainColor);
+            }
+            else
+            {
+                _simplePolygon.setColor(hoverColor);
             }
         }
     }

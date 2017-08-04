@@ -33,7 +33,7 @@ namespace Arakara.Components
         private VirtualButton _rightInput;
 
         private Selector _cardSelector;
-        private Entity _targeter;
+        private Selector _targetSelector;
 
         private int _selectedCardIndex = 0;
 
@@ -63,6 +63,12 @@ namespace Arakara.Components
                 onFocus: OnCardFocus,
                 onBlur: OnCardBlur,
                 onSelect: OnCardSelect));
+
+            var targetSelectorEntity = entity.scene.createEntity("targetSelector");
+            _targetSelector = targetSelectorEntity.addComponent(new Selector(
+                onFocus: OnTargetFocus,
+                onBlur: OnTargetBlur,
+                onSelect: OnTargetSelect));
 
             SetupInput();
         }
@@ -101,7 +107,11 @@ namespace Arakara.Components
         public void PlayCard(Card<TEnum> card)
         {
             _selectedCard = card;
-            Controller.MakeTargetables(this, _selectedCard.Action.Targeting);
+            var targets = Controller.MakeTargetables(this, _selectedCard.Action.Targeting);
+            foreach(var target in targets)
+            {
+                _targetSelector.AddEntity(target);
+            }
         }
 
         protected override void OnStartOfTurn()
@@ -150,10 +160,23 @@ namespace Arakara.Components
             }
             else
             {
-                if(_backInput.isPressed)
+                if (_rightInput.isPressed)
+                {
+                    _targetSelector.MoveNext();
+                }
+                else if (_leftInput.isPressed)
+                {
+                    _targetSelector.MoveBack();
+                }
+                else if (_selectInput.isPressed)
+                {
+                    _targetSelector.SelectHoveredEntity();
+                }
+                else if (_backInput.isPressed)
                 {
                     _selectedCard = null;
                     Controller.RemoveTargetables();
+                    _targetSelector.Reset();
                 }
             }
         }
@@ -174,6 +197,7 @@ namespace Arakara.Components
             _selectedCard = null;
             _selectedTargets = null;
             _cardSelector.Reset();
+            _targetSelector.Reset();
         }
 
         private void DrawCards()
@@ -249,6 +273,24 @@ namespace Arakara.Components
         {
             var card = entity.getComponent<CardSelector<TEnum>>().Card;
             PlayCard(card);
+        }
+
+        private void OnTargetFocus(Entity entity)
+        {
+            var targetable = entity.getComponent<Targetable>();
+            targetable.Selected = true;
+        }
+
+        private void OnTargetBlur(Entity entity)
+        {
+            var targetable = entity.getComponent<Targetable>();
+            targetable.Selected = false;
+        }
+
+        private void OnTargetSelect(Entity entity)
+        {
+            var targetable = entity.getComponent<Targetable>();
+            targetable.Target.Controller.CurrentActor.SelectTarget(targetable.Target);
         }
     }
 }
