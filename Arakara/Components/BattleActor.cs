@@ -103,20 +103,29 @@ namespace Arakara.Components
             {
                 IsActive = true;
                 _currentPhase = Phases.First;
-                foreach(var phase in Phases)
-                {
-                    phase.IsFinished = false;
-                }
+                _currentPhase.Value.Initialize();
             }
-            _currentPhase.Value.Perform();
-            if(_currentPhase.Value.IsFinished && _currentPhase.Next != null)
+            if (_currentPhase.Value.IsFinished && _currentPhase.Next != null)
             {
                 _currentPhase = _currentPhase.Next;
+                _currentPhase.Value.Initialize();
             }
-            else if(_currentPhase.Value.IsFinished && _currentPhase.Next == null)
+            if(_currentPhase.Value.GoBack && _currentPhase.Previous != null)
             {
-                IsActive = false;
-                _currentPhase = null;
+                _currentPhase = _currentPhase.Previous;
+                _currentPhase.Value.Initialize();
+            }
+
+            _currentPhase.Value.Update();
+
+            if(_currentPhase.Value.IsFinished)
+            {
+                _currentPhase.Value.Finish();
+                if(_currentPhase.Next == null)
+                {
+                    IsActive = false;
+                    _currentPhase = null;
+                }
             }
         }
 

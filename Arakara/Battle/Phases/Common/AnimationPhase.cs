@@ -9,22 +9,34 @@ namespace Arakara.Battle.Phases.Common
 {
     public class AnimationPhase : Phase
     {
+        private bool _isAnimating;
+
         public AnimationPhase(BattleActor actor) 
             : base(actor)
         {
         }
 
-        public override void Update()
+        protected override void initialize()
         {
-            if (!EqualityComparer<Animations>.Default.Equals(Actor.Animator.currentAnimation, Actor.CurrentAction.Animation)
-                && !IsFinished)
+            _isAnimating = true;
+            Actor.Animator.play(Actor.CurrentAction.Animation);
+            Actor.Animator.onAnimationCompletedEvent = (t) => {
+                Actor.Animator.onAnimationCompletedEvent = null;
+                _isAnimating = false;
+            };
+        }
+
+        protected override void update()
+        {
+            if(!_isAnimating)
             {
-                Actor.Animator.play(Actor.CurrentAction.Animation);
-                Actor.Animator.onAnimationCompletedEvent = (t) => {
-                    Actor.Animator.onAnimationCompletedEvent = null;
-                    IsFinished = true;
-                };
+                IsFinished = true;
             }
+        }
+
+        protected override void finish()
+        {
+            Actor.Animator.play(Actor.IdleAnimation);
         }
     }
 }

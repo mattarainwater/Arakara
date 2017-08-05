@@ -201,6 +201,8 @@ namespace Arakara.Scenes
                 },
             }, .25f, .25f, 200f, Animations.Idle);
 
+            mainCharacterEntity.addComponent(mainCharacterActor);
+
             mainCharacterActor.AddPhase(typeof(ApplyStatusEffectsPhase));
             mainCharacterActor.AddPhase(typeof(DrawCardsPhase));
             mainCharacterActor.AddPhase(typeof(SelectCardPhase));
@@ -208,8 +210,6 @@ namespace Arakara.Scenes
             mainCharacterActor.AddPhase(typeof(AnimationPhase));
             mainCharacterActor.AddPhase(typeof(ApplyEffectsPhase));
             mainCharacterActor.AddPhase(typeof(Battle.Phases.DeckBuilder.CleanUpPhase));
-
-            mainCharacterEntity.addComponent(mainCharacterActor);
 
             var texture = contentManager.Load<Texture2D>("prisca_big");
             var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
@@ -305,6 +305,9 @@ namespace Arakara.Scenes
                 },
                 new RandomAIDecider(), 0f, 0f, 100f
             );
+
+            enemyEntity.addComponent(aIActor);
+
             aIActor.AddPhase(typeof(ApplyStatusEffectsPhase));
             aIActor.AddPhase(typeof(SelectActionPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.SelectTargetPhase));
@@ -312,7 +315,6 @@ namespace Arakara.Scenes
             aIActor.AddPhase(typeof(ApplyEffectsPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.CleanUpPhase));
 
-            enemyEntity.addComponent(aIActor);
             return enemyEntity;
         }
 
@@ -358,13 +360,15 @@ namespace Arakara.Scenes
                 },
                 new RandomAIDecider(), 0f, 0f, 50f
             );
+
+            enemyEntity.addComponent(aIActor);
+
             aIActor.AddPhase(typeof(ApplyStatusEffectsPhase));
             aIActor.AddPhase(typeof(SelectActionPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.SelectTargetPhase));
             aIActor.AddPhase(typeof(AnimationPhase));
             aIActor.AddPhase(typeof(ApplyEffectsPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.CleanUpPhase));
-            enemyEntity.addComponent(aIActor);
 
             return enemyEntity;
         }

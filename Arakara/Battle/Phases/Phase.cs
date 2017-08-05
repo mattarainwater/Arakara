@@ -10,29 +10,35 @@ namespace Arakara.Battle.Phases
     public abstract class Phase
     {
         public bool IsFinished { get; set; }
+        public bool GoBack { get; set; }
         public BattleActor Actor { get; set; }
-
-        private bool _logged;
 
         public Phase(BattleActor actor)
         {
             Actor = actor;
         }
 
-        public void Perform()
+        public void Initialize()
         {
-            if(!_logged)
-            {
-                Console.Out.WriteLine($"Actor: {Actor.Name} Phase: {GetType().ToString()}");
-                _logged = true;
-            }
-            Update();
-            if(IsFinished)
-            {
-                _logged = false;
-            }
+            Console.Out.WriteLine($"Started - Actor: {Actor.Name} Phase: {GetType().ToString()}");
+            IsFinished = false;
+            GoBack = false;
+            initialize();
         }
 
-        public abstract void Update();
+        public void Update()
+        {
+            update();
+        }
+
+        public void Finish()
+        {
+            Console.Out.WriteLine($"Finished - Actor: {Actor.Name} Phase: {GetType().ToString()}");
+            finish();
+        }
+
+        protected virtual void initialize() { }
+        protected abstract void update();
+        protected virtual void finish() { }
     }
 }

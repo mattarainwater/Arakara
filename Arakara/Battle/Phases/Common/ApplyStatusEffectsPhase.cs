@@ -14,7 +14,7 @@ namespace Arakara.Battle.Phases.Common
         {
         }
 
-        public override void Update()
+        protected override void update()
         {
             Actor.Statuses.ApplyStatuses(Actor, Actor.Controller);
             IsFinished = true;

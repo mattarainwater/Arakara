@@ -64,10 +64,19 @@ namespace Arakara.Components
             SelectableEntities.Add(entity);
         }
 
+        public void AddEntities(IEnumerable<Entity> entities)
+        {
+            foreach(var entity in entities)
+            {
+                AddEntity(entity);
+            }
+        }
+
         public void Reset()
         {
             SelectableEntities.ForEach(x => _onBlur?.Invoke(x));
             SelectableEntities.Clear();
+            FocusedEntity = null;
             _hoveredIndex = 0;
         }
 

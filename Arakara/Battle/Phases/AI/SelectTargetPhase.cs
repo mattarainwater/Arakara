@@ -17,7 +17,7 @@ namespace Arakara.Battle.Phases.AI
             _aiActor = actor;
         }
 
-        public override void Update()
+        protected override void update()
         {
             var enemyActor = Actor.Controller.Actors.FirstOrDefault(y => y.Faction.Id != Actor.Faction.Id);
             Actor.SelectTarget(enemyActor);

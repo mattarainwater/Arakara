@@ -25,16 +25,20 @@ namespace Arakara.Battle.Phases.DeckBuilder
             _drawing = false;
         }
 
-        public override void Update()
+        protected override void initialize()
         {
-            if (!_drawing && !IsFinished)
+            _drawing = true;
+            DrawCards();
+            Core.schedule(_handSize * .25f, t => {
+                _drawing = false;
+            });
+        }
+
+        protected override void update()
+        {
+            if(!_drawing)
             {
-                _drawing = true;
-                DrawCards();
-                Core.schedule(_handSize * .25f, t => {
-                    _drawing = false;
-                    IsFinished = true;
-                });
+                IsFinished = true;
             }
         }
 
@@ -84,7 +88,6 @@ namespace Arakara.Battle.Phases.DeckBuilder
             cardEntity.addCollider(new BoxCollider(new Rectangle(10, 0, 100, 125)));
 
             _deckBuilderActor.HandEntities.Add(cardEntity);
-            _deckBuilderActor.CardSelector.AddEntity(cardEntity);
         }
 
         private void ShuffleDeck()

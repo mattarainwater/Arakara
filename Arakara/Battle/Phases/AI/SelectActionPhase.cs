@@ -17,7 +17,7 @@ namespace Arakara.Battle.Phases.AI
             _aiActor = actor;
         }
 
-        public override void Update()
+        protected override void update()
         {
             Actor.CurrentAction = (BattleAction<Animations>)_aiActor.Decider.ChooseAction(Actor, _aiActor.Actions.Select(x => (BattleAction)x).ToList(), Actor.Controller);
             IsFinished = true;

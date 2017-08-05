@@ -11,8 +11,11 @@ namespace Arakara
 {
     public class GameMain : Core
     {
-        private const int WIDTH = 1920;
-        private const int HEIGHT = 1200;
+        //private const int WIDTH = 1920;
+        //private const int HEIGHT = 1200;
+
+        private const int WIDTH = 1600;
+        private const int HEIGHT = 900;
 
         public GameMain()
             : base(width: WIDTH, height: HEIGHT, isFullScreen: false, windowTitle: "Arakara")
@@ -27,6 +30,7 @@ namespace Arakara
             //CommonResources.DefaultBitmapFont = contentManager.Load<BitmapFont>("default");
             CommonResources.DefaultBitmapFont = Graphics.instance.bitmapFont;
             scene = new MainGameScene();
+            VirtualButtons.SetupInput();
         }
     }
 }

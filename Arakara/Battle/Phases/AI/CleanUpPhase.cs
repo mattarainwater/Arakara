@@ -17,9 +17,8 @@ namespace Arakara.Battle.Phases.AI
             _aiActor = actor;
         }
 
-        public override void Update()
+        protected override void update()
         {
-            Actor.Animator.play(Actor.IdleAnimation);
             _aiActor.SelectedTargets = null;
             _aiActor.CurrentAction = null;
             IsFinished = true;
