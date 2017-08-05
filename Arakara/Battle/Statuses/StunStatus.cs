@@ -16,7 +16,7 @@ namespace Arakara.Battle.Statuses
 
         public override void Apply(BattleActor actor, BattleController controller)
         {
-            actor.State = BattleState.EndOfTurn;
+            actor.IsActive = false;
         }
 
         public override string GetDescription()

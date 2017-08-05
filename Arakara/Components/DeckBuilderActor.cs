@@ -9,45 +9,46 @@ using Nez.Sprites;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Nez.Textures;
+using Arakara.Battle.Phases;
 
 namespace Arakara.Components
 {
-    public class DeckBuilderActor<TEnum> : BattleActor where TEnum : struct, IComparable, IFormattable
+    public class DeckBuilderActor : BattleActor
     {
-        public List<Card<TEnum>> Deck { get; set; }
-        private List<Card<TEnum>> _hand;
-        private List<Card<TEnum>> _discardPile;
-        private List<Entity> _handEntities;
-        private Card<TEnum> _selectedCard;
-        private int _handSize = 3;
-        private bool _drawing;
-        private Sprite<TEnum> _animator;
-        private TEnum _idleAnimation;
+        public List<Card<Animations>> Deck { get; set; }
+        public List<Card<Animations>> Hand { get; set; }
+        public List<Card<Animations>> DiscardPile { get; set; }
+        public List<Entity> HandEntities { get; set; }
 
-        private Texture2D _defaultCardTexture;
-        private Texture2D _hoverCardTexture;
+        public Card<Animations> SelectedCard { get; set; }
 
+        public Texture2D DefaultCardTexture { get; set; }
+        public Texture2D HoverCardTexture { get; set; }
+
+        public Selector CardSelector { get; set; }
+        public Selector TargetSelector { get; set; }
+        
         private VirtualButton _selectInput;
         private VirtualButton _backInput;
         private VirtualButton _leftInput;
         private VirtualButton _rightInput;
 
-        private Selector _cardSelector;
-        private Selector _targetSelector;
-
-        private int _selectedCardIndex = 0;
-
-        public DeckBuilderActor(string name, int maxHP, Faction faction, List<Card<TEnum>> cards, float dodgeChance, float critChance, float speed, TEnum idleAnimation) :
-            base(name, maxHP, faction, dodgeChance, critChance, speed)
+        public DeckBuilderActor(string name, 
+            int maxHP, 
+            Faction faction, 
+            List<Card<Animations>> cards, 
+            float dodgeChance, 
+            float critChance, 
+            float speed,
+            Animations idleAnimation) 
+                : base(name, maxHP, faction, dodgeChance, critChance, speed)
         {
             Deck = cards;
-            _hand = new List<Card<TEnum>>();
-            _discardPile = new List<Card<TEnum>>();
-            _handEntities = new List<Entity>();
-
-            ShuffleDeck();
-
-            _idleAnimation = idleAnimation;
+            Deck.shuffle();
+            Hand = new List<Card<Animations>>();
+            DiscardPile = new List<Card<Animations>>();
+            HandEntities = new List<Entity>();
+            IdleAnimation = idleAnimation;
         }
 
         public override void onAddedToEntity()
@@ -56,30 +57,28 @@ namespace Arakara.Components
 
             SetupInput();
 
-            _animator = entity.getComponent<Sprite<TEnum>>();
-            _animator.play(_idleAnimation);
-            _defaultCardTexture = entity.scene.contentManager.Load<Texture2D>("card");
-            _hoverCardTexture = entity.scene.contentManager.Load<Texture2D>("card_dark");
+            DefaultCardTexture = entity.scene.contentManager.Load<Texture2D>("card");
+            HoverCardTexture = entity.scene.contentManager.Load<Texture2D>("card_dark");
 
             var cardSelectorEntity = entity.scene.createEntity("cardSelector");
-            _cardSelector = cardSelectorEntity.addComponent(new Selector(
+            CardSelector = cardSelectorEntity.addComponent(new Selector(
                 _selectInput,
                 _leftInput,
                 _rightInput,
                 onFocus: OnCardFocus,
                 onBlur: OnCardBlur,
                 onSelect: OnCardSelect));
-            _cardSelector.enabled = false;
+            CardSelector.enabled = false;
 
             var targetSelectorEntity = entity.scene.createEntity("targetSelector");
-            _targetSelector = targetSelectorEntity.addComponent(new Selector(
+            TargetSelector = targetSelectorEntity.addComponent(new Selector(
                 _selectInput,
                 _leftInput,
                 _rightInput,
                 onFocus: OnTargetFocus,
                 onBlur: OnTargetBlur,
                 onSelect: OnTargetSelect));
-            _targetSelector.enabled = false;
+            TargetSelector.enabled = false;
         }
 
         public override void onRemovedFromEntity()
@@ -113,152 +112,30 @@ namespace Arakara.Components
             _rightInput.nodes.Add(new Nez.VirtualButton.GamePadButton(0, Buttons.LeftThumbstickRight));
         }
 
-        public void PlayCard(Card<TEnum> card)
+        public void PlayCard(Card<Animations> card)
         {
-            _selectedCard = card;
-            var targets = Controller.MakeTargetables(this, _selectedCard.Action.Targeting);
+            SelectedCard = card;
+            CurrentAction = card.Action;
+            var targets = Controller.MakeTargetables(this, SelectedCard.Action.Targeting);
             foreach(var target in targets)
             {
-                _targetSelector.AddEntity(target);
+                TargetSelector.AddEntity(target);
             }
-        }
-
-        protected override void OnStartOfTurn()
-        {
-            _selectedCardIndex = 0;
-            if (!_drawing)
-            {
-                _drawing = true;
-                DrawCards();
-                Core.schedule(_handSize * .25f, t => {
-                    _drawing = false;
-                    State = BattleState.DuringTurn;
-                    Immune = false;
-                    _cardSelector.enabled = true;
-                });
-            }
-        }
-
-        protected override void DuringTurn()
-        {
-            if(_selectedCard != null && _selectedTargets != null)
-            {
-                if(!EqualityComparer<TEnum>.Default.Equals(_animator.currentAnimation, _selectedCard.Action.Animation))
-                {
-                    _animator.play(_selectedCard.Action.Animation);
-                    _animator.onAnimationCompletedEvent = (t) => {
-                        _selectedCard.Action.Effect.Perform(this, _selectedTargets, Controller);
-                        _animator.onAnimationCompletedEvent = null;
-                        State = BattleState.EndOfTurn;
-                    };
-                }
-            }
-            if(_selectedCard != null)
-            {
-                _cardSelector.enabled = false;
-                _targetSelector.enabled = true;
-                if (_backInput.isPressed)
-                {
-                    _selectedCard = null;
-                    Controller.RemoveTargetables();
-                    _targetSelector.Reset();
-                    _cardSelector.enabled = true;
-                    _targetSelector.enabled = false;
-                }
-            }
-        }
-
-        protected override void OnEndOfTurn()
-        {
-            _animator.play(_idleAnimation);
-            Reset();
-            State = BattleState.NotTurn;
-        }
-
-        private void Reset()
-        {
-            _discardPile.AddRange(_hand);
-            _handEntities.ForEach(entity => entity.destroy());
-            _handEntities = new List<Entity>();
-            _hand = new List<Card<TEnum>>();
-            _selectedCard = null;
-            _selectedTargets = null;
-            _cardSelector.Reset();
-            _cardSelector.enabled = false;
-            _targetSelector.Reset();
-            _targetSelector.enabled = false;
-        }
-
-        private void DrawCards()
-        {
-            for (var i = 0; i < _handSize; i++)
-            {
-                var index = i;
-                Core.schedule(i * .25f, t => DrawCard(index));
-            }
-        }
-
-        private void DrawCard(int index)
-        {
-            if (!Deck.Any())
-            {
-                ShuffleDeck();
-            }
-            _hand.Add(Deck.First());
-            CreateCardEntity(index, Deck.First());
-            Deck.Remove(Deck.First());
-        }
-
-        private void CreateCardEntity(int index, Card<TEnum> card)
-        {
-            var cardEntity = entity.scene.createEntity("card " + index, new Vector2(transform.position.X + (125 * (index - 1)), transform.position.Y - 175));
-            cardEntity.tag = EntityTags.CARDCLICKER_TAG;
-
-            var sprite = new Sprite(_defaultCardTexture);
-            sprite.origin = Vector2.Zero;
-            sprite.setRenderLayer(100);
-            cardEntity.addComponent(sprite);
-
-            var nameText = new Text(CommonResources.DefaultBitmapFont, card.Action.Name, new Vector2(20, 7), Color.White);
-            nameText.setRenderLayer(50);
-            cardEntity.addComponent(nameText);
-
-            var cardText = new Text(CommonResources.DefaultBitmapFont, card.Action.Effect.FormatDescription(), new Vector2(20, 40), Color.White);
-            cardText.setRenderLayer(50);
-            cardEntity.addComponent(cardText);
-
-            var buyValueText = new Text(CommonResources.DefaultBitmapFont, card.BuyValue.ToString(), new Vector2(97, 107), Color.White);
-            buyValueText.setRenderLayer(50);
-            cardEntity.addComponent(buyValueText);
-
-            cardEntity.addComponent(card);
-            cardEntity.addCollider(new BoxCollider(new Rectangle(10, 0, 100, 125)));
-
-            _handEntities.Add(cardEntity);
-            _cardSelector.AddEntity(cardEntity);
-        }
-
-        private void ShuffleDeck()
-        {
-            var deckList = _discardPile.Concat(Deck).ToArray();
-            deckList.shuffle();
-            Deck = deckList.ToList();
-            _discardPile = new List<Card<TEnum>>();
         }
 
         private void OnCardFocus(Entity entity)
         {
-            entity.getComponent<Sprite>().subtexture = new Subtexture(_hoverCardTexture);
+            entity.getComponent<Sprite>().subtexture = new Subtexture(HoverCardTexture);
         }
 
         private void OnCardBlur(Entity entity)
         {
-            entity.getComponent<Sprite>().subtexture = new Subtexture(_defaultCardTexture);
+            entity.getComponent<Sprite>().subtexture = new Subtexture(DefaultCardTexture);
         }
 
         private void OnCardSelect(Entity entity)
         {
-            var card = entity.getComponent<Card<TEnum>>();
+            var card = entity.getComponent<Card<Animations>>();
             PlayCard(card);
         }
 

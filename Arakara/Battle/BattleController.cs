@@ -39,7 +39,6 @@ namespace Arakara.Battle
                 {
                     IsInitialized = true;
                     CurrentActor = Actors.First();
-                    CurrentActor.State = BattleState.StartOfTurn;
                 }
                 var triggeredEvent = GetTriggeredEvent();
                 if (CurrentEvent != null)
@@ -53,13 +52,12 @@ namespace Arakara.Battle
                 else if (CurrentActor != null)
                 {
                     CurrentActor.ProcessTurn();
-                    if (CurrentActor.State == BattleState.NotTurn)
+                    if (!CurrentActor.IsActive)
                     {
                         var indexOfNextActor = Actors.IndexOf(CurrentActor) + 1 == Actors.Count() ? 0 : Actors.IndexOf(CurrentActor) + 1;
                         CurrentActorIndex = indexOfNextActor;
                         CurrentActor = Actors[CurrentActorIndex];
                         Actors.ForEach(x => x.Targetable = false);
-                        CurrentActor.State = BattleState.StartOfTurn;
                     }
                 }
                 else
@@ -67,7 +65,6 @@ namespace Arakara.Battle
                     CurrentActorIndex++;
                     CurrentActorIndex = CurrentActorIndex == Actors.Count() ? 0 : CurrentActorIndex;
                     CurrentActor = Actors[CurrentActorIndex];
-                    CurrentActor.State = BattleState.StartOfTurn;
                 }
             }
         }

@@ -63,10 +63,20 @@
     <Compile Include="Battle\BattleAction.cs" />
     <Compile Include="Battle\Effects\ActionEffect.cs" />
     <Compile Include="Battle\Animations.cs" />
-    <Compile Include="Battle\BattleState.cs" />
     <Compile Include="Battle\Events\BattleEventEffectState.cs" />
     <Compile Include="Battle\Events\Effects\KillEffect.cs" />
     <Compile Include="Battle\Events\Triggers\OnDeathTrigger.cs" />
+    <Compile Include="Battle\Phases\AI\CleanUpPhase.cs" />
+    <Compile Include="Battle\Phases\AI\SelectActionPhase.cs" />
+    <Compile Include="Battle\Phases\AI\SelectTargetPhase.cs" />
+    <Compile Include="Battle\Phases\Common\AnimationPhase.cs" />
+    <Compile Include="Battle\Phases\Common\ApplyEffectsPhase.cs" />
+    <Compile Include="Battle\Phases\Common\ApplyStatusEffectsPhase.cs" />
+    <Compile Include="Battle\Phases\DeckBuilder\CleanUpPhase.cs" />
+    <Compile Include="Battle\Phases\DeckBuilder\DrawCardsPhase.cs" />
+    <Compile Include="Battle\Phases\DeckBuilder\SelectCardPhase.cs" />
+    <Compile Include="Battle\Phases\DeckBuilder\SelectTargetPhase.cs" />
+    <Compile Include="Battle\Phases\Phase.cs" />
     <Compile Include="Battle\Statuses\BattleStatus.cs" />
     <Compile Include="Battle\BattleStatusCollection.cs" />
     <Compile Include="Components\Card.cs" />
@@ -187,6 +197,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

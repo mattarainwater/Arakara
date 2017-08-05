@@ -1,7 +1,9 @@
 ﻿using Arakara.Battle;
+using Arakara.Battle.Phases;
 using Arakara.Common;
 using Microsoft.Xna.Framework;
 using Nez;
+using Nez.Sprites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +18,7 @@ namespace Arakara.Components
         public int MaxHP { get; set; }
         public int CurrentHP { get; set; }
         public Faction Faction { get; set; }
-        public BattleState State { get; set; }
+        public bool IsActive { get; set; }
         public bool Immune { get; set; }
         public int Size { get; set; }
         public bool Targetable { get; set; }
@@ -25,8 +27,14 @@ namespace Arakara.Components
         public float CriticalHitChance { get; set; }
         public float Speed { get; set; }
         public BattleStatusCollection Statuses { get; set; }
+        public Sprite<Animations> Animator { get; set; }
+        public Animations IdleAnimation { get; set; }
+        public BattleAction<Animations> CurrentAction { get; set; }
 
-        protected List<BattleActor> _selectedTargets;
+        public LinkedList<Phase> Phases { get; set; }
+        private LinkedListNode<Phase> _currentPhase;
+
+        public List<BattleActor> SelectedTargets { get; set; }
 
         private TargetPolygon _targetablePolygon;
         private TurnMarkerPolygon _turnMarkerPolygon;
@@ -38,11 +46,18 @@ namespace Arakara.Components
             CurrentHP = maxHp;
             Speed = speed;
             Faction = faction;
-            State = BattleState.NotTurn;
+            IsActive = false;
             Size = size;
             DodgeChance = dodgeChance;
             CriticalHitChance = critChance;
             Statuses = new BattleStatusCollection();
+            Phases = new LinkedList<Phase>();
+        }
+
+        public void AddPhase(Type phaseType)
+        {
+            var phase = (Phase)Activator.CreateInstance(phaseType, this);
+            Phases.AddLast(phase);
         }
 
         public override void onAddedToEntity()
@@ -56,6 +71,9 @@ namespace Arakara.Components
             var turnMarkerPolygon = new TurnMarkerPolygon();
             _turnMarkerPolygon = entity.addComponent(turnMarkerPolygon);
             _turnMarkerPolygon.enabled = false;
+
+            Animator = entity.getComponent<Sprite<Animations>>();
+            Animator.play(IdleAnimation);
         }
 
         public void update()
@@ -69,7 +87,7 @@ namespace Arakara.Components
                 _targetablePolygon.enabled = false;
             }
 
-            if(State != BattleState.NotTurn)
+            if(IsActive)
             {
                 _turnMarkerPolygon.enabled = true;
             }
@@ -81,18 +99,24 @@ namespace Arakara.Components
 
         public void ProcessTurn()
         {
-            switch (State)
+            if(_currentPhase == null)
             {
-                case BattleState.StartOfTurn:
-                    Statuses.ApplyStatuses(this, Controller);
-                    OnStartOfTurn();
-                    break;
-                case BattleState.DuringTurn:
-                    DuringTurn();
-                    break;
-                case BattleState.EndOfTurn:
-                    OnEndOfTurn();
-                    break;
+                IsActive = true;
+                _currentPhase = Phases.First;
+                foreach(var phase in Phases)
+                {
+                    phase.IsFinished = false;
+                }
+            }
+            _currentPhase.Value.Perform();
+            if(_currentPhase.Value.IsFinished && _currentPhase.Next != null)
+            {
+                _currentPhase = _currentPhase.Next;
+            }
+            else if(_currentPhase.Value.IsFinished && _currentPhase.Next == null)
+            {
+                IsActive = false;
+                _currentPhase = null;
             }
         }
 
@@ -103,14 +127,8 @@ namespace Arakara.Components
 
         public void SelectTargets(List<BattleActor> targets)
         {
-            _selectedTargets = targets;
+            SelectedTargets = targets;
         }
-
-        protected abstract void OnStartOfTurn();
-
-        protected abstract void DuringTurn();
-
-        protected abstract void OnEndOfTurn();
 
         public int CompareTo(BattleActor other)
         {
