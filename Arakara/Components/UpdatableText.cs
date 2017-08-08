@@ -16,6 +16,7 @@ namespace Arakara.Components
             : base(font, "", position, color)
         {
             TextFunc = func;
+            renderLayer = 5;
         }
 
         public void update()

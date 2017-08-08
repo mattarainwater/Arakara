@@ -1,22 +1,22 @@
-﻿using System;
+﻿using Arakara.Common;
+using Arakara.Components;
+using Nez;
+using Nez.Sprites;
+using Nez.Textures;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Arakara.Components;
-using Arakara.Common;
-using Nez;
-using Nez.Textures;
-using Nez.Sprites;
 
 namespace Arakara.Battle.Phases.DeckBuilder
 {
-    public class SelectCardPhase : Phase
+    public class SelectBuyableCardPhase : Phase
     {
         private DeckBuilderActor _deckBuilderActor;
         public Selector CardSelector { get; set; }
 
-        public SelectCardPhase(DeckBuilderActor actor) 
+        public SelectBuyableCardPhase(DeckBuilderActor actor) 
             : base(actor)
         {
             _deckBuilderActor = actor;
@@ -33,13 +33,13 @@ namespace Arakara.Battle.Phases.DeckBuilder
         protected override void initialize()
         {
             CardSelector.enabled = true;
-            _deckBuilderActor.SelectedCard = null;
-            CardSelector.AddEntities(_deckBuilderActor.HandEntities);
+            _deckBuilderActor.SelectedBuyableCard = null;
+            CardSelector.AddEntities(_deckBuilderActor.BuyableHandEntities);
         }
 
         protected override void update()
         {
-            if(_deckBuilderActor.SelectedCard != null)
+            if (_deckBuilderActor.SelectedBuyableCard != null)
             {
                 IsFinished = true;
             }
@@ -49,6 +49,7 @@ namespace Arakara.Battle.Phases.DeckBuilder
         {
             CardSelector.enabled = false;
             CardSelector.Reset();
+            Actor.entity.scene.findEntity("backdrop").destroy();
         }
 
         private void OnCardFocus(Entity entity)
@@ -64,13 +65,14 @@ namespace Arakara.Battle.Phases.DeckBuilder
         private void OnCardSelect(Entity entity)
         {
             var card = entity.getComponent<Card>();
-            PlayCard(card);
+            BuyCard(card);
         }
 
-        private void PlayCard(Card card)
+        private void BuyCard(Card card)
         {
-            _deckBuilderActor.SelectedCard = card;
-            Actor.CurrentAction = card.Action;
+            _deckBuilderActor.BuyableHand.Remove(card);
+            _deckBuilderActor.DiscardPile.Add(card);
+            _deckBuilderActor.SelectedBuyableCard = card;
         }
     }
 }

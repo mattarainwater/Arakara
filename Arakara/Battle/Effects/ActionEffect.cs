@@ -17,7 +17,7 @@ namespace Arakara.Battle.Effects
 
         public string FormatDescription()
         {
-            return GetDescription().WrapText(18);
+            return GetDescription().WrapText(15);
         }
 
         public void Perform(BattleActor actor, BattleActor target, BattleController controller)

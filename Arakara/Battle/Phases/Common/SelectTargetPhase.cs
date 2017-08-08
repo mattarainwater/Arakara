@@ -8,17 +8,15 @@ using Nez;
 using Microsoft.Xna.Framework;
 using Arakara.Common;
 
-namespace Arakara.Battle.Phases.DeckBuilder
+namespace Arakara.Battle.Phases.Common
 {
     public class SelectTargetPhase : Phase
     {
-        private DeckBuilderActor _deckBuilderActor;
         public Selector TargetSelector { get; set; }
 
-        public SelectTargetPhase(DeckBuilderActor actor) 
+        public SelectTargetPhase(BattleActor actor) 
             : base(actor)
         {
-            _deckBuilderActor = actor;
             TargetSelector = actor.entity.addComponent(new Selector(
                 VirtualButtons.SelectInput,
                 VirtualButtons.LeftInput,
@@ -32,7 +30,7 @@ namespace Arakara.Battle.Phases.DeckBuilder
         protected override void initialize()
         {
             TargetSelector.enabled = true;
-            var targets = Actor.Controller.MakeTargetables(Actor, _deckBuilderActor.SelectedCard.Action.Targeting);
+            var targets = Actor.Controller.MakeTargetables(Actor, Actor.CurrentAction.Targeting);
             foreach (var target in targets)
             {
                 TargetSelector.AddEntity(target);
@@ -41,7 +39,7 @@ namespace Arakara.Battle.Phases.DeckBuilder
 
         protected override void update()
         {
-            if (_deckBuilderActor.SelectedTargets != null)
+            if (Actor.SelectedTargets != null)
             {
                 IsFinished = true;
             }

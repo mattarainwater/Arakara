@@ -72,13 +72,17 @@
     <Compile Include="Battle\Phases\Common\AnimationPhase.cs" />
     <Compile Include="Battle\Phases\Common\ApplyEffectsPhase.cs" />
     <Compile Include="Battle\Phases\Common\ApplyStatusEffectsPhase.cs" />
+    <Compile Include="Battle\Phases\Common\WaitPhase.cs" />
     <Compile Include="Battle\Phases\DeckBuilder\CleanUpPhase.cs" />
+    <Compile Include="Battle\Phases\DeckBuilder\DrawBuyableCardsPhase.cs" />
     <Compile Include="Battle\Phases\DeckBuilder\DrawCardsPhase.cs" />
+    <Compile Include="Battle\Phases\DeckBuilder\SelectBuyableCardPhase.cs" />
     <Compile Include="Battle\Phases\DeckBuilder\SelectCardPhase.cs" />
-    <Compile Include="Battle\Phases\DeckBuilder\SelectTargetPhase.cs" />
+    <Compile Include="Battle\Phases\Common\SelectTargetPhase.cs" />
     <Compile Include="Battle\Phases\Phase.cs" />
     <Compile Include="Battle\Statuses\BattleStatus.cs" />
     <Compile Include="Battle\BattleStatusCollection.cs" />
+    <Compile Include="Common\ObjectExtensions.cs" />
     <Compile Include="Common\VirtualButtons.cs" />
     <Compile Include="Components\Card.cs" />
     <Compile Include="Battle\Effects\DamageEffect.cs" />
@@ -109,6 +113,7 @@
     <Compile Include="Components\TurnMarkerPolygon.cs" />
     <Compile Include="Components\TargetPolygon.cs" />
     <Compile Include="Components\UpdatableText.cs" />
+    <Compile Include="Factories\Entities\CardEntityFactory.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -151,6 +156,7 @@
     <None Include="Content\prisca.png" />
     <None Include="Content\prisca_big.png" />
     <None Include="Content\Nez\NezDefaultBMFont.png" />
+    <Content Include="Content\backdrop.png" />
     <Content Include="Content\background2.png" />
     <Content Include="Content\card.png" />
     <None Include="Content\card_dark.png" />
@@ -175,7 +181,9 @@
       <SubType>Designer</SubType>
     </None>
     <MonoGameContentReference Include="Content\Content.mgcb" />
-    <None Include="Content\prisca.json" />
+    <Content Include="Content\prisca.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

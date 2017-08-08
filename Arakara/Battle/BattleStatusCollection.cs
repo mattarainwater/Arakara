@@ -22,6 +22,11 @@ namespace Arakara.Battle
             _statuses.Add(status);
         }
 
+        public BattleStatus Get(string statusCode)
+        {
+            return _statuses.FirstOrDefault(x => x.GetCode() == statusCode);
+        }
+
         public bool Contains(string statusCode)
         {
             return _statuses.Any(x => x.GetCode() == statusCode);

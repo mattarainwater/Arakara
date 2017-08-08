@@ -12,10 +12,6 @@ namespace Arakara.Battle
         public ActionEffect Effect { get; set; }
         public Targeting Targeting { get; set; }
         public string Name { get; set; }
-    }
-
-    public class BattleAction<TEnum> : BattleAction where TEnum : struct, IComparable, IFormattable
-    {
-        public TEnum Animation { get; set; }
+        public Animations Animation { get; set; }
     }
 }

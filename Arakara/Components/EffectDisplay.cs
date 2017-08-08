@@ -20,6 +20,7 @@ namespace Arakara.Components
         {
             TimeToLive = timeToLive;
             _container = container;
+            renderLayer = 5;
         }
 
         public void update()

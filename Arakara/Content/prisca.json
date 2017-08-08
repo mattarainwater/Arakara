@@ -10,15 +10,20 @@
   "Speed": 200,
   "Deck": [
     {
-      "Grade": "Bronze",
+      "BuyValue": 2,
+      "Cost": 0,
       "Action": {
         "Name": "Slash",
         "Targeting": "Enemies",
-        "Animation": "Attack",
+        "Animation": "Attack1",
         "Effect": {
-
+          "$type": "Arakara.Battle.Effects.DamageEffect, Arakara",
+          "MinDamage": 1,
+          "MaxDamage": 3
         }
       }
     }
+  ],
+  "BuyableDeck": [
   ]
 }

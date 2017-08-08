@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Arakara.Components;
 using Nez;
 using Microsoft.Xna.Framework;
+using Arakara.Battle.Statuses;
 
 namespace Arakara.Battle.Effects
 {
@@ -31,12 +32,14 @@ namespace Arakara.Battle.Effects
                 var dodge = Nez.Random.nextFloat() <= target.DodgeChance ? 0 : 1;
                 DamageDealt *= dodge;
                 var defense = 0;
-                if(target.Statuses.Contains("DefenseUp"))
+                var defenseUp = target.Statuses.Get("DefenseUp");
+                if(defenseUp != null)
                 {
-                    defense = 10;
+                    defense = ((DefenseUpStatus)defenseUp).Value;
                 }
-                target.CurrentHP -= (DamageDealt - defense);
-                var displayText = DamageDealt == 0 ? "Miss" : crit == 2 ? "Crit! " + DamageDealt.ToString() : DamageDealt.ToString();
+                DamageDealt = DamageDealt - defense < 0 ? 0 : DamageDealt - defense;
+                target.CurrentHP -= DamageDealt;
+                var displayText = dodge == 0 ? "Miss" : crit == 2 ? "Crit! " + DamageDealt.ToString() : DamageDealt == 0 ? "Blocked!" : DamageDealt.ToString();
                 var displayColor = DamageDealt == 0 ? Color.DarkGray : crit == 2 ? Color.DarkViolet : Color.Red;
                 var effectDisplayContainer = target.getComponent<EffectDisplayContainer>();
                 effectDisplayContainer.MakeEffectDisplay(displayText, displayColor);

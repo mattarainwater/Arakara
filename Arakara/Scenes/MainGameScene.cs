@@ -9,12 +9,14 @@ using Arakara.Common;
 using Arakara.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using Nez;
 using Nez.Sprites;
 using Nez.Textures;
 using Nez.Tiled;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,9 +51,14 @@ namespace Arakara.Scenes
 
         public override void onStart()
         {
+            //using (StreamReader sr = new StreamReader("Content/prisca.json"))
+            //{
+            //    var contents = sr.ReadToEnd();
+            //    var mcTest = JsonConvert.DeserializeObject<DeckBuilderActor>(contents, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+            //}
+
             _battle.AddBattleEntity(MakeMC(), this);
 
-            _battle.AddBattleEntity(MakeKnight(), this);
             _battle.AddBattleEntity(MakeKnight(), this);
             _battle.AddBattleEntity(MakeNecromancer(), this);
 
@@ -61,154 +68,247 @@ namespace Arakara.Scenes
         private Entity MakeMC()
         {
             var mainCharacterEntity = createEntity("mc");
-            var mainCharacterActor = new DeckBuilderActor("Prisca", 10000, new Faction
+            var mainCharacterActor = new DeckBuilderActor("Prisca", 20, new Faction
             {
                 FactionName = "PC",
                 Id = 1
-            }, new List<Card<Animations>>()
+            }, 
+            new List<Card>()
             {
-                new Card<Animations>
+                new Card
                 {
-                    Action = new BattleAction<Animations>
+                    Action = new BattleAction
                     {
-                        Name = "Poison",
-                        Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
+                        Name = "Slash",
+                        Effect = new DamageEffect(1, 3),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1,
                     },
-                    BuyValue = 5,
-                    Cost = 2
+                    BuyValue = 2,
+                    Cost = 0
                 },
-                new Card<Animations>
+                new Card
                 {
-                    Action = new BattleAction<Animations>
+                    Action = new BattleAction
                     {
-                        Name = "Poison",
-                        Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
+                        Name = "Slash",
+                        Effect = new DamageEffect(1, 3),
                         Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    },
-                    BuyValue = 5,
-                    Cost = 2
-                },
-                new Card<Animations>
-                {
-                    Action = new BattleAction<Animations>
-                    {
-                        Name = "Poison",
-                        Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    },
-                    BuyValue = 5,
-                    Cost = 2
-                },
-                new Card<Animations>
-                {
-                    Action = new BattleAction<Animations>
-                    {
-                        Name = "Poison",
-                        Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    },
-                    BuyValue = 5,
-                    Cost = 2
-                },
-                new Card<Animations>
-                {
-                    Action = new BattleAction<Animations>
-                    {
-                        Name = "Poison",
-                        Effect = new ApplyStatusEffect(new PoisonStatus(5, 10, 20)),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    },
-                    BuyValue = 5,
-                    Cost = 2
-                },
-                new Card<Animations>
-                {
-                    Action = new BattleAction<Animations>
-                    {
-                        Name = "Quick Slash",
-                        Effect = new DamageEffect(5, 10),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    },
-                    BuyValue = 4,
-                    Cost = 4
-                },
-                new Card<Animations>
-                {
-                    Action = new BattleAction<Animations>
-                    {
-                        Name = "Quick Slash",
-                        Effect = new DamageEffect(5, 10),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    },
-                    BuyValue = 4,
-                    Cost = 4
-                },
-                new Card<Animations>
-                {
-                    Action = new BattleAction<Animations>
-                    {
-                        Name = "Quick Slash",
-                        Effect = new DamageEffect(5, 10),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    },
-                    BuyValue = 4,
-                    Cost = 4
-                },
-                new Card<Animations>
-                {
-                    Action = new BattleAction<Animations>
-                    {
-                        Name = "Heavy Slash",
-                        Effect = new DamageEffect(10, 20),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    },
-                    BuyValue = 3,
-                    Cost = 3
-                },
-                new Card<Animations>
-                {
-                    Action = new BattleAction<Animations>
-                    {
-                        Name = "Heavy Slash",
-                        Effect = new DamageEffect(10, 20),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1
-                    },
-                    BuyValue = 3,
-                    Cost = 3
-                },
-                new Card<Animations>
-                {
-                    Action = new BattleAction<Animations>
-                    {
-                        Name = "Potion",
-                        Effect = new HealEffect(40),
-                        Targeting = Targeting.Self,
-                        Animation = Animations.Support1
+                        Animation = Animations.Attack1,
                     },
                     BuyValue = 2,
-                    Cost = 1
+                    Cost = 0
                 },
-            }, .25f, .25f, 200f, Animations.Idle);
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Slash",
+                        Effect = new DamageEffect(1, 3),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 2,
+                    Cost = 0
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Slash",
+                        Effect = new DamageEffect(1, 3),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 2,
+                    Cost = 0
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Guard",
+                        Effect = new ApplyStatusEffect(new DefenseUpStatus(3, 2)),
+                        Targeting = Targeting.Self,
+                        Animation = Animations.Support1,
+                    },
+                    BuyValue = 1,
+                    Cost = 0
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Guard",
+                        Effect = new ApplyStatusEffect(new DefenseUpStatus(3, 2)),
+                        Targeting = Targeting.Self,
+                        Animation = Animations.Support1,
+                    },
+                    BuyValue = 1,
+                    Cost = 0
+                },
+            },
+
+            new List<Card>()
+            {
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Heavy Slash",
+                        Effect = new DamageEffect(3, 5),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 2,
+                    Cost = 4
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Heavy Slash",
+                        Effect = new DamageEffect(3, 5),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 2,
+                    Cost = 4
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Heavy Slash",
+                        Effect = new DamageEffect(3, 5),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 2,
+                    Cost = 4
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Heavy Slash",
+                        Effect = new DamageEffect(3, 5),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 2,
+                    Cost = 4
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Potion",
+                        Effect = new HealEffect(5),
+                        Targeting = Targeting.Self,
+                        Animation = Animations.Support1,
+                    },
+                    BuyValue = 3,
+                    Cost = 4
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Potion",
+                        Effect = new HealEffect(5),
+                        Targeting = Targeting.Self,
+                        Animation = Animations.Support1,
+                    },
+                    BuyValue = 3,
+                    Cost = 4
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Potion",
+                        Effect = new HealEffect(5),
+                        Targeting = Targeting.Self,
+                        Animation = Animations.Support1,
+                    },
+                    BuyValue = 3,
+                    Cost = 4
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Assassinate",
+                        Effect = new DamageEffect(5, 7),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 2,
+                    Cost = 6
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Assassinate",
+                        Effect = new DamageEffect(5, 7),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 2,
+                    Cost = 6
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Posion",
+                        Effect = new ApplyStatusEffect(new PoisonStatus(3, 2, 4)),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 3,
+                    Cost = 4
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Posion",
+                        Effect = new ApplyStatusEffect(new PoisonStatus(3, 2, 4)),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 3,
+                    Cost = 4
+                },
+                new Card
+                {
+                    Action = new BattleAction
+                    {
+                        Name = "Posion",
+                        Effect = new ApplyStatusEffect(new PoisonStatus(3, 2, 4)),
+                        Targeting = Targeting.Enemies,
+                        Animation = Animations.Attack1,
+                    },
+                    BuyValue = 3,
+                    Cost = 4
+                },
+            }
+            ,0, 0, 200f, Animations.Idle);
 
             mainCharacterEntity.addComponent(mainCharacterActor);
 
             mainCharacterActor.AddPhase(typeof(ApplyStatusEffectsPhase));
             mainCharacterActor.AddPhase(typeof(DrawCardsPhase));
             mainCharacterActor.AddPhase(typeof(SelectCardPhase));
-            mainCharacterActor.AddPhase(typeof(Battle.Phases.DeckBuilder.SelectTargetPhase));
+            mainCharacterActor.AddPhase(typeof(Battle.Phases.Common.SelectTargetPhase));
             mainCharacterActor.AddPhase(typeof(AnimationPhase));
             mainCharacterActor.AddPhase(typeof(ApplyEffectsPhase));
+            mainCharacterActor.AddPhase(typeof(WaitPhase));
+            mainCharacterActor.AddPhase(typeof(DrawBuyableCardsPhase));
+            mainCharacterActor.AddPhase(typeof(SelectBuyableCardPhase));
             mainCharacterActor.AddPhase(typeof(Battle.Phases.DeckBuilder.CleanUpPhase));
 
             var texture = contentManager.Load<Texture2D>("prisca_big");
@@ -253,6 +353,7 @@ namespace Arakara.Scenes
             sprite.addAnimation(Animations.Support1, new SpriteAnimation(potionAnimationFrames) { loop = false }, Vector2.Zero);
             sprite.flipX = true;
             sprite.setOrigin(Vector2.Zero);
+            sprite.renderLayer = 1000;
 
             return mainCharacterEntity;
         }
@@ -280,30 +381,31 @@ namespace Arakara.Scenes
             sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
             sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = false }, Vector2.Zero);
             sprite.setOrigin(Vector2.Zero);
+            sprite.renderLayer = 1000;
 
-            var aIActor = new AIActor("Guard", 1, new Faction
+            var aIActor = new AIActor("Guard", 15, new Faction
                 {
                     FactionName = "Enemies",
                     Id = 2
                 },
-                new List<BattleAction<Animations>>
+                new List<BattleAction>
                 {
-                    new BattleAction<Animations>
+                    new BattleAction
                     {
                         Animation = Animations.Attack1,
-                        Effect = new DamageEffect(10,  15),
+                        Effect = new DamageEffect(1,  3),
                         Name = "Stab",
                         Targeting = Targeting.Enemies
                     },
-                    new BattleAction<Animations>
+                    new BattleAction
                     {
                         Animation = Animations.Attack1,
-                        Effect = new DamageEffect(20, 30),
+                        Effect = new DamageEffect(3, 5),
                         Name = "Super Stab",
                         Targeting = Targeting.Enemies
                     }
                 },
-                new RandomAIDecider(), 0f, 0f, 100f
+                new RandomAIDecider(), 0f, 0f, 100f, Animations.Idle
             );
 
             enemyEntity.addComponent(aIActor);
@@ -313,6 +415,7 @@ namespace Arakara.Scenes
             aIActor.AddPhase(typeof(Battle.Phases.AI.SelectTargetPhase));
             aIActor.AddPhase(typeof(AnimationPhase));
             aIActor.AddPhase(typeof(ApplyEffectsPhase));
+            aIActor.AddPhase(typeof(WaitPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.CleanUpPhase));
 
             return enemyEntity;
@@ -342,23 +445,24 @@ namespace Arakara.Scenes
             sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
             sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = false }, Vector2.Zero);
             sprite.setOrigin(Vector2.Zero);
+            sprite.renderLayer = 1000;
 
-            var aIActor = new AIActor("Necromancer", 10000, new Faction
+            var aIActor = new AIActor("Necromancer", 15, new Faction
             {
                 FactionName = "Enemies",
                 Id = 2
             },
-                new List<BattleAction<Animations>>
+                new List<BattleAction>
                 {
-                    new BattleAction<Animations>
+                    new BattleAction
                     {
                         Animation = Animations.Attack1,
-                        Effect = new DamageEffect(10, 20),
+                        Effect = new DamageEffect(2, 4),
                         Name = "Necro Bolt",
                         Targeting = Targeting.Enemies
                     },
                 },
-                new RandomAIDecider(), 0f, 0f, 50f
+                new RandomAIDecider(), 0f, 0f, 50f, Animations.Idle
             );
 
             enemyEntity.addComponent(aIActor);
@@ -368,6 +472,7 @@ namespace Arakara.Scenes
             aIActor.AddPhase(typeof(Battle.Phases.AI.SelectTargetPhase));
             aIActor.AddPhase(typeof(AnimationPhase));
             aIActor.AddPhase(typeof(ApplyEffectsPhase));
+            aIActor.AddPhase(typeof(WaitPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.CleanUpPhase));
 
             return enemyEntity;

@@ -14,19 +14,20 @@ namespace Arakara.Components
 {
     public class AIActor : BattleActor
     {
-        public List<BattleAction<Animations>> Actions { get; set; }
+        public List<BattleAction> Actions { get; set; }
         public AIDecider Decider { get; set; }
 
         public AIActor(
             string name, 
             int maxHP, 
             Faction faction, 
-            List<BattleAction<Animations>> actions, 
+            List<BattleAction> actions, 
             AIDecider decider, 
             float dodgeChance, 
             float critChance, 
-            float speed) 
-                : base(name, maxHP, faction, dodgeChance, critChance, speed)
+            float speed,
+            Animations idleAnimations) 
+                : base(name, maxHP, faction, dodgeChance, critChance, speed, idleAnimations)
         {
             Actions = actions;
             Decider = decider;

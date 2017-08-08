@@ -15,32 +15,57 @@ namespace Arakara.Components
 {
     public class DeckBuilderActor : BattleActor
     {
-        public List<Card<Animations>> Deck { get; set; }
-        public List<Card<Animations>> Hand { get; set; }
-        public List<Card<Animations>> DiscardPile { get; set; }
+        public List<Card> Deck { get; set; }
+        public List<Card> Hand { get; set; }
+        public List<Card> DiscardPile { get; set; }
         public List<Entity> HandEntities { get; set; }
 
-        public Card<Animations> SelectedCard { get; set; }
+        public Card SelectedCard { get; set; }
+
+        public List<Card> BuyableDeck { get; set; }
+        public List<Card> BuyableHand { get; set; }
+        public List<Card> BuyableDiscardPile { get; set; }
+        public List<Entity> BuyableHandEntities { get; set; }
+
+        public Card SelectedBuyableCard { get; set; }
 
         public Texture2D DefaultCardTexture { get; set; }
         public Texture2D HoverCardTexture { get; set; }
+        public Texture2D BackdropTexture { get; set; }
+
+        public DeckBuilderActor()
+        {
+            Hand = new List<Card>();
+            DiscardPile = new List<Card>();
+            HandEntities = new List<Entity>();
+
+            BuyableHand = new List<Card>();
+            BuyableDiscardPile = new List<Card>();
+            BuyableHandEntities = new List<Entity>();
+        }
 
         public DeckBuilderActor(string name, 
             int maxHP, 
             Faction faction, 
-            List<Card<Animations>> cards, 
+            List<Card> cards,
+            List<Card> buyableCards,
             float dodgeChance, 
             float critChance, 
             float speed,
             Animations idleAnimation) 
-                : base(name, maxHP, faction, dodgeChance, critChance, speed)
+                : base(name, maxHP, faction, dodgeChance, critChance, speed, idleAnimation)
         {
             Deck = cards;
             Deck.shuffle();
-            Hand = new List<Card<Animations>>();
-            DiscardPile = new List<Card<Animations>>();
+            Hand = new List<Card>();
+            DiscardPile = new List<Card>();
             HandEntities = new List<Entity>();
-            IdleAnimation = idleAnimation;
+            
+            BuyableDeck = buyableCards;
+            BuyableDeck.shuffle();
+            BuyableHand = new List<Card>();
+            BuyableDiscardPile = new List<Card>();
+            BuyableHandEntities = new List<Entity>();
         }
 
         public override void onAddedToEntity()
@@ -49,6 +74,7 @@ namespace Arakara.Components
 
             DefaultCardTexture = entity.scene.contentManager.Load<Texture2D>("card");
             HoverCardTexture = entity.scene.contentManager.Load<Texture2D>("card_dark");
+            BackdropTexture = entity.scene.contentManager.Load<Texture2D>("backdrop");
         }
     }
 }

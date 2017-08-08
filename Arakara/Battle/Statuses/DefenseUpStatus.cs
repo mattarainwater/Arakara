@@ -9,9 +9,12 @@ namespace Arakara.Battle.Statuses
 {
     public class DefenseUpStatus : BattleStatus
     {
-        public DefenseUpStatus(int duration) 
+        public int Value { get; set; }
+
+        public DefenseUpStatus(int duration, int value) 
             : base(duration)
         {
+            Value = value;
         }
 
         public override void Apply(BattleActor actor, BattleController controller)
@@ -20,7 +23,7 @@ namespace Arakara.Battle.Statuses
 
         public override string GetDescription()
         {
-            return $"Reduces damage by 10 for {Duration} turns.";
+            return $"Reduces damage by {Value} for {Duration} turns.";
         }
 
         public override string GetCode()

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Arakara.Components
 {
-    public class Card<TEnum> : Component where TEnum : struct, IComparable, IFormattable
+    public class Card : Component
     {
-        public BattleAction<TEnum> Action { get; set; }
+        public BattleAction Action { get; set; }
         public int BuyValue { get; set; }
         public int Cost { get; set; }
     }

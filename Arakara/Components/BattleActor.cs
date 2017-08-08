@@ -20,7 +20,6 @@ namespace Arakara.Components
         public Faction Faction { get; set; }
         public bool IsActive { get; set; }
         public bool Immune { get; set; }
-        public int Size { get; set; }
         public bool Targetable { get; set; }
         public BattleController Controller { get; set; }
         public float DodgeChance { get; set; }
@@ -29,7 +28,7 @@ namespace Arakara.Components
         public BattleStatusCollection Statuses { get; set; }
         public Sprite<Animations> Animator { get; set; }
         public Animations IdleAnimation { get; set; }
-        public BattleAction<Animations> CurrentAction { get; set; }
+        public BattleAction CurrentAction { get; set; }
 
         public LinkedList<Phase> Phases { get; set; }
         private LinkedListNode<Phase> _currentPhase;
@@ -39,7 +38,13 @@ namespace Arakara.Components
         private TargetPolygon _targetablePolygon;
         private TurnMarkerPolygon _turnMarkerPolygon;
 
-        public BattleActor(string name, int maxHp, Faction faction, float dodgeChance, float critChance, float speed, int size = 1)
+        public BattleActor(int size = 1)
+        {
+            Statuses = new BattleStatusCollection();
+            Phases = new LinkedList<Phase>();
+        }
+
+        public BattleActor(string name, int maxHp, Faction faction, float dodgeChance, float critChance, float speed, Animations idleAnimation)
         {
             Name = name;
             MaxHP = maxHp;
@@ -47,11 +52,11 @@ namespace Arakara.Components
             Speed = speed;
             Faction = faction;
             IsActive = false;
-            Size = size;
             DodgeChance = dodgeChance;
             CriticalHitChance = critChance;
             Statuses = new BattleStatusCollection();
             Phases = new LinkedList<Phase>();
+            IdleAnimation = Animations.Idle;
         }
 
         public void AddPhase(Type phaseType)
@@ -62,7 +67,8 @@ namespace Arakara.Components
 
         public override void onAddedToEntity()
         {
-            entity.addComponent(new Text(CommonResources.DefaultBitmapFont, Name, new Vector2(0f, -5), Color.Gray));
+            var nameText = entity.addComponent(new Text(CommonResources.DefaultBitmapFont, Name, new Vector2(0f, -5), Color.Gray));
+            nameText.renderLayer = 70;
 
             var targetPolygon = new TargetPolygon();
             _targetablePolygon = entity.addComponent(targetPolygon);
