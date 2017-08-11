@@ -15,6 +15,8 @@ namespace Arakara.Battle.Phases.DeckBuilder
 {
     public class DrawBuyableCardsPhase : Phase
     {
+        public const int BUYABLE_TEMP_TAG = 1225;
+
         private bool _drawing;
         private int _handSize;
         private DeckBuilderActor _deckBuilderActor;
@@ -32,8 +34,10 @@ namespace Arakara.Battle.Phases.DeckBuilder
 
         protected override void initialize()
         {
-            _backdrop = Actor.entity.scene.createEntity("backdrop", new Vector2(DimensionConstants.SCREEN_WIDTH / 4, DimensionConstants.SCREEN_HEIGHT / 4));
+            _backdrop = Actor.entity.scene.createEntity("background", new Vector2(DimensionConstants.SCREEN_WIDTH / 4, DimensionConstants.SCREEN_HEIGHT / 4));
+            _backdrop.setTag(BUYABLE_TEMP_TAG);
             var sprite = _backdrop.addComponent(new Sprite(_deckBuilderActor.BackdropTexture));
+            DrawBuyPoints();
             sprite.renderLayer = 4;
             sprite.setOrigin(Vector2.Zero);
             _drawing = true;
@@ -51,6 +55,22 @@ namespace Arakara.Battle.Phases.DeckBuilder
             }
         }
 
+        private void DrawBuyPoints()
+        {
+            var buyableText = Actor.entity.scene.createEntity("buyableText", new Vector2(DimensionConstants.SCREEN_WIDTH / 4, DimensionConstants.SCREEN_HEIGHT / 4));
+            buyableText.setTag(BUYABLE_TEMP_TAG);
+            var buyableTextComponent = new Text(CommonResources.DefaultBitmapFont, GetBuyablePoints(), new Vector2(10, 10), Color.White);
+            buyableText.addComponent(buyableTextComponent);
+        }
+
+        private string GetBuyablePoints()
+        {
+            var template = "Buy Points: {0}";
+            var cardsInHand = _deckBuilderActor.Hand.Where(x => x != _deckBuilderActor.SelectedCard);
+            _deckBuilderActor.BuyPoints = cardsInHand.Sum(x => x.BuyValue);
+            return string.Format(template, _deckBuilderActor.BuyPoints);
+        }
+
         private void DrawCards()
         {
             for (var i = 0; i < _handSize; i++)
@@ -66,9 +86,10 @@ namespace Arakara.Battle.Phases.DeckBuilder
             {
                 ShuffleDeck();
             }
-            _deckBuilderActor.BuyableHand.Add(_deckBuilderActor.BuyableDeck.First());
-            CreateCardEntity(index, _deckBuilderActor.BuyableDeck.First());
-            _deckBuilderActor.BuyableDeck.Remove(_deckBuilderActor.BuyableDeck.First());
+            var drawnCard = _deckBuilderActor.BuyableDeck.First();
+            _deckBuilderActor.BuyableHand.Add(drawnCard);
+            CreateCardEntity(index, drawnCard);
+            _deckBuilderActor.BuyableDeck.Remove(drawnCard);
         }
 
         private void CreateCardEntity(int index, Card card)

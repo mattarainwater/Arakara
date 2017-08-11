@@ -27,10 +27,14 @@ namespace Arakara.Components
         public List<Card> BuyableDiscardPile { get; set; }
         public List<Entity> BuyableHandEntities { get; set; }
 
+        public int BuyPoints { get; set; }
+
         public Card SelectedBuyableCard { get; set; }
 
         public Texture2D DefaultCardTexture { get; set; }
         public Texture2D HoverCardTexture { get; set; }
+        public Texture2D DisabledCardTexture { get; set; }
+
         public Texture2D BackdropTexture { get; set; }
 
         public DeckBuilderActor()
@@ -73,7 +77,8 @@ namespace Arakara.Components
             base.onAddedToEntity();
 
             DefaultCardTexture = entity.scene.contentManager.Load<Texture2D>("card");
-            HoverCardTexture = entity.scene.contentManager.Load<Texture2D>("card_dark");
+            DisabledCardTexture = entity.scene.contentManager.Load<Texture2D>("card_dark");
+            HoverCardTexture = entity.scene.contentManager.Load<Texture2D>("card_light");
             BackdropTexture = entity.scene.contentManager.Load<Texture2D>("backdrop");
         }
     }

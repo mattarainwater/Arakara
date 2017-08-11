@@ -35,6 +35,15 @@ namespace Arakara.Battle.Phases.DeckBuilder
             CardSelector.enabled = true;
             _deckBuilderActor.SelectedBuyableCard = null;
             CardSelector.AddEntities(_deckBuilderActor.BuyableHandEntities);
+            foreach(var entity in _deckBuilderActor.BuyableHandEntities)
+            {
+                var card = entity.getComponent<Card>();
+                var sprite = entity.getComponent<Sprite>();
+                if(_deckBuilderActor.BuyPoints < card.Cost)
+                {
+                    sprite.subtexture = new Subtexture(_deckBuilderActor.DisabledCardTexture);
+                }
+            }
         }
 
         protected override void update()
@@ -49,12 +58,21 @@ namespace Arakara.Battle.Phases.DeckBuilder
         {
             CardSelector.enabled = false;
             CardSelector.Reset();
-            Actor.entity.scene.findEntity("backdrop").destroy();
+            Actor.entity.scene.findEntitiesWithTag(DrawBuyableCardsPhase.BUYABLE_TEMP_TAG).ForEach(x => x.destroy());
         }
 
         private void OnCardFocus(Entity entity)
         {
-            entity.getComponent<Sprite>().subtexture = new Subtexture(_deckBuilderActor.HoverCardTexture);
+            var card = entity.getComponent<Card>();
+            var sprite = entity.getComponent<Sprite>();
+            if (_deckBuilderActor.BuyPoints < card.Cost)
+            {
+                CardSelector.MoveNext();
+            }
+            else
+            {
+                sprite.subtexture = new Subtexture(_deckBuilderActor.HoverCardTexture);
+            }
         }
 
         private void OnCardBlur(Entity entity)
