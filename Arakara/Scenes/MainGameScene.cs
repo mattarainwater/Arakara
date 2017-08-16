@@ -367,13 +367,13 @@ namespace Arakara.Scenes
             },
                 new List<BattleAction>
                 {
-                    //new BattleAction
-                    //{
-                    //    Animation = Animations.Attack1,
-                    //    Effect = new DamageEffect(1, 3),
-                    //    Name = "Necro Bolt",
-                    //    Targeting = Targeting.Enemies
-                    //},
+                    new BattleAction
+                    {
+                        Animation = Animations.Attack1,
+                        Effect = new DamageEffect(1, 3),
+                        Name = "Necro Bolt",
+                        Targeting = Targeting.Enemies
+                    },
                     new BattleAction
                     {
                         Animation = Animations.Attack1,
