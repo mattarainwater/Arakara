@@ -7,6 +7,7 @@ using Arakara.Components;
 using Nez;
 using Microsoft.Xna.Framework;
 using Arakara.Battle.Statuses;
+using Nez.Sprites;
 
 namespace Arakara.Battle.Effects
 {
@@ -43,6 +44,15 @@ namespace Arakara.Battle.Effects
                 var displayColor = DamageDealt == 0 ? Color.DarkGray : crit == 2 ? Color.DarkViolet : Color.Red;
                 var effectDisplayContainer = target.getComponent<EffectDisplayContainer>();
                 effectDisplayContainer.MakeEffectDisplay(displayText, displayColor);
+
+                var animator = target.getComponent<Sprite<Animations>>();
+                if(animator.hasAnimation(Animations.Hit) && dodge != 0)
+                {
+                    animator.play(Animations.Hit);
+                    Core.schedule(1f, (t) => {
+                        animator.play(Animations.Idle);
+                    });
+                }
             }
         }
 

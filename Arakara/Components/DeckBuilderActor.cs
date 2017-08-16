@@ -23,8 +23,6 @@ namespace Arakara.Components
         public Card SelectedCard { get; set; }
 
         public List<Card> BuyableDeck { get; set; }
-        public List<Card> BuyableHand { get; set; }
-        public List<Card> BuyableDiscardPile { get; set; }
         public List<Entity> BuyableHandEntities { get; set; }
 
         public int BuyPoints { get; set; }
@@ -36,17 +34,6 @@ namespace Arakara.Components
         public Texture2D DisabledCardTexture { get; set; }
 
         public Texture2D BackdropTexture { get; set; }
-
-        public DeckBuilderActor()
-        {
-            Hand = new List<Card>();
-            DiscardPile = new List<Card>();
-            HandEntities = new List<Entity>();
-
-            BuyableHand = new List<Card>();
-            BuyableDiscardPile = new List<Card>();
-            BuyableHandEntities = new List<Entity>();
-        }
 
         public DeckBuilderActor(string name, 
             int maxHP, 
@@ -66,9 +53,6 @@ namespace Arakara.Components
             HandEntities = new List<Entity>();
             
             BuyableDeck = buyableCards;
-            BuyableDeck.shuffle();
-            BuyableHand = new List<Card>();
-            BuyableDiscardPile = new List<Card>();
             BuyableHandEntities = new List<Entity>();
         }
 

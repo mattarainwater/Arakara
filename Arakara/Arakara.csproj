@@ -57,6 +57,7 @@
     <Compile Include="Battle\Effects\Condition.cs" />
     <Compile Include="Battle\Effects\ConditionalEffect.cs" />
     <Compile Include="Battle\Effects\Conditions\TargetHasStatusCondition.cs" />
+    <Compile Include="Battle\Effects\TrashEffect.cs" />
     <Compile Include="Battle\Events\BattleEventEffect.cs" />
     <Compile Include="Battle\Events\BattleEventTrigger.cs" />
     <Compile Include="Battle\Effects\ApplyStatusEffect.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="Battle\Phases\Phase.cs" />
     <Compile Include="Battle\Statuses\BattleStatus.cs" />
     <Compile Include="Battle\BattleStatusCollection.cs" />
+    <Compile Include="Battle\Statuses\CurseStatus.cs" />
     <Compile Include="Common\ObjectExtensions.cs" />
     <Compile Include="Common\VirtualButtons.cs" />
     <Compile Include="Components\Card.cs" />

@@ -240,6 +240,10 @@ namespace Nez.Sprites
 			_totalElapsedTime = (float)startFrame * _currentAnimation.secondsPerFrame;
 		}
 
+        public bool hasAnimation ( TEnum animationKey )
+        {
+            return _animations.ContainsKey(animationKey);
+        }
 
 		public bool isAnimationPlaying( TEnum animationKey )
 		{

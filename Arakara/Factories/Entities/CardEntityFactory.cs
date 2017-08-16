@@ -19,29 +19,29 @@ namespace Arakara.Factories.Entities
         {
         }
 
-        public Entity GetCardEntity(Card card, Vector2 position, Texture2D cardSprite)
+        public Entity GetCardEntity(Card card, Vector2 position, Texture2D cardSprite, int layer)
         {
             var cardEntity = Core.scene.createEntity("card", position);
 
             var sprite = new Sprite(cardSprite);
             sprite.origin = Vector2.Zero;
-            sprite.setRenderLayer(3);
+            sprite.setRenderLayer(layer);
             cardEntity.addComponent(sprite);
 
             var nameText = new Text(CommonResources.DefaultBitmapFont, card.Action.Name, new Vector2(20, 7), Color.White);
-            nameText.setRenderLayer(2);
+            nameText.setRenderLayer(layer - 1);
             cardEntity.addComponent(nameText);
 
             var costText = new Text(CommonResources.DefaultBitmapFont, card.Cost.ToString(), new Vector2(97, 7), Color.White);
-            costText.setRenderLayer(2);
+            costText.setRenderLayer(layer - 1);
             cardEntity.addComponent(costText);
 
             var cardText = new Text(CommonResources.DefaultBitmapFont, card.Action.Effect.FormatDescription(), new Vector2(20, 40), Color.White);
-            cardText.setRenderLayer(2);
+            cardText.setRenderLayer(layer - 1);
             cardEntity.addComponent(cardText);
 
             var buyValueText = new Text(CommonResources.DefaultBitmapFont, card.BuyValue.ToString(), new Vector2(97, 107), Color.White);
-            buyValueText.setRenderLayer(2);
+            buyValueText.setRenderLayer(layer - 1);
             cardEntity.addComponent(buyValueText);
 
             cardEntity.addComponent(card);

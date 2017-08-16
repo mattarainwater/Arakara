@@ -1,5 +1,6 @@
 ﻿using Arakara.Common;
 using Arakara.Components;
+using Microsoft.Xna.Framework;
 using Nez;
 using Nez.Sprites;
 using Nez.Textures;
@@ -15,6 +16,10 @@ namespace Arakara.Battle.Phases.DeckBuilder
     {
         private DeckBuilderActor _deckBuilderActor;
         public Selector CardSelector { get; set; }
+
+        private Vector2 _centerPos;
+        private Vector2 _leftPos;
+        private Vector2 _rightPos;
 
         public SelectBuyableCardPhase(DeckBuilderActor actor) 
             : base(actor)
@@ -32,6 +37,11 @@ namespace Arakara.Battle.Phases.DeckBuilder
 
         protected override void initialize()
         {
+            var backdrop = Actor.entity.scene.findEntity("background");
+            _leftPos = new Vector2(backdrop.transform.position.X + (175 * 0), backdrop.transform.position.Y + 50);
+            _centerPos = new Vector2(backdrop.transform.position.X + (175 * 1), backdrop.transform.position.Y + 50);
+            _rightPos = new Vector2(backdrop.transform.position.X + (175 * 2), backdrop.transform.position.Y + 50);
+
             CardSelector.enabled = true;
             _deckBuilderActor.SelectedBuyableCard = null;
             CardSelector.AddEntities(_deckBuilderActor.BuyableHandEntities);
@@ -48,7 +58,7 @@ namespace Arakara.Battle.Phases.DeckBuilder
 
         protected override void update()
         {
-            if (_deckBuilderActor.SelectedBuyableCard != null)
+            if (_deckBuilderActor.SelectedBuyableCard != null || VirtualButtons.BackInput.isPressed)
             {
                 IsFinished = true;
             }
@@ -65,30 +75,63 @@ namespace Arakara.Battle.Phases.DeckBuilder
         {
             var card = entity.getComponent<Card>();
             var sprite = entity.getComponent<Sprite>();
-            if (_deckBuilderActor.BuyPoints < card.Cost)
-            {
-                CardSelector.MoveNext();
-            }
-            else
+            var index = _deckBuilderActor.BuyableHandEntities.IndexOf(entity);
+            if (_deckBuilderActor.BuyPoints >= card.Cost)
             {
                 sprite.subtexture = new Subtexture(_deckBuilderActor.HoverCardTexture);
             }
+
+            _deckBuilderActor.BuyableHandEntities.ForEach(x => x.enabled = false);
+
+            Entity left = null;
+            Entity right = null;
+            if (index == 0)
+            {
+                left = _deckBuilderActor.BuyableHandEntities.Last();
+                right = _deckBuilderActor.BuyableHandEntities[index + 1];
+            }
+            else if(index == _deckBuilderActor.BuyableHandEntities.Count() - 1)
+            {
+                left = _deckBuilderActor.BuyableHandEntities[index - 1];
+                right = _deckBuilderActor.BuyableHandEntities.First();
+            }
+            else
+            {
+                left = _deckBuilderActor.BuyableHandEntities[index - 1];
+                right = _deckBuilderActor.BuyableHandEntities[index + 1];
+            }
+
+            left.enabled = true;
+            left.transform.position = _leftPos;
+
+            right.enabled = true;
+            right.transform.position = _rightPos;
+
+            entity.enabled = true;
+            entity.transform.position = _centerPos;
         }
 
         private void OnCardBlur(Entity entity)
         {
-            entity.getComponent<Sprite>().subtexture = new Subtexture(_deckBuilderActor.DefaultCardTexture);
+            var card = entity.getComponent<Card>();
+            var sprite = entity.getComponent<Sprite>();
+            if (_deckBuilderActor.BuyPoints >= card.Cost)
+            {
+                sprite.subtexture = new Subtexture(_deckBuilderActor.DefaultCardTexture);
+            }
         }
 
         private void OnCardSelect(Entity entity)
         {
             var card = entity.getComponent<Card>();
-            BuyCard(card);
+            if (_deckBuilderActor.BuyPoints >= card.Cost)
+            {
+                BuyCard(card);
+            }
         }
 
         private void BuyCard(Card card)
         {
-            _deckBuilderActor.BuyableHand.Remove(card);
             _deckBuilderActor.DiscardPile.Add(card);
             _deckBuilderActor.SelectedBuyableCard = card;
         }

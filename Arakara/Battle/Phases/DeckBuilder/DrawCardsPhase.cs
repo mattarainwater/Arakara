@@ -30,9 +30,11 @@ namespace Arakara.Battle.Phases.DeckBuilder
 
         protected override void initialize()
         {
+            var cursed = _deckBuilderActor.Statuses.Contains("Curse");
+            var handSize = cursed ? _handSize - 1 : _handSize;
             _drawing = true;
-            DrawCards();
-            Core.schedule(_handSize * .25f, t => {
+            DrawCards(handSize);
+            Core.schedule(handSize * .25f, t => {
                 _drawing = false;
             });
         }
@@ -45,9 +47,9 @@ namespace Arakara.Battle.Phases.DeckBuilder
             }
         }
 
-        private void DrawCards()
+        private void DrawCards(int handSize)
         {
-            for (var i = 0; i < _handSize; i++)
+            for (var i = 0; i < handSize; i++)
             {
                 var index = i;
                 Core.schedule(i * .25f, t => DrawCard(index));
@@ -68,7 +70,7 @@ namespace Arakara.Battle.Phases.DeckBuilder
         private void CreateCardEntity(int index, Card card)
         {
             var cardPos = new Vector2(Actor.transform.position.X + (125 * (index - 1)), Actor.transform.position.Y - 175);
-            var cardEntity = _factory.GetCardEntity(card, cardPos, _deckBuilderActor.DefaultCardTexture);
+            var cardEntity = _factory.GetCardEntity(card, cardPos, _deckBuilderActor.DefaultCardTexture, 10);
             _deckBuilderActor.HandEntities.Add(cardEntity);
         }
 

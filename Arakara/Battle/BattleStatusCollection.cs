@@ -19,6 +19,7 @@ namespace Arakara.Battle
 
         public void Add(BattleStatus status, int duration)
         {
+            status.CurrentDuration = 0;
             _statuses.Add(status);
         }
 

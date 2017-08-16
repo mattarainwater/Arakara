@@ -26,10 +26,8 @@ namespace Arakara.Battle.Phases.DeckBuilder
             _deckBuilderActor.Hand = new List<Card>();
             _deckBuilderActor.SelectedCard = null;
 
-            _deckBuilderActor.BuyableDiscardPile.AddRange(_deckBuilderActor.BuyableHand);
             _deckBuilderActor.BuyableHandEntities.ForEach(entity => entity.destroy());
             _deckBuilderActor.BuyableHandEntities = new List<Entity>();
-            _deckBuilderActor.BuyableHand = new List<Card>();
             _deckBuilderActor.SelectedBuyableCard = null;
 
             _deckBuilderActor.SelectedTargets = null;

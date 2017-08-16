@@ -37,25 +37,13 @@ namespace Arakara.Scenes
             addRenderer(new RenderLayerExcludeRenderer(0));
             setDesignResolution(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT, SceneResolutionPolicy.NoBorderPixelPerfect);
             clearColor = Color.WhiteSmoke;
-
-            var battleEntity = createEntity("battle");
-            _battle = new BattleContainer(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT);
-            battleEntity.addComponent(_battle);
-
-            //var tiledEntity = createEntity("tiled-map-entity");
-            //var tiledmap = contentManager.Load<TiledMap>("background");
-            //var tiledMapComponent = tiledEntity.addComponent(new TiledMapComponent(tiledmap));
-            //tiledMapComponent.renderLayer = 10;
-            //tiledEntity.transform.scale = new Vector2(.5f, .5f);
         }
 
         public override void onStart()
         {
-            //using (StreamReader sr = new StreamReader("Content/prisca.json"))
-            //{
-            //    var contents = sr.ReadToEnd();
-            //    var mcTest = JsonConvert.DeserializeObject<DeckBuilderActor>(contents, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
-            //}
+            var battleEntity = createEntity("battle");
+            _battle = new BattleContainer(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT);
+            battleEntity.addComponent(_battle);
 
             _battle.AddBattleEntity(MakeMC(), this);
 
@@ -130,7 +118,7 @@ namespace Arakara.Scenes
                         Name = "Guard",
                         Effect = new ApplyStatusEffect(new DefenseUpStatus(3, 2)),
                         Targeting = Targeting.Self,
-                        Animation = Animations.Support1,
+                        Animation = Animations.Hit,
                     },
                     BuyValue = 1,
                     Cost = 0
@@ -142,7 +130,7 @@ namespace Arakara.Scenes
                         Name = "Guard",
                         Effect = new ApplyStatusEffect(new DefenseUpStatus(3, 2)),
                         Targeting = Targeting.Self,
-                        Animation = Animations.Support1,
+                        Animation = Animations.Hit,
                     },
                     BuyValue = 1,
                     Cost = 0
@@ -161,64 +149,16 @@ namespace Arakara.Scenes
                         Animation = Animations.Attack1,
                     },
                     BuyValue = 2,
-                    Cost = 4
+                    Cost = 3
                 },
                 new Card
                 {
                     Action = new BattleAction
                     {
-                        Name = "Heavy Slash",
-                        Effect = new DamageEffect(3, 5),
+                        Name = "Poison",
+                        Effect = new ApplyStatusEffect(new PoisonStatus(3, 2, 4)),
                         Targeting = Targeting.Enemies,
                         Animation = Animations.Attack1,
-                    },
-                    BuyValue = 2,
-                    Cost = 4
-                },
-                new Card
-                {
-                    Action = new BattleAction
-                    {
-                        Name = "Heavy Slash",
-                        Effect = new DamageEffect(3, 5),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1,
-                    },
-                    BuyValue = 2,
-                    Cost = 4
-                },
-                new Card
-                {
-                    Action = new BattleAction
-                    {
-                        Name = "Heavy Slash",
-                        Effect = new DamageEffect(3, 5),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1,
-                    },
-                    BuyValue = 2,
-                    Cost = 4
-                },
-                new Card
-                {
-                    Action = new BattleAction
-                    {
-                        Name = "Potion",
-                        Effect = new HealEffect(5),
-                        Targeting = Targeting.Self,
-                        Animation = Animations.Support1,
-                    },
-                    BuyValue = 3,
-                    Cost = 4
-                },
-                new Card
-                {
-                    Action = new BattleAction
-                    {
-                        Name = "Potion",
-                        Effect = new HealEffect(5),
-                        Targeting = Targeting.Self,
-                        Animation = Animations.Support1,
                     },
                     BuyValue = 3,
                     Cost = 4
@@ -251,56 +191,19 @@ namespace Arakara.Scenes
                 {
                     Action = new BattleAction
                     {
-                        Name = "Assassinate",
-                        Effect = new DamageEffect(5, 7),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1,
+                        Name = "Prepare",
+                        Effect = new TrashEffect(2, false),
+                        Targeting = Targeting.Self,
+                        Animation = Animations.Hit,
                     },
-                    BuyValue = 2,
-                    Cost = 6
-                },
-                new Card
-                {
-                    Action = new BattleAction
-                    {
-                        Name = "Posion",
-                        Effect = new ApplyStatusEffect(new PoisonStatus(3, 2, 4)),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1,
-                    },
-                    BuyValue = 3,
-                    Cost = 4
-                },
-                new Card
-                {
-                    Action = new BattleAction
-                    {
-                        Name = "Posion",
-                        Effect = new ApplyStatusEffect(new PoisonStatus(3, 2, 4)),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1,
-                    },
-                    BuyValue = 3,
-                    Cost = 4
-                },
-                new Card
-                {
-                    Action = new BattleAction
-                    {
-                        Name = "Posion",
-                        Effect = new ApplyStatusEffect(new PoisonStatus(3, 2, 4)),
-                        Targeting = Targeting.Enemies,
-                        Animation = Animations.Attack1,
-                    },
-                    BuyValue = 3,
-                    Cost = 4
+                    BuyValue = 4,
+                    Cost = 3
                 },
             }
             ,0, 0, 200f, Animations.Idle);
 
             mainCharacterEntity.addComponent(mainCharacterActor);
 
-            mainCharacterActor.AddPhase(typeof(ApplyStatusEffectsPhase));
             mainCharacterActor.AddPhase(typeof(DrawCardsPhase));
             mainCharacterActor.AddPhase(typeof(SelectCardPhase));
             mainCharacterActor.AddPhase(typeof(Battle.Phases.Common.SelectTargetPhase));
@@ -310,6 +213,7 @@ namespace Arakara.Scenes
             mainCharacterActor.AddPhase(typeof(DrawBuyableCardsPhase));
             mainCharacterActor.AddPhase(typeof(SelectBuyableCardPhase));
             mainCharacterActor.AddPhase(typeof(Battle.Phases.DeckBuilder.CleanUpPhase));
+            mainCharacterActor.AddPhase(typeof(ApplyStatusEffectsPhase));
 
             var texture = contentManager.Load<Texture2D>("prisca_big");
             var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
@@ -348,9 +252,18 @@ namespace Arakara.Scenes
                 subtextures[7],
                 subtextures[0]
             };
+            var woundedAnimationFrames = new List<Subtexture>
+            {
+                subtextures[8],
+                subtextures[8],
+                subtextures[8],
+                subtextures[8],
+                subtextures[8]
+            };
             sprite.addAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames) { loop = false, fps = 30 }, Vector2.Zero);
             sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true }, Vector2.Zero);
             sprite.addAnimation(Animations.Support1, new SpriteAnimation(potionAnimationFrames) { loop = false }, Vector2.Zero);
+            sprite.addAnimation(Animations.Hit, new SpriteAnimation(woundedAnimationFrames) { loop = false }, Vector2.Zero);
             sprite.flipX = true;
             sprite.setOrigin(Vector2.Zero);
             sprite.renderLayer = 1000;
@@ -393,30 +306,23 @@ namespace Arakara.Scenes
                     new BattleAction
                     {
                         Animation = Animations.Attack1,
-                        Effect = new DamageEffect(1,  3),
+                        Effect = new DamageEffect(2,  4),
                         Name = "Stab",
                         Targeting = Targeting.Enemies
                     },
-                    new BattleAction
-                    {
-                        Animation = Animations.Attack1,
-                        Effect = new DamageEffect(3, 5),
-                        Name = "Super Stab",
-                        Targeting = Targeting.Enemies
-                    }
                 },
                 new RandomAIDecider(), 0f, 0f, 100f, Animations.Idle
             );
 
             enemyEntity.addComponent(aIActor);
 
-            aIActor.AddPhase(typeof(ApplyStatusEffectsPhase));
             aIActor.AddPhase(typeof(SelectActionPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.SelectTargetPhase));
             aIActor.AddPhase(typeof(AnimationPhase));
             aIActor.AddPhase(typeof(ApplyEffectsPhase));
             aIActor.AddPhase(typeof(WaitPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.CleanUpPhase));
+            aIActor.AddPhase(typeof(ApplyStatusEffectsPhase));
 
             return enemyEntity;
         }
@@ -440,25 +346,39 @@ namespace Arakara.Scenes
             };
             var idleAnimationFrames = new List<Subtexture>
             {
+                subtextures[0],
+                subtextures[3],
+                subtextures[3],
+                subtextures[4],
+                subtextures[4],
+                subtextures[3],
+                subtextures[3],
                 subtextures[0]
             };
             sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
-            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = false }, Vector2.Zero);
+            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true }, Vector2.Zero);
             sprite.setOrigin(Vector2.Zero);
             sprite.renderLayer = 1000;
 
-            var aIActor = new AIActor("Necromancer", 15, new Faction
+            var aIActor = new AIActor("Warlock", 10, new Faction
             {
                 FactionName = "Enemies",
                 Id = 2
             },
                 new List<BattleAction>
                 {
+                    //new BattleAction
+                    //{
+                    //    Animation = Animations.Attack1,
+                    //    Effect = new DamageEffect(1, 3),
+                    //    Name = "Necro Bolt",
+                    //    Targeting = Targeting.Enemies
+                    //},
                     new BattleAction
                     {
                         Animation = Animations.Attack1,
-                        Effect = new DamageEffect(2, 4),
-                        Name = "Necro Bolt",
+                        Effect = new ApplyStatusEffect(new CurseStatus(1)),
+                        Name = "Curse",
                         Targeting = Targeting.Enemies
                     },
                 },
@@ -467,13 +387,13 @@ namespace Arakara.Scenes
 
             enemyEntity.addComponent(aIActor);
 
-            aIActor.AddPhase(typeof(ApplyStatusEffectsPhase));
             aIActor.AddPhase(typeof(SelectActionPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.SelectTargetPhase));
             aIActor.AddPhase(typeof(AnimationPhase));
             aIActor.AddPhase(typeof(ApplyEffectsPhase));
             aIActor.AddPhase(typeof(WaitPhase));
             aIActor.AddPhase(typeof(Battle.Phases.AI.CleanUpPhase));
+            aIActor.AddPhase(typeof(ApplyStatusEffectsPhase));
 
             return enemyEntity;
         }
