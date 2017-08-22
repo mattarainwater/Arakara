@@ -66,7 +66,9 @@
     <Compile Include="Battle\Animations.cs" />
     <Compile Include="Battle\Events\BattleEventEffectState.cs" />
     <Compile Include="Battle\Events\Effects\KillEffect.cs" />
+    <Compile Include="Battle\Events\Effects\SceneTransitionEffect.cs" />
     <Compile Include="Battle\Events\Triggers\OnDeathTrigger.cs" />
+    <Compile Include="Battle\Events\Triggers\OnFactionWinTrigger.cs" />
     <Compile Include="Battle\Phases\AI\CleanUpPhase.cs" />
     <Compile Include="Battle\Phases\AI\SelectActionPhase.cs" />
     <Compile Include="Battle\Phases\AI\SelectTargetPhase.cs" />

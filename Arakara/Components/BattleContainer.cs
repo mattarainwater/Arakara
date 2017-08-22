@@ -47,30 +47,12 @@ namespace Arakara.Components
             {
                 Core.startSceneTransition(new FadeTransition(LoadStartScene) { fadeInDuration = 0f, fadeOutDuration = 0f, delayBeforeFadeInDuration = 0f, fadeToColor = Color.WhiteSmoke });
             }
-            if (Input.isKeyReleased(Microsoft.Xna.Framework.Input.Keys.T))
-            {
-                Core.startSceneTransition(new FadeTransition(LoadWinScreen) { fadeInDuration = 0f, fadeOutDuration = 0f, delayBeforeFadeInDuration = 0f, fadeToColor = Color.WhiteSmoke });
-            }
-            if (Input.isKeyReleased(Microsoft.Xna.Framework.Input.Keys.Y))
-            {
-                Core.startSceneTransition(new FadeTransition(LoadLoseScreen) { fadeInDuration = 0f, fadeOutDuration = 0f, delayBeforeFadeInDuration = 0f, fadeToColor = Color.WhiteSmoke });
-            }
             Controller.Update();
         }
 
         private Scene LoadStartScene()
         {
             return new MainGameScene();
-        }
-
-        private Scene LoadWinScreen()
-        {
-            return new MessageScene("You Win!");
-        }
-
-        private Scene LoadLoseScreen()
-        {
-            return new MessageScene("You Lose!");
         }
 
         public void AddBattleEntity(Entity entity, Scene scene)

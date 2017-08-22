@@ -2,6 +2,6 @@
 {
     public abstract class BattleEventTrigger
     {
-        public abstract bool IsTriggered();
+        public abstract bool IsTriggered(BattleController controller);
     }
 }

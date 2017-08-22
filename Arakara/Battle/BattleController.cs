@@ -100,7 +100,7 @@ namespace Arakara.Battle
 
         private BattleEvent GetTriggeredEvent()
         {
-            return Events.FirstOrDefault(x => x.Trigger.IsTriggered());
+            return Events.FirstOrDefault(x => x.Trigger.IsTriggered(this));
         }
 
         private List<BattleActor> GetTargetableActors(BattleActor targerter, Targeting targeting)

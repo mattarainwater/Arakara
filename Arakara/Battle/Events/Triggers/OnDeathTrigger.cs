@@ -12,7 +12,7 @@ namespace Arakara.Battle.Events.Triggers
             Target = target;
         }
 
-        public override bool IsTriggered()
+        public override bool IsTriggered(BattleController controller)
         {
             return Target.CurrentHP <= 0;
         }

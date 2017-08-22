@@ -1,6 +1,9 @@
 ﻿using Arakara.Battle;
 using Arakara.Battle.AI;
 using Arakara.Battle.Effects;
+using Arakara.Battle.Events;
+using Arakara.Battle.Events.Effects;
+using Arakara.Battle.Events.Triggers;
 using Arakara.Battle.Phases.AI;
 using Arakara.Battle.Phases.Common;
 using Arakara.Battle.Phases.DeckBuilder;
@@ -51,6 +54,24 @@ namespace Arakara.Scenes
             _battle.AddBattleEntity(MakeNecromancer(), this);
 
             _battle.ToggleBattleActive();
+
+            var pcWin = new BattleEvent(new OnFactionWinTrigger(1));
+            pcWin.AddEffect(new SceneTransitionEffect(1, LoadWinScreen));
+            _battle.Controller.AddEvent(pcWin);
+
+            var enemiesWin = new BattleEvent(new OnFactionWinTrigger(2));
+            enemiesWin.AddEffect(new SceneTransitionEffect(1, LoadLoseScreen));
+            _battle.Controller.AddEvent(enemiesWin);
+        }
+
+        private Scene LoadWinScreen()
+        {
+            return new MessageScene("You Win!");
+        }
+
+        private Scene LoadLoseScreen()
+        {
+            return new MessageScene("You Lose!");
         }
 
         private Entity MakeMC()
@@ -306,7 +327,7 @@ namespace Arakara.Scenes
                     new BattleAction
                     {
                         Animation = Animations.Attack1,
-                        Effect = new DamageEffect(2,  4),
+                        Effect = new DamageEffect(2, 4),
                         Name = "Stab",
                         Targeting = Targeting.Enemies
                     },

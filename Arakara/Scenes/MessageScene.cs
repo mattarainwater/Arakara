@@ -22,15 +22,15 @@ namespace Arakara.Scenes
         {
             addRenderer(new RenderLayerExcludeRenderer(0));
             setDesignResolution(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT, SceneResolutionPolicy.NoBorderPixelPerfect);
-            clearColor = Color.White;
+            clearColor = Color.WhiteSmoke;
         }
 
         public override void onStart()
         {
             var messageEntity = createEntity("message");
-            var textComponent = new Text(CommonResources.DefaultBitmapFont, Message, new Vector2(50, 50), Color.Black);
+            var textComponent = new Text(CommonResources.DefaultBitmapFont, Message, Vector2.Zero, Color.Black);
             messageEntity.addComponent(textComponent);
-            messageEntity.transform.position = new Vector2(50, 50);
+            messageEntity.transform.position = new Vector2(150, 150);
             messageEntity.transform.scale = new Vector2(2, 2);
         }
     }
