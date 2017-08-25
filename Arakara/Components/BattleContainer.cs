@@ -52,7 +52,7 @@ namespace Arakara.Components
 
         private Scene LoadStartScene()
         {
-            return new MainGameScene();
+            return new TestGameScene();
         }
 
         public void AddBattleEntity(Entity entity, Scene scene)

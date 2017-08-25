@@ -109,6 +109,8 @@
     <Compile Include="Battle\BattleController.cs" />
     <Compile Include="Battle\Events\BattleEvent.cs" />
     <Compile Include="Components\DeckBuilderActor.cs" />
+    <Compile Include="Components\DialogueActor.cs" />
+    <Compile Include="Components\DialogueContainer.cs" />
     <Compile Include="Components\EffectDisplay.cs" />
     <Compile Include="Components\EffectDisplayContainer.cs" />
     <Compile Include="Components\HealthBar.cs" />
@@ -117,13 +119,17 @@
     <Compile Include="Components\TurnMarkerPolygon.cs" />
     <Compile Include="Components\TargetPolygon.cs" />
     <Compile Include="Components\UpdatableText.cs" />
+    <Compile Include="Dialogue\DialogueEntry.cs" />
+    <Compile Include="Dialogue\DialogueController.cs" />
+    <Compile Include="Dialogue\DialoguePortrait.cs" />
     <Compile Include="Factories\Entities\CardEntityFactory.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scenes\MainGameScene.cs" />
+    <Compile Include="Scenes\TestGameScene.cs" />
     <Compile Include="Scenes\MessageScene.cs" />
     <Compile Include="Scenes\StartMenuScreen.cs" />
+    <Compile Include="Scenes\TestDialogueScene.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -168,6 +174,7 @@
     <None Include="Content\card_light.png" />
     <Content Include="Content\DarkHouseTiles.png" />
     <None Include="Content\default_0.png" />
+    <Content Include="Content\prisca-portrait.png" />
     <Content Include="External DLLs\Ionic.ZLib.dll" />
     <Content Include="External DLLs\Newtonsoft.Json.dll" />
     <Content Include="External DLLs\Nez.dll" />

@@ -447,14 +447,34 @@ namespace Nez
 			}
 
 			return false;
-		}
+        }
 
 
-		/// <summary>
-		/// removes a Component from the components list
-		/// </summary>
-		/// <param name="component">The Component to remove</param>
-		public void removeComponent( Component component )
+        /// <summary>
+        /// removes all Components of type T from the components list
+        /// </summary>
+        /// <param name="component">The Components to remove</param>
+        public bool removeComponents<T>() where T : Component
+        {
+            var comps = getComponents<T>();
+            if (comps != null && comps.Any())
+            {
+                foreach(var comp in comps)
+                {
+                    removeComponent(comp);
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// removes a Component from the components list
+        /// </summary>
+        /// <param name="component">The Component to remove</param>
+        public void removeComponent( Component component )
 		{
 			components.remove( component );
 		}

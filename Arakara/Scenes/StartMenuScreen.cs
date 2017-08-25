@@ -43,7 +43,7 @@ namespace Arakara.Scenes
 
         private Scene LoadStartScene()
         {
-            return new MainGameScene();
+            return new TestGameScene();
         }
     }
 }

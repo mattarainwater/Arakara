@@ -26,11 +26,11 @@ using System.Threading.Tasks;
 
 namespace Arakara.Scenes
 {
-    public class MainGameScene : Scene
+    public class TestGameScene : Scene
     {
         private BattleContainer _battle;
 
-        public MainGameScene()
+        public TestGameScene()
             : base()
         {
         }

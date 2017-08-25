@@ -21,7 +21,7 @@ namespace Arakara
         {
             base.Initialize();
             CommonResources.DefaultBitmapFont = Graphics.instance.bitmapFont;
-            scene = new MainGameScene();
+            scene = new TestDialogueScene();
             VirtualButtons.SetupInput();
         }
     }
