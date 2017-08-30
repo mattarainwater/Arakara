@@ -12,7 +12,7 @@ namespace Arakara
     public class GameMain : Core
     {
         public GameMain()
-            : base(width: DimensionConstants.SCREEN_WIDTH_ONE_AND_A_HALF, height: DimensionConstants.SCREEN_HEIGHT_ONE_AND_A_HALF, isFullScreen: false, windowTitle: "Arakara")
+            : base(width: DimensionConstants.SCREEN_WIDTH, height: DimensionConstants.SCREEN_HEIGHT, isFullScreen: DimensionConstants.IS_FULL_SCREEN, windowTitle: "Arakara")
         {
             Core.defaultSamplerState = SamplerState.PointClamp;
         }

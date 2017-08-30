@@ -12,29 +12,20 @@ using System.Threading.Tasks;
 
 namespace Arakara.Scenes
 {
-    public class TestDialogueScene : Scene
+    public class TestDialogueScene : BaseScene
     {
         private DialogueContainer _dialogue;
-
-        public TestDialogueScene()
-            : base()
-        {
-        }
-
-        public override void initialize()
-        {
-            addRenderer(new RenderLayerExcludeRenderer(0));
-            setDesignResolution(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT, SceneResolutionPolicy.NoBorderPixelPerfect);
-            clearColor = Color.WhiteSmoke;
-        }
 
         public override void onStart()
         {
             var dialogueActorEntity = createEntity("dialogueActor");
-            var dialogueActor = dialogueActorEntity.addComponent(new DialogueActor());
+            var textBoxTexture = contentManager.Load<Texture2D>("textbox");
+            var nameBoxTexture = contentManager.Load<Texture2D>("namebox");
+            var markerTexture = contentManager.Load<Texture2D>("marker");
+            var dialogueActor = dialogueActorEntity.addComponent(new DialogueActor(textBoxTexture, nameBoxTexture, markerTexture));
 
             var dialogueEntity = createEntity("dialogue");
-            _dialogue = new DialogueContainer(dialogueActor, OnComplete, DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT);
+            _dialogue = new DialogueContainer(dialogueActor, OnComplete, DimensionConstants.DESIGN_WIDTH, DimensionConstants.DESIGN_HEIGHT);
             dialogueEntity.addComponent(_dialogue);
 
             var texture = contentManager.Load<Texture2D>("prisca-portrait");
@@ -42,7 +33,7 @@ namespace Arakara.Scenes
             leftPortrait.IsActive = true;
             var rightPortrait = new DialoguePortrait(texture);
 
-            _dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test!This is a test!This is a test!This is a test!This is a test!This is a test!", "Prisca", leftPortrait, rightPortrait));
+            _dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test! This is a test! This is a test! This isss a test! This is a test! This is a test!", "Prisca", leftPortrait, rightPortrait));
             _dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test 22!", "Prisca", rightPortrait, leftPortrait));
             _dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test, a very good one!", "Prisca", leftPortrait, rightPortrait));
 

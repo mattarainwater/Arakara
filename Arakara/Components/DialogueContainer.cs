@@ -15,6 +15,7 @@ namespace Arakara.Components
         private int _screenWidth;
         private int _screenHeight;
         private int _marginLeftRight;
+        private int _marginUpDown;
         private int _entityYPos;
         private int _halfWayPoint;
         private int _spacing;
@@ -26,15 +27,16 @@ namespace Arakara.Components
             Controller = new DialogueController(dialogueActor, onComplete);
             _screenWidth = screenWidth;
             _screenHeight = screenHeight;
+            _marginLeftRight = _screenWidth / 20;
+            _marginUpDown = screenHeight / 20;
 
             _halfWayPoint = _screenWidth / 2;
-            _entityYPos = _screenHeight - (_screenHeight / 3);
-            _marginLeftRight = _screenWidth / 5;
+            _entityYPos = 230;
             _spacing = _screenWidth / 40;
 
-            dialogueActor.transform.position = new Vector2(_marginLeftRight, _entityYPos);
-            dialogueActor.LeftPortaitPosition = new Vector2(_marginLeftRight + 100, _entityYPos - 200);
-            dialogueActor.RightPortaitPosition = new Vector2(_screenWidth - _marginLeftRight - 100, _entityYPos - 200);
+            dialogueActor.transform.position = new Vector2(20, _entityYPos);
+            dialogueActor.LeftPortaitPosition = new Vector2(0, _entityYPos - DimensionConstants.PORTRAIT_HEIGHT - 10);
+            dialogueActor.RightPortaitPosition = new Vector2(_screenWidth - DimensionConstants.PORTRAIT_WIDTH, _entityYPos - DimensionConstants.PORTRAIT_HEIGHT - 10);
         }
 
         public void update()

@@ -4,20 +4,13 @@ using Nez.UI;
 
 namespace Arakara.Scenes
 {
-    public class StartMenuScreen : Scene
+    public class StartMenuScreen : BaseScene
     {
         private UICanvas _canvas;
         private Table _table;
 
-        public StartMenuScreen()
-            : base()
+        public override void onStart()
         {
-        }
-
-        public override void initialize()
-        {
-            addRenderer(new RenderLayerExcludeRenderer(0));
-
             _canvas = createEntity("ui").addComponent(new UICanvas());
             _canvas.isFullScreen = true;
 

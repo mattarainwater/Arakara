@@ -34,10 +34,10 @@ namespace Arakara.Components
 
             _halfWayPoint = _screenWidth / 2;
             _entityYPos = _screenHeight / 2;
-            _marginLeftRight = _screenWidth / 20;
+            _marginLeftRight = _screenWidth / 5;
             _spacing = _screenWidth / 40;
 
-            _allyFactionStartingX = _halfWayPoint - _marginLeftRight - DimensionConstants.CHARACTER_WIDTH;
+            _allyFactionStartingX = _halfWayPoint - _marginLeftRight;
             _enemyFactionStartingX = _halfWayPoint + _marginLeftRight;
         }
 

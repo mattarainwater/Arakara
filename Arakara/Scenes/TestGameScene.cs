@@ -26,26 +26,14 @@ using System.Threading.Tasks;
 
 namespace Arakara.Scenes
 {
-    public class TestGameScene : Scene
+    public class TestGameScene : BaseScene
     {
         private BattleContainer _battle;
-
-        public TestGameScene()
-            : base()
-        {
-        }
-
-        public override void initialize()
-        {
-            addRenderer(new RenderLayerExcludeRenderer(0));
-            setDesignResolution(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT, SceneResolutionPolicy.NoBorderPixelPerfect);
-            clearColor = Color.WhiteSmoke;
-        }
 
         public override void onStart()
         {
             var battleEntity = createEntity("battle");
-            _battle = new BattleContainer(DimensionConstants.SCREEN_WIDTH, DimensionConstants.SCREEN_HEIGHT);
+            _battle = new BattleContainer(DimensionConstants.DESIGN_WIDTH, DimensionConstants.DESIGN_HEIGHT);
             battleEntity.addComponent(_battle);
 
             _battle.AddBattleEntity(MakeMC(), this);
