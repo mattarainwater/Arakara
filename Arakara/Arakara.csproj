@@ -69,6 +69,8 @@
     <Compile Include="Battle\Events\Effects\SceneTransitionEffect.cs" />
     <Compile Include="Battle\Events\Triggers\OnDeathTrigger.cs" />
     <Compile Include="Battle\Events\Triggers\OnFactionWinTrigger.cs" />
+    <Compile Include="Battle\Phases\ActionProgammer\CleanUpPhase.cs" />
+    <Compile Include="Battle\Phases\ActionProgammer\SelectActionsPhase.cs" />
     <Compile Include="Battle\Phases\AI\CleanUpPhase.cs" />
     <Compile Include="Battle\Phases\AI\SelectActionPhase.cs" />
     <Compile Include="Battle\Phases\AI\SelectTargetPhase.cs" />
@@ -88,6 +90,7 @@
     <Compile Include="Battle\Statuses\CurseStatus.cs" />
     <Compile Include="Common\ObjectExtensions.cs" />
     <Compile Include="Common\VirtualButtons.cs" />
+    <Compile Include="Components\ActionProgrammerActor.cs" />
     <Compile Include="Components\Card.cs" />
     <Compile Include="Battle\Effects\DamageEffect.cs" />
     <Compile Include="Battle\Faction.cs" />
@@ -114,6 +117,7 @@
     <Compile Include="Components\EffectDisplay.cs" />
     <Compile Include="Components\EffectDisplayContainer.cs" />
     <Compile Include="Components\HealthBar.cs" />
+    <Compile Include="Components\ProgrammedAction.cs" />
     <Compile Include="Components\Selector.cs" />
     <Compile Include="Battle\TurnOrderDisplay.cs" />
     <Compile Include="Components\TurnMarkerPolygon.cs" />

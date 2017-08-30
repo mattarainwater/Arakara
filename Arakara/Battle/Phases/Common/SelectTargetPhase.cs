@@ -13,8 +13,9 @@ namespace Arakara.Battle.Phases.Common
     public class SelectTargetPhase : Phase
     {
         public Selector TargetSelector { get; set; }
+        public bool Undoable { get; set; }
 
-        public SelectTargetPhase(BattleActor actor) 
+        public SelectTargetPhase(BattleActor actor, bool undoable = true) 
             : base(actor)
         {
             TargetSelector = actor.entity.addComponent(new Selector(
@@ -25,6 +26,7 @@ namespace Arakara.Battle.Phases.Common
                 onBlur: OnTargetBlur,
                 onSelect: OnTargetSelect));
             TargetSelector.enabled = false;
+            Undoable = undoable;
         }
 
         protected override void initialize()
@@ -43,7 +45,7 @@ namespace Arakara.Battle.Phases.Common
             {
                 IsFinished = true;
             }
-            else if(VirtualButtons.BackInput.isPressed)
+            else if(VirtualButtons.BackInput.isPressed && Undoable)
             {
                 GoBack = true;
                 TargetSelector.Reset();
