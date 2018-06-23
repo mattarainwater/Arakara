@@ -107,7 +107,6 @@
     <Compile Include="Common\JSONReader.cs" />
     <Compile Include="Common\StringExtensions.cs" />
     <Compile Include="Components\AIActor.cs" />
-    <Compile Include="Components\BattleContainer.cs" />
     <Compile Include="Components\BattleActor.cs" />
     <Compile Include="Battle\BattleController.cs" />
     <Compile Include="Battle\Events\BattleEvent.cs" />
@@ -116,12 +115,11 @@
     <Compile Include="Components\DialogueContainer.cs" />
     <Compile Include="Components\EffectDisplay.cs" />
     <Compile Include="Components\EffectDisplayContainer.cs" />
-    <Compile Include="Components\HealthBar.cs" />
     <Compile Include="Components\ProgrammedAction.cs" />
+    <Compile Include="Components\RondelActor.cs" />
+    <Compile Include="Components\RondelSection.cs" />
     <Compile Include="Components\Selector.cs" />
     <Compile Include="Battle\TurnOrderDisplay.cs" />
-    <Compile Include="Components\TurnMarkerPolygon.cs" />
-    <Compile Include="Components\TargetPolygon.cs" />
     <Compile Include="Components\UpdatableText.cs" />
     <Compile Include="Dialogue\DialogueEntry.cs" />
     <Compile Include="Dialogue\DialogueController.cs" />
@@ -177,11 +175,16 @@
     <Content Include="Content\card.png" />
     <None Include="Content\card_dark.png" />
     <None Include="Content\card_light.png" />
+    <None Include="Content\card_small.png" />
     <Content Include="Content\DarkHouseTiles.png" />
     <None Include="Content\default_0.png" />
+    <Content Include="Content\farisa-2.0.png" />
+    <None Include="Content\icons.png" />
     <Content Include="Content\karlock_portrait.png" />
     <Content Include="Content\marker.png" />
     <Content Include="Content\namebox.png" />
+    <Content Include="Content\prisca-2.0.png" />
+    <Content Include="Content\prisca-4.0.png" />
     <Content Include="Content\prisca-portrait.png" />
     <Content Include="Content\textbox.png" />
     <Content Include="External DLLs\Ionic.ZLib.dll" />
@@ -214,6 +217,10 @@
     <ProjectReference Include="..\Nez\Nez-PCL\Nez.csproj">
       <Project>{60b7197d-d0d5-405c-90a2-a56903e9b039}</Project>
       <Name>Nez</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tenswee.Common\Tenswee.Common.csproj">
+      <Project>{03cb7548-583c-444f-8ea2-fcc080b317d1}</Project>
+      <Name>Tenswee.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nez", "Nez\Nez-PCL\Nez.csproj", "{60B7197D-D0D5-405C-90A2-A56903E9B039}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arakara", "Arakara\Arakara.csproj", "{0FC348A9-2787-4D3F-B86E-8C88DF1C3565}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenswee.Common", "Tenswee.Common\Tenswee.Common.csproj", "{03CB7548-583C-444F-8EA2-FCC080B317D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arakara.BattleEngine", "Arakara.BattleEngine\Arakara.BattleEngine.csproj", "{1376D10D-82F2-4A3C-8A49-073A7E739622}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,8 +34,27 @@ Global
 		{0FC348A9-2787-4D3F-B86E-8C88DF1C3565}.Release|Any CPU.ActiveCfg = Release|x86
 		{0FC348A9-2787-4D3F-B86E-8C88DF1C3565}.Release|x86.ActiveCfg = Release|x86
 		{0FC348A9-2787-4D3F-B86E-8C88DF1C3565}.Release|x86.Build.0 = Release|x86
+		{03CB7548-583C-444F-8EA2-FCC080B317D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03CB7548-583C-444F-8EA2-FCC080B317D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03CB7548-583C-444F-8EA2-FCC080B317D1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{03CB7548-583C-444F-8EA2-FCC080B317D1}.Debug|x86.Build.0 = Debug|Any CPU
+		{03CB7548-583C-444F-8EA2-FCC080B317D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03CB7548-583C-444F-8EA2-FCC080B317D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03CB7548-583C-444F-8EA2-FCC080B317D1}.Release|x86.ActiveCfg = Release|Any CPU
+		{03CB7548-583C-444F-8EA2-FCC080B317D1}.Release|x86.Build.0 = Release|Any CPU
+		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Debug|x86.Build.0 = Debug|Any CPU
+		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Release|x86.ActiveCfg = Release|Any CPU
+		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {13F67AB7-95C2-4B18-9508-0C7A4F05B0BB}
 	EndGlobalSection
 EndGlobal

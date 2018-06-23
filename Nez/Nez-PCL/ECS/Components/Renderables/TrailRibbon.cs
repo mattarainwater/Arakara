@@ -136,6 +136,9 @@ namespace Nez
 			_areVertsDirty = false;
 		}
 
+
+		#region Component/RenderableComponent/IUpdatable
+
 		public override void onEnabled()
 		{
 			base.onEnabled();
@@ -144,13 +147,21 @@ namespace Nez
 			initializeVertices();
 		}
 
+
 		public override void onAddedToEntity()
 		{
 			initializeVertices();
 
-			_basicEffect = entity.scene.contentManager.loadMonoGameEffect<BasicEffect>();
+			_basicEffect = entity.scene.content.loadMonoGameEffect<BasicEffect>();
 			_basicEffect.World = Matrix.Identity;
 			_basicEffect.VertexColorEnabled = true;
+		}
+
+
+		public override void onRemovedFromEntity()
+		{
+			entity.scene.content.unloadEffect( _basicEffect );
+			_basicEffect = null;
 		}
 
 
@@ -197,6 +208,8 @@ namespace Nez
 
 			Core.graphicsDevice.DrawUserPrimitives( PrimitiveType.TriangleStrip, _vertices, 0, _ribbonLength * 2 + 1 );
 		}
+
+		#endregion
 
 
 		class RibbonSegment

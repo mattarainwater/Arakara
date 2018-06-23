@@ -1,6 +1,5 @@
 ﻿using System;
 using Nez.Tiled;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
@@ -18,26 +17,22 @@ namespace Nez
 		/// </summary>
 		public int[] layerIndicesToRender;
 
-		public override float width
-		{
-			get { return tiledMap.width * tiledMap.tileWidth; }
-		}
-
-		public override float height
-		{
-			get { return tiledMap.height * tiledMap.tileHeight; }
-		}
+		public override float width { get { return tiledMap.width * tiledMap.tileWidth; } }
+		public override float height { get { return tiledMap.height * tiledMap.tileHeight; } }
 
 		public TiledTileLayer collisionLayer;
+
+		bool _shouldCreateColliders;
 		Collider[] _colliders;
 
 
-		public TiledMapComponent( TiledMap tiledmap, string collisionLayerName = null )
+		public TiledMapComponent( TiledMap tiledMap, string collisionLayerName = null, bool shouldCreateColliders = true )
 		{
-			this.tiledMap = tiledmap;
+			this.tiledMap = tiledMap;
+			_shouldCreateColliders = shouldCreateColliders;
 
 			if( collisionLayerName != null )
-				collisionLayer = tiledmap.getLayer<TiledTileLayer>( collisionLayerName );
+				collisionLayer = tiledMap.getLayer<TiledTileLayer>( collisionLayerName );
 		}
 
 
@@ -116,10 +111,14 @@ namespace Nez
 
 		#region Component overrides
 
-		public override void onEntityTransformChanged()
+		public override void onEntityTransformChanged( Transform.Component comp )
 		{
-			removeColliders();
-			addColliders();
+			// we only deal with positional changes here. TiledMaps cant be scaled.
+			if( _shouldCreateColliders && comp == Transform.Component.Position )
+			{
+				removeColliders();
+				addColliders();
+			}
 		}
 
 
@@ -177,18 +176,17 @@ namespace Nez
 
 		public void addColliders()
 		{
-			if( collisionLayer == null )
+			if( collisionLayer == null || !_shouldCreateColliders )
 				return;
 
 			// fetch the collision layer and its rects for collision
 			var collisionRects = collisionLayer.getCollisionRectangles();
-			var renderPosition = entity.transform.position + _localOffset;
 
 			// create colliders for the rects we received
 			_colliders = new Collider[collisionRects.Count];
 			for( var i = 0; i < collisionRects.Count; i++ )
 			{
-				var collider = new BoxCollider( collisionRects[i].X + renderPosition.X, collisionRects[i].Y + renderPosition.Y, collisionRects[i].Width, collisionRects[i].Height );
+				var collider = new BoxCollider( collisionRects[i].X + _localOffset.X, collisionRects[i].Y + _localOffset.Y, collisionRects[i].Width, collisionRects[i].Height );
 				collider.physicsLayer = physicsLayer;
 				collider.entity = entity;
 				_colliders[i] = collider;

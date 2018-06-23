@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Nez.Systems;
@@ -60,7 +60,14 @@ namespace Nez
 			/// <summary>
 			/// Pixel perfect version of FixedWidth. Scaling is limited to integer values.
 			/// </summary>
-			FixedWidthPixelPerfect
+			FixedWidthPixelPerfect,
+			/// <summary>
+			/// The application takes the width and height that best fits the design resolution with optional cropping inside of the "bleed area"
+			/// and possible letter/pillar boxing. Works just like ShowAll except with horizontal/vertical bleed (padding). Gives you an area much
+			/// like the old TitleSafeArea. Example: if design resolution is 1348x900 and bleed is 148x140 the safe area would be 1200x760 (design
+			/// resolution - bleed).
+			/// </summary>
+			BestFit
 		}
 
 
@@ -88,7 +95,7 @@ namespace Nez
 		/// Scene-specific ContentManager. Use it to load up any resources that are needed only by this scene. If you have global/multi-scene
 		/// resources you can use Core.contentManager to load them since Nez will not ever unload them.
 		/// </summary>
-		public readonly NezContentManager contentManager;
+		public readonly NezContentManager content;
 
 		/// <summary>
 		/// global toggle for PostProcessors
@@ -116,7 +123,7 @@ namespace Nez
 		/// <value>The size of the scene render texture.</value>
 		public Point sceneRenderTargetSize
 		{
-			get { return _sceneRenderTarget.Bounds.Size; }
+			get { return new Point( _sceneRenderTarget.Bounds.Width, _sceneRenderTarget.Bounds.Height ); }
 		}
 
 		/// <summary>
@@ -154,15 +161,23 @@ namespace Nez
 		}
 		IFinalRenderDelegate _finalRenderDelegate;
 
+
+		#region SceneResolutionPolicy private fields
+
 		/// <summary>
 		/// default resolution size used for all scenes
 		/// </summary>
-		static Point defaultDesignResolutionSize;
+		static Point _defaultDesignResolutionSize;
 
+		/// <summary>
+		/// default bleed size for <see cref="SceneResolutionPolicy.BestFit"/> resolution policy
+		/// </summary>
+		static Point _defaultDesignBleedSize;
+		
 		/// <summary>
 		/// default resolution policy used for all scenes
 		/// </summary>
-		static SceneResolutionPolicy defaultSceneResolutionPolicy = SceneResolutionPolicy.None;
+		static SceneResolutionPolicy _defaultSceneResolutionPolicy = SceneResolutionPolicy.None;
 
 		/// <summary>
 		/// resolution policy used by the scene
@@ -175,30 +190,43 @@ namespace Nez
 		Point _designResolutionSize;
 
 		/// <summary>
+		/// bleed size for <see cref="SceneResolutionPolicy.BestFit"/> resolution policy
+		/// </summary>
+		Point _designBleedSize;
+
+		/// <summary>
 		/// this gets setup based on the resolution policy and is used for the final blit of the RenderTarget
 		/// </summary>
 		Rectangle _finalRenderDestinationRect;
+
+		#endregion
+
 
 		RenderTarget2D _sceneRenderTarget;
 		RenderTarget2D _destinationRenderTarget;
 		Action<Texture2D> _screenshotRequestCallback;
 
-		List<Renderer> _renderers = new List<Renderer>();
-		readonly List<Renderer> _afterPostProcessorRenderers = new List<Renderer>();
-		internal readonly List<PostProcessor> _postProcessors = new List<PostProcessor>();
+		internal readonly FastList<SceneComponent> _sceneComponents = new FastList<SceneComponent>();
+		FastList<Renderer> _renderers = new FastList<Renderer>();
+		readonly FastList<Renderer> _afterPostProcessorRenderers = new FastList<Renderer>();
+		internal readonly FastList<PostProcessor> _postProcessors = new FastList<PostProcessor>();
 		bool _didSceneBegin;
 
 
 		/// <summary>
-		/// sets the default design size and resolution policy that new scenes will use
+		/// sets the default design size and resolution policy that new scenes will use. horizontal/verticalBleed are only relevant for BestFit.
 		/// </summary>
 		/// <param name="width">Width.</param>
 		/// <param name="height">Height.</param>
 		/// <param name="sceneResolutionPolicy">Scene resolution policy.</param>
-		public static void setDefaultDesignResolution( int width, int height, SceneResolutionPolicy sceneResolutionPolicy )
+		/// <param name="horizontalBleed">Horizontal bleed size. Used only if resolution policy is set to <see cref="SceneResolutionPolicy.BestFit"/>.</param>
+		/// <param name="verticalBleed">Vertical bleed size. Used only if resolution policy is set to <see cref="SceneResolutionPolicy.BestFit"/>.</param>
+		public static void setDefaultDesignResolution( int width, int height, SceneResolutionPolicy sceneResolutionPolicy, int horizontalBleed = 0, int verticalBleed = 0 )
 		{
-			defaultDesignResolutionSize = new Point( width, height );
-			defaultSceneResolutionPolicy = sceneResolutionPolicy;
+			_defaultDesignResolutionSize = new Point( width, height );
+			_defaultSceneResolutionPolicy = sceneResolutionPolicy;
+			if( _defaultSceneResolutionPolicy == SceneResolutionPolicy.BestFit )
+				_defaultDesignBleedSize = new Point( horizontalBleed, verticalBleed );
 		}
 
 
@@ -223,6 +251,7 @@ namespace Nez
 		/// helper that creates a scene of type T with the DefaultRenderer attached and ready for use
 		/// </summary>
 		/// <returns>The with default renderer.</returns>
+		[Obsolete( "use new Scene() instead" )]
 		public static T createWithDefaultRenderer<T>( Color? clearColor = null ) where T : Scene, new()
 		{
 			var scene = new T();
@@ -238,6 +267,7 @@ namespace Nez
 		/// helper that creates a scene with no Renderer
 		/// </summary>
 		/// <returns>The with default renderer.</returns>
+		[Obsolete( "use new Scene() instead" )]
 		public static Scene create( Color? clearColor = null )
 		{
 			var scene = new Scene();
@@ -253,6 +283,7 @@ namespace Nez
 		/// helper that creates a scene of type T with no Renderer
 		/// </summary>
 		/// <returns>The with default renderer.</returns>
+		[Obsolete( "use new Scene() instead" )]
 		public static T create<T>( Color? clearColor = null ) where T : Scene, new()
 		{
 			var scene = new T();
@@ -270,7 +301,7 @@ namespace Nez
 		{
 			entities = new EntityList( this );
 			renderableComponents = new RenderableComponentList();
-			contentManager = new NezContentManager();
+			content = new NezContentManager();
 
 			var cameraEntity = createEntity( "camera" );
 			camera = cameraEntity.addComponent( new Camera() );
@@ -279,8 +310,9 @@ namespace Nez
 				entityProcessors = new EntityProcessorList();
 
 			// setup our resolution policy. we'll commit it in begin
-			_resolutionPolicy = defaultSceneResolutionPolicy;
-			_designResolutionSize = defaultDesignResolutionSize;
+			_resolutionPolicy = _defaultSceneResolutionPolicy;
+			_designResolutionSize = _defaultDesignResolutionSize;
+			_designBleedSize = _defaultDesignBleedSize;
 
 			initialize();
 		}
@@ -312,7 +344,7 @@ namespace Nez
 
 		internal void begin()
 		{
-			Assert.isFalse( _renderers.Count == 0, "Scene has begun with no renderer. At least one renderer must be present before beginning a scene." );
+			Assert.isFalse( _renderers.length == 0, "Scene has begun with no renderer. At least one renderer must be present before beginning a scene." );
 			Physics.reset();
 
 			// prep our render textures
@@ -332,17 +364,23 @@ namespace Nez
 		{
 			_didSceneBegin = false;
 
-			for( var i = 0; i < _renderers.Count; i++ )
-				_renderers[i].unload();
+			// we kill Renderers and PostProcessors first since they rely on Entities
+			for( var i = 0; i < _renderers.length; i++ )
+				_renderers.buffer[i].unload();
 
-			for( var i = 0; i < _postProcessors.Count; i++ )
-				_postProcessors[i].unload();
+			for( var i = 0; i < _postProcessors.length; i++ )
+				_postProcessors.buffer[i].unload();
 
+			// now we can remove the Entities and finally the SceneComponents
 			Core.emitter.removeObserver( CoreEvents.GraphicsDeviceReset, onGraphicsDeviceReset );
 			entities.removeAllEntities();
 
+			for( var i = 0; i < _sceneComponents.length; i++ )
+				_sceneComponents.buffer[i].onRemovedFromScene();
+			_sceneComponents.clear();
+
 			camera = null;
-			contentManager.Dispose();
+			content.Dispose();
 			_sceneRenderTarget.Dispose();
 			Physics.clear();
 
@@ -356,7 +394,7 @@ namespace Nez
 		}
 
 
-		internal void update()
+		public virtual void update()
 		{
 			// we set the RenderTarget here so that the Viewport will match the RenderTarget properly
 			Core.graphicsDevice.setRenderTarget( _sceneRenderTarget );
@@ -364,22 +402,29 @@ namespace Nez
 			// update our lists in case they have any changes
 			entities.updateLists();
 
+			// update our SceneComponents
+			for( var i = _sceneComponents.length - 1; i >= 0; i-- )
+			{
+				if( _sceneComponents.buffer[i].enabled )
+					_sceneComponents.buffer[i].update();
+			}
+				
+			// update our EntityProcessors
 			if( entityProcessors != null )
 				entityProcessors.update();
 
-			for( var i = 0; i < entities.Count; i++ )
-			{
-				var entity = entities[i];
-				if( entity.enabled && ( entity.updateInterval == 1 || Time.frameCount % entity.updateInterval == 0 ) )
-					entity.update();
-			}
+			// update our Entities
+			entities.update();
+
+			if( entityProcessors != null )
+				entityProcessors.lateUpdate();
 
 			// we update our renderables after entity.update in case any new Renderables were added
 			renderableComponents.updateLists();
 		}
 
 
-		internal void preRender()
+		internal void render()
 		{
 			// Renderers should always have those that require a RenderTarget first. They clear themselves and set themselves as
 			// the current RenderTarget when they render. If the first Renderer wants the sceneRenderTarget we set and clear it now.
@@ -388,29 +433,26 @@ namespace Nez
 				Core.graphicsDevice.setRenderTarget( _sceneRenderTarget );
 				Core.graphicsDevice.Clear( clearColor );
 			}
-		}
 
 
-		internal void render()
-		{
 			var lastRendererHadRenderTarget = false;
-			for( var i = 0; i < _renderers.Count; i++ )
+			for( var i = 0; i < _renderers.length; i++ )
 			{
 				// MonoGame follows the XNA bullshit implementation so it will clear the entire buffer if we change the render target even if null.
 				// Because of that, we track when we are done with our RenderTargets and clear the scene at that time.
-				if( lastRendererHadRenderTarget && _renderers[i].wantsToRenderToSceneRenderTarget )
+				if( lastRendererHadRenderTarget && _renderers.buffer[i].wantsToRenderToSceneRenderTarget )
 				{
 					Core.graphicsDevice.setRenderTarget( _sceneRenderTarget );
 					Core.graphicsDevice.Clear( clearColor );
 
 					// force a Camera matrix update to account for the new Viewport size
-					if( _renderers[i].camera != null )
-						_renderers[i].camera.forceMatrixUpdate();
+					if( _renderers.buffer[i].camera != null )
+						_renderers.buffer[i].camera.forceMatrixUpdate();
 					camera.forceMatrixUpdate();
 				}
 
-				_renderers[i].render( this );
-				lastRendererHadRenderTarget = _renderers[i].renderTexture != null;
+				_renderers.buffer[i].render( this );
+				lastRendererHadRenderTarget = _renderers.buffer[i].renderTexture != null;
 			}
 		}
 
@@ -424,19 +466,19 @@ namespace Nez
 			var enabledCounter = 0;
 			if( enablePostProcessing )
 			{
-				for( var i = 0; i < _postProcessors.Count; i++ )
+				for( var i = 0; i < _postProcessors.length; i++ )
 				{
-					if( _postProcessors[i].enabled )
+					if( _postProcessors.buffer[i].enabled )
 					{
 						var isEven = Mathf.isEven( enabledCounter );
 						enabledCounter++;
-						_postProcessors[i].process( isEven ? _sceneRenderTarget : _destinationRenderTarget, isEven ? _destinationRenderTarget : _sceneRenderTarget );
+						_postProcessors.buffer[i].process( isEven ? _sceneRenderTarget : _destinationRenderTarget, isEven ? _destinationRenderTarget : _sceneRenderTarget );
 					}
 				}
 			}
 
 			// deal with our Renderers that want to render after PostProcessors if we have any
-			for( var i = 0; i < _afterPostProcessorRenderers.Count; i++ )
+			for( var i = 0; i < _afterPostProcessorRenderers.length; i++ )
 			{
 				if( i == 0 )
 				{
@@ -445,9 +487,9 @@ namespace Nez
 				}
 
 				// force a Camera matrix update to account for the new Viewport size
-				if( _afterPostProcessorRenderers[i].camera != null )
-					_afterPostProcessorRenderers[i].camera.forceMatrixUpdate();
-				_afterPostProcessorRenderers[i].render( this );
+				if( _afterPostProcessorRenderers.buffer[i].camera != null )
+					_afterPostProcessorRenderers.buffer[i].camera.forceMatrixUpdate();
+				_afterPostProcessorRenderers.buffer[i].render( this );
 			}
 
 			// if we have a screenshot request deal with it before the final render to the backbuffer
@@ -494,10 +536,14 @@ namespace Nez
 		/// <param name="width">Width.</param>
 		/// <param name="height">Height.</param>
 		/// <param name="sceneResolutionPolicy">Scene resolution policy.</param>
-		public void setDesignResolution( int width, int height, SceneResolutionPolicy sceneResolutionPolicy )
+		/// <param name="horizontalBleed">Horizontal bleed size. Used only if resolution policy is set to <see cref="SceneResolutionPolicy.BestFit"/>.</param>
+		/// <param name="verticalBleed">Horizontal bleed size. Used only if resolution policy is set to <see cref="SceneResolutionPolicy.BestFit"/>.</param>
+		public void setDesignResolution( int width, int height, SceneResolutionPolicy sceneResolutionPolicy, int horizontalBleed = 0, int verticalBleed = 0 )
 		{
 			_designResolutionSize = new Point( width, height );
 			_resolutionPolicy = sceneResolutionPolicy;
+			if( _resolutionPolicy == SceneResolutionPolicy.BestFit )
+				_designBleedSize = new Point( horizontalBleed, verticalBleed );
 			updateResolutionScaler();
 		}
 
@@ -505,7 +551,7 @@ namespace Nez
 		void updateResolutionScaler()
 		{
 			var designSize = _designResolutionSize;
-			var screenSize = new Point( Screen.backBufferWidth, Screen.backBufferHeight );
+			var screenSize = new Point( Screen.width, Screen.height );
 			var screenAspectRatio = (float)screenSize.X / (float)screenSize.Y;
 
 			var renderTargetWidth = screenSize.X;
@@ -636,6 +682,19 @@ namespace Nez
 					renderTargetHeight = (int)( designSize.Y * resolutionScaleY / pixelPerfectScale );
 
 					break;
+				case SceneResolutionPolicy.BestFit:
+					var safeScaleX = (float)screenSize.X / ( designSize.X - _designBleedSize.X );
+					var safeScaleY = (float)screenSize.Y / ( designSize.Y - _designBleedSize.Y );
+
+					var resolutionScale = MathHelper.Max( resolutionScaleX, resolutionScaleY );
+					var safeScale = MathHelper.Min( safeScaleX, safeScaleY );
+
+					resolutionScaleX = resolutionScaleY = MathHelper.Min( resolutionScale, safeScale );
+
+					renderTargetWidth = designSize.X;
+					renderTargetHeight = designSize.Y;
+
+					break;
 			}
 
 			// if we didnt already calculate a rect (None and all pixel perfect variants calculate it themselves) calculate it now
@@ -669,14 +728,14 @@ namespace Nez
 			}
 
 			// notify the Renderers, PostProcessors and FinalRenderDelegate of the change in render texture size
-			for( var i = 0; i < _renderers.Count; i++ )
-				_renderers[i].onSceneBackBufferSizeChanged( renderTargetWidth, renderTargetHeight );
+			for( var i = 0; i < _renderers.length; i++ )
+				_renderers.buffer[i].onSceneBackBufferSizeChanged( renderTargetWidth, renderTargetHeight );
 
-			for( var i = 0; i < _afterPostProcessorRenderers.Count; i++ )
-				_afterPostProcessorRenderers[i].onSceneBackBufferSizeChanged( renderTargetWidth, renderTargetHeight );
-			
-			for( var i = 0; i < _postProcessors.Count; i++ )
-				_postProcessors[i].onSceneBackBufferSizeChanged( renderTargetWidth, renderTargetHeight );
+			for( var i = 0; i < _afterPostProcessorRenderers.length; i++ )
+				_afterPostProcessorRenderers.buffer[i].onSceneBackBufferSizeChanged( renderTargetWidth, renderTargetHeight );
+
+			for( var i = 0; i < _postProcessors.length; i++ )
+				_postProcessors.buffer[i].onSceneBackBufferSizeChanged( renderTargetWidth, renderTargetHeight );
 
 			if( _finalRenderDelegate != null )
 				_finalRenderDelegate.onSceneBackBufferSizeChanged( renderTargetWidth, renderTargetHeight );
@@ -698,16 +757,86 @@ namespace Nez
 		{
 			_screenshotRequestCallback = callback;
 		}
-	
+
+		#endregion
+
+
+		#region SceneComponent Management
 
 		/// <summary>
-		/// Returns whether the timeSinceSceneLoad has passed the given time interval since the last frame. Ex: given 2.0f, this will return true once every 2 seconds
+		/// Adds and returns a SceneComponent to the components list
 		/// </summary>
-		/// <param name="interval">The time interval to check for</param>
-		/// <returns></returns>
-		public bool onInterval( float interval )
+		/// <returns>Scene.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public T addSceneComponent<T>() where T : SceneComponent, new()
 		{
-			return (int)( ( Time.timeSinceSceneLoad - Time.deltaTime ) / interval ) < (int)( Time.timeSinceSceneLoad / interval );
+			var component = new T();
+			component.scene = this;
+			component.onEnabled();
+			_sceneComponents.add( component );
+			_sceneComponents.sort();
+			return component;
+		}
+
+
+		/// <summary>
+		/// Gets the first SceneComponent of type T and returns it. If no component is found returns null.
+		/// </summary>
+		/// <returns>The component.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public T getSceneComponent<T>() where T : SceneComponent
+		{
+			for( var i = 0; i < _sceneComponents.length; i++ )
+			{
+				var component = _sceneComponents.buffer[i];
+				if( component is T )
+					return component as T;
+			}
+			return null;
+		}
+
+
+		/// <summary>
+		/// Gets the first SceneComponent of type T and returns it. If no SceneComponent is found the SceneComponent will be created.
+		/// </summary>
+		/// <returns>The component.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public T getOrCreateSceneComponent<T>() where T : SceneComponent, new()
+		{
+			var comp = getSceneComponent<T>();
+			if( comp == null )
+				comp = addSceneComponent<T>();
+
+			return comp;
+		}
+
+
+		/// <summary>
+		/// removes the first SceneComponent of type T from the components list
+		/// </summary>
+		/// <returns><c>true</c>, if component was removed, <c>false</c> otherwise.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public bool removeSceneComponent<T>() where T : SceneComponent
+		{
+			var comp = getSceneComponent<T>();
+			if( comp != null )
+			{
+				removeSceneComponent( comp );
+				return true;
+			}
+
+			return false;
+		}
+
+
+		/// <summary>
+		/// removes a SceneComponent from the SceneComponents list
+		/// </summary>
+		public void removeSceneComponent( SceneComponent component )
+		{
+			Assert.isTrue( _sceneComponents.contains( component ), "SceneComponent {0} is not in the SceneComponents list!", component );
+			_sceneComponents.remove( component );
+			component.onRemovedFromScene();
 		}
 
 		#endregion
@@ -724,19 +853,19 @@ namespace Nez
 		{
 			if( renderer.wantsToRenderAfterPostProcessors )
 			{
-				_afterPostProcessorRenderers.Add( renderer );
-				_afterPostProcessorRenderers.Sort();
+				_afterPostProcessorRenderers.add( renderer );
+				_afterPostProcessorRenderers.sort();
 			}
 			else
 			{
-				_renderers.Add( renderer );
-				_renderers.Sort();
+				_renderers.add( renderer );
+				_renderers.sort();
 			}
 
 			// if we already began let the PostProcessor know what size our RenderTarget is
 			if( _didSceneBegin )
 				renderer.onSceneBackBufferSizeChanged( _sceneRenderTarget.Width, _sceneRenderTarget.Height );
-			
+
 			return renderer;
 		}
 
@@ -749,16 +878,16 @@ namespace Nez
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
 		public T getRenderer<T>() where T : Renderer
 		{
-			for( var i = 0; i < _renderers.Count; i++ )
+			for( var i = 0; i < _renderers.length; i++ )
 			{
-				if( _renderers[i] is T )
+				if( _renderers.buffer[i] is T )
 					return _renderers[i] as T;
 			}
 
-			for( var i = 0; i < _afterPostProcessorRenderers.Count; i++ )
+			for( var i = 0; i < _afterPostProcessorRenderers.length; i++ )
 			{
-				if( _afterPostProcessorRenderers[i] is T )
-					return _afterPostProcessorRenderers[i] as T;
+				if( _afterPostProcessorRenderers.buffer[i] is T )
+					return _afterPostProcessorRenderers.buffer[i] as T;
 			}
 			return null;
 		}
@@ -771,9 +900,9 @@ namespace Nez
 		public void removeRenderer( Renderer renderer )
 		{
 			if( renderer.wantsToRenderAfterPostProcessors )
-				_afterPostProcessorRenderers.Remove( renderer );
+				_afterPostProcessorRenderers.remove( renderer );
 			else
-				_renderers.Remove( renderer );
+				_renderers.remove( renderer );
 		}
 
 
@@ -784,8 +913,8 @@ namespace Nez
 		/// <param name="postProcessor">Post processor.</param>
 		public T addPostProcessor<T>( T postProcessor ) where T : PostProcessor
 		{
-			_postProcessors.Add( postProcessor );
-			_postProcessors.Sort();
+			_postProcessors.add( postProcessor );
+			_postProcessors.sort();
 			postProcessor.scene = this;
 			postProcessor.onAddedToScene();
 
@@ -807,13 +936,30 @@ namespace Nez
 
 
 		/// <summary>
+		/// gets the first PostProcessor of Type T
+		/// </summary>
+		/// <returns>The post processor.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public T getPostProcessor<T>() where T : PostProcessor
+		{
+			for( var i = 0; i < _postProcessors.length; i++ )
+			{
+				if( _postProcessors.buffer[i] is T )
+					return _postProcessors[i] as T;
+			}
+
+			return null;
+		}
+
+
+		/// <summary>
 		/// removes a PostProcessor. Note that unload is not called when removing so if you no longer need the PostProcessor be sure to call
 		/// unload to free resources.
 		/// </summary>
 		/// <param name="step">Step.</param>
 		public void removePostProcessor( PostProcessor step )
 		{
-			_postProcessors.Remove( step );
+			_postProcessors.remove( step );
 		}
 
 		#endregion
@@ -855,6 +1001,7 @@ namespace Nez
 		{
 			Assert.isFalse( entities.contains( entity ), "You are attempting to add the same entity to a scene twice: {0}", entity );
 			entities.add( entity );
+			entity.scene = this;
 
 			for( var i = 0; i < entity.transform.childCount; i++ )
 				addEntity( entity.transform.getChild( i ).entity );
@@ -867,10 +1014,11 @@ namespace Nez
 		/// adds an Entity to the Scene's Entities list
 		/// </summary>
 		/// <param name="entity">The Entity to add</param>
-		public T addEntity<T>( T entity ) where T : Entity 
+		public T addEntity<T>( T entity ) where T : Entity
 		{
 			Assert.isFalse( entities.contains( entity ), "You are attempting to add the same entity to a scene twice: {0}", entity );
 			entities.add( entity );
+			entity.scene = this;
 			return entity;
 		}
 
@@ -880,7 +1028,7 @@ namespace Nez
 		/// </summary>
 		public void destroyAllEntities()
 		{
-			for( var i = 0; i < entities.Count; i++ )
+			for( var i = 0; i < entities.count; i++ )
 				entities[i].destroy();
 		}
 
@@ -919,24 +1067,24 @@ namespace Nez
 
 
 		/// <summary>
-		/// Returns the first enabled loaded object of Type T
+		/// returns the first enabled loaded component of Type T
 		/// </summary>
-		/// <returns>The object of type.</returns>
+		/// <returns>The component of type.</returns>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
-		public T findObjectOfType<T>() where T : Component
+		public T findComponentOfType<T>() where T : Component
 		{
-			return entities.findObjectOfType<T>();
+			return entities.findComponentOfType<T>();
 		}
 
 
 		/// <summary>
-		/// Returns a list of all enabled loaded objects of Type T
+		/// returns a list of all enabled loaded components of Type T
 		/// </summary>
-		/// <returns>The objects of type.</returns>
+		/// <returns>The components of type.</returns>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
-		public List<T> findObjectsOfType<T>() where T : Component
+		public List<T> findComponentsOfType<T>() where T : Component
 		{
-			return entities.findObjectsOfType<T>();
+			return entities.findComponentsOfType<T>();
 		}
 
 		#endregion
@@ -958,7 +1106,7 @@ namespace Nez
 
 
 		/// <summary>
-		/// Removes an EntitySystem processor from the scene
+		/// removes an EntitySystem processor from the scene
 		/// </summary>
 		/// <param name="processor">Processor.</param>
 		public void removeEntityProcessor( EntitySystem processor )
@@ -968,7 +1116,7 @@ namespace Nez
 
 
 		/// <summary>
-		/// Gets an EntitySystem processor
+		/// gets an EntitySystem processor
 		/// </summary>
 		/// <returns>The processor.</returns>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
@@ -978,7 +1126,7 @@ namespace Nez
 		}
 
 		#endregion
-	
+
 	}
 }
 

@@ -62,20 +62,10 @@ namespace Arakara.Battle.Phases.Common
 
         private void OnTargetFocus(Entity entity)
         {
-            var simplePolygon = entity.getComponent<TargetPolygon>();
-            if (simplePolygon != null)
-            {
-                simplePolygon.setColor(Color.Red);
-            }
         }
 
         private void OnTargetBlur(Entity entity)
         {
-            var simplePolygon = entity.getComponent<TargetPolygon>();
-            if (simplePolygon != null)
-            {
-                simplePolygon.setColor(Color.LightPink);
-            }
         }
 
         private void OnTargetSelect(Entity entity)

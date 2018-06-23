@@ -1,13 +1,44 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+#if !FNA
+using Microsoft.Xna.Framework.Input.Touch;
+#endif
 
 
 namespace Nez
 {
 	public class Camera : Component
 	{
+		struct CameraInset
+		{
+			internal float left;
+			internal float right;
+			internal float top;
+			internal float bottom;
+		}
+
+		
 		#region Fields and Properties
+
+		#region 3D Camera Fields
+
+		/// <summary>
+		/// z-position of the 3D camera projections. Affects the fov greatly. Lower values make the objects appear very long in the z-direction.
+		/// </summary>
+		public float positionZ3D = 2000f;
+
+		/// <summary>
+		/// near clip plane of the 3D camera projection
+		/// </summary>
+		public float nearClipPlane3D = 0.0001f;
+
+		/// <summary>
+		/// far clip plane of the 3D camera projection
+		/// </summary>
+		public float farClipPlane3D = 5000f;
+
+		#endregion
+
 
 		/// <summary>
 		/// shortcut to entity.transform.position
@@ -57,10 +88,10 @@ namespace Nez
 			{
 				if( _zoom == 0 )
 					return 1f;
-				else if( _zoom < 1 )
+
+				if( _zoom < 1 )
 					return Mathf.map( _zoom, _minimumZoom, 1, -1, 0 );
-				else
-					return Mathf.map( _zoom, 1, _maximumZoom, 0, 1 );
+				return Mathf.map( _zoom, 1, _maximumZoom, 0, 1 );
 			}
 			set { setZoom( value ); }
 		}
@@ -99,14 +130,14 @@ namespace Nez
 				if( _areBoundsDirty )
 				{
 					// top-left and bottom-right are needed by either rotated or non-rotated bounds
-					var topLeft = screenToWorldPoint( new Vector2( Core.graphicsDevice.Viewport.X, Core.graphicsDevice.Viewport.Y ) );
-					var bottomRight = screenToWorldPoint( new Vector2( Core.graphicsDevice.Viewport.X + Core.graphicsDevice.Viewport.Width, Core.graphicsDevice.Viewport.Y + Core.graphicsDevice.Viewport.Height ) );
+					var topLeft = screenToWorldPoint( new Vector2( Core.graphicsDevice.Viewport.X + _inset.left, Core.graphicsDevice.Viewport.Y + _inset.top ) );
+					var bottomRight = screenToWorldPoint( new Vector2( Core.graphicsDevice.Viewport.X + Core.graphicsDevice.Viewport.Width - _inset.right, Core.graphicsDevice.Viewport.Y + Core.graphicsDevice.Viewport.Height - _inset.bottom ) );
 
-					if( entity.transform.rotation != 0 )
+					if ( entity.transform.rotation != 0 )
 					{
 						// special care for rotated bounds. we need to find our absolute min/max values and create the bounds from that
-						var topRight = screenToWorldPoint( new Vector2( Core.graphicsDevice.Viewport.X + Core.graphicsDevice.Viewport.Width, Core.graphicsDevice.Viewport.Y ) );
-						var bottomLeft = screenToWorldPoint( new Vector2( Core.graphicsDevice.Viewport.X, Core.graphicsDevice.Viewport.Y + Core.graphicsDevice.Viewport.Height ) );	
+						var topRight = screenToWorldPoint( new Vector2( Core.graphicsDevice.Viewport.X + Core.graphicsDevice.Viewport.Width - _inset.right, Core.graphicsDevice.Viewport.Y + _inset.top ) );
+						var bottomLeft = screenToWorldPoint( new Vector2( Core.graphicsDevice.Viewport.X + _inset.left, Core.graphicsDevice.Viewport.Y + Core.graphicsDevice.Viewport.Height - _inset.bottom ) );
 
 						var minX = Mathf.minOf( topLeft.X, bottomRight.X, topRight.X, bottomLeft.X );
 						var maxX = Mathf.maxOf( topLeft.X, bottomRight.X, topRight.X, bottomLeft.X );
@@ -135,7 +166,7 @@ namespace Nez
 		/// used to convert from world coordinates to screen
 		/// </summary>
 		/// <value>The transform matrix.</value>
-		public Matrix transformMatrix
+		public Matrix2D transformMatrix
 		{
 			get
 			{
@@ -149,7 +180,7 @@ namespace Nez
 		/// used to convert from screen coordinates to world
 		/// </summary>
 		/// <value>The inverse transform matrix.</value>
-		public Matrix inverseTransformMatrix
+		public Matrix2D inverseTransformMatrix
 		{
 			get
 			{
@@ -160,7 +191,7 @@ namespace Nez
 		}
 
 		/// <summary>
-		/// the Cameras projection matrix
+		/// the 2D Cameras projection matrix
 		/// </summary>
 		/// <value>The projection matrix.</value>
 		public Matrix projectionMatrix
@@ -182,10 +213,42 @@ namespace Nez
 		/// <value>The view projection matrix.</value>
 		public Matrix viewProjectionMatrix { get { return transformMatrix * projectionMatrix; } }
 
-		internal Vector2 origin
+		#region 3D Camera Matrixes
+
+		/// <summary>
+		/// returns a perspective projection for this camera for use when rendering 3D objects
+		/// </summary>
+		/// <value>The projection matrix3 d.</value>
+		public Matrix projectionMatrix3D
+		{
+			get
+			{
+				var targetHeight = ( Core.graphicsDevice.Viewport.Height / _zoom );
+				var fov = (float)Math.Atan( targetHeight / ( 2f * positionZ3D ) ) * 2f;
+				return Matrix.CreatePerspectiveFieldOfView( fov, Core.graphicsDevice.Viewport.AspectRatio, nearClipPlane3D, farClipPlane3D );
+			}
+		}
+
+		/// <summary>
+		/// returns a view Matrix via CreateLookAt for this camera for use when rendering 3D objects
+		/// </summary>
+		/// <value>The view matrix3 d.</value>
+		public Matrix viewMatrix3D
+		{
+			get
+			{
+				// we need to always invert the y-values to match the way Batcher/SpriteBatch does things
+				var position3D = new Vector3( position.X, -position.Y, positionZ3D );
+				return Matrix.CreateLookAt( position3D, position3D + Vector3.Forward, Vector3.Up );
+			}
+		}
+
+		#endregion
+
+		public Vector2 origin
 		{
 			get { return _origin; }
-			set
+			internal set
 			{
 				if( _origin != value )
 				{
@@ -200,8 +263,9 @@ namespace Nez
 		float _minimumZoom = 0.3f;
 		float _maximumZoom = 3f;
 		RectangleF _bounds;
-		Matrix _transformMatrix = Matrix.Identity;
-		Matrix _inverseTransformMatrix = Matrix.Identity;
+		CameraInset _inset;
+		Matrix2D _transformMatrix = Matrix2D.identity;
+		Matrix2D _inverseTransformMatrix = Matrix2D.identity;
 		Matrix _projectionMatrix;
 		Vector2 _origin;
 
@@ -239,27 +303,26 @@ namespace Nez
 			if( !_areMatrixesDirty )
 				return;
 
-			Matrix tempMat;
-
-			_transformMatrix = Matrix.CreateTranslation( -entity.transform.position.X, -entity.transform.position.Y, 0f ); // position
+			Matrix2D tempMat;
+			_transformMatrix = Matrix2D.createTranslation( -entity.transform.position.X, -entity.transform.position.Y ); // position
 
 			if( _zoom != 1f )
 			{
-				Matrix.CreateScale( _zoom, _zoom, 1f, out tempMat ); // scale ->
-				Matrix.Multiply( ref _transformMatrix, ref tempMat, out _transformMatrix );
+				Matrix2D.createScale( _zoom, _zoom, out tempMat ); // scale ->
+				Matrix2D.multiply( ref _transformMatrix, ref tempMat, out _transformMatrix );
 			}
 
 			if( entity.transform.rotation != 0f )
 			{
-				Matrix.CreateRotationZ( entity.transform.rotation, out tempMat ); // rotation
-				Matrix.Multiply( ref _transformMatrix, ref tempMat, out _transformMatrix );
+				Matrix2D.createRotation( entity.transform.rotation, out tempMat ); // rotation
+				Matrix2D.multiply( ref _transformMatrix, ref tempMat, out _transformMatrix );
 			}
 
-			Matrix.CreateTranslation( (int)_origin.X, (int)_origin.Y, 0f, out tempMat ); // translate -origin
-			Matrix.Multiply( ref _transformMatrix, ref tempMat, out _transformMatrix );
+			Matrix2D.createTranslation( (int)_origin.X, (int)_origin.Y, out tempMat ); // translate -origin
+			Matrix2D.multiply( ref _transformMatrix, ref tempMat, out _transformMatrix );
 
 			// calculate our inverse as well
-			Matrix.Invert( ref _transformMatrix, out _inverseTransformMatrix );
+			Matrix2D.invert( ref _transformMatrix, out _inverseTransformMatrix );
 
 			// whenever the matrix changes the bounds are then invalid
 			_areBoundsDirty = true;
@@ -270,10 +333,24 @@ namespace Nez
 		#region Fluent setters
 
 		/// <summary>
+		/// sets the amount used to inset the camera bounds from the viewport edge
+		/// </summary>
+		/// <param name="left">The amount to set the left bounds in from the viewport.</param>
+		/// <param name="right">The amount to set the right bounds in from the viewport.</param>
+		/// <param name="top">The amount to set the top bounds in from the viewport.</param>
+		/// <param name="bottom">The amount to set the bottom bounds in from the viewport.</param>
+		public Camera setInset( float left, float right, float top, float bottom )
+		{
+			_inset = new CameraInset { left = left, right = right , top = top, bottom = bottom };
+			_areBoundsDirty = true;
+			return this;
+		}
+
+
+		/// <summary>
 		/// shortcut to entity.transform.setPosition
 		/// </summary>
-		/// <returns>The position.</returns>
-		/// <param name="value">Value.</param>
+		/// <param name="position">Position.</param>
 		public Camera setPosition( Vector2 position )
 		{
 			entity.transform.setPosition( position );
@@ -284,7 +361,6 @@ namespace Nez
 		/// <summary>
 		/// shortcut to entity.transform.setRotation
 		/// </summary>
-		/// <returns>The rotation.</returns>
 		/// <param name="radians">Radians.</param>
 		public Camera setRotation( float radians )
 		{
@@ -296,7 +372,6 @@ namespace Nez
 		/// <summary>
 		/// shortcut to entity.transform.setRotationDegrees
 		/// </summary>
-		/// <returns>The rotation degrees.</returns>
 		/// <param name="degrees">Degrees.</param>
 		public Camera setRotationDegrees( float degrees )
 		{
@@ -309,7 +384,6 @@ namespace Nez
 		/// sets the the zoom value which should be between -1 and 1. This value is then translated to be from minimumZoom to maximumZoom.
 		/// This lets you set appropriate minimum/maximum values then use a more intuitive -1 to 1 mapping to change the zoom.
 		/// </summary>
-		/// <returns>The zoom.</returns>
 		/// <param name="zoom">Zoom.</param>
 		public Camera setZoom( float zoom )
 		{
@@ -330,7 +404,6 @@ namespace Nez
 		/// <summary>
 		/// minimum non-scaled value (0 - float.Max) that the camera zoom can be. Defaults to 0.3
 		/// </summary>
-		/// <returns>The minimum zoom.</returns>
 		/// <param name="value">Value.</param>
 		public Camera setMinimumZoom( float minZoom )
 		{
@@ -347,7 +420,6 @@ namespace Nez
 		/// <summary>
 		/// maximum non-scaled value (0 - float.Max) that the camera zoom can be. Defaults to 3
 		/// </summary>
-		/// <returns>The maximum zoom.</returns>
 		/// <param name="maxZoom">Max zoom.</param>
 		public Camera setMaximumZoom( float maxZoom )
 		{
@@ -374,7 +446,7 @@ namespace Nez
 
 		#region component overrides
 
-		public override void onEntityTransformChanged()
+		public override void onEntityTransformChanged( Transform.Component comp )
 		{
 			forceMatrixUpdate();
 		}
@@ -408,7 +480,7 @@ namespace Nez
 		public Vector2 worldToScreenPoint( Vector2 worldPosition )
 		{
 			updateMatrixes();
-			Vector2.Transform( ref worldPosition, ref _transformMatrix, out worldPosition );
+			Vector2Ext.transform( ref worldPosition, ref _transformMatrix, out worldPosition );
 			return worldPosition;
 		}
 
@@ -421,13 +493,13 @@ namespace Nez
 		public Vector2 screenToWorldPoint( Vector2 screenPosition )
 		{
 			updateMatrixes();
-			Vector2.Transform( ref screenPosition, ref _inverseTransformMatrix, out screenPosition );
+			Vector2Ext.transform( ref screenPosition, ref _inverseTransformMatrix, out screenPosition );
 			return screenPosition;
 		}
 
 
 		/// <summary>
-		/// converts a oint from screen coordinates to world
+		/// converts a point from screen coordinates to world
 		/// </summary>
 		/// <returns>The to world point.</returns>
 		/// <param name="screenPosition">Screen position.</param>
@@ -435,6 +507,28 @@ namespace Nez
 		{
 			return screenToWorldPoint( screenPosition.ToVector2() );
 		}
+
+
+		/// <summary>
+		/// returns the mouse position in world space
+		/// </summary>
+		/// <returns>The to world point.</returns>
+		public Vector2 mouseToWorldPoint()
+		{
+			return screenToWorldPoint( Input.mousePosition );
+		}
+
+
+#if !FNA
+		/// <summary>
+		/// returns the touch position in world space
+		/// </summary>
+		/// <returns>The to world point.</returns>
+		public Vector2 touchToWorldPoint( TouchLocation touch )
+		{
+			return screenToWorldPoint( touch.scaledPosition() );
+		}
+#endif
 
 		#endregion
 

@@ -11,7 +11,7 @@ namespace Nez
     public class Triangulator
     {
 		/// <summary>
-		/// The indexes of triangle list entries for the list of points used in the last <see cref="Triangulate"/> call.
+		/// The indexes of triangle list entries for the list of points used in the last triangulate call.
 		/// </summary>
 		public List<int> triangleIndices = new List<int>();
 
@@ -20,22 +20,28 @@ namespace Nez
 
 
         /// <summary>
-        /// Computes a triangle list that fully covers the area enclosed by the given set of points.
+        /// Computes a triangle list that fully covers the area enclosed by the given set of points. If points are not CCW, pass false for
+		/// the arePointsCCW parameter
         /// </summary>
         /// <param name="points">A list of points that defines an enclosing path.</param>
         /// <param name="count">The number of points in the path.</param>
-        public void triangulate( Vector2[] points )
+        public void triangulate( Vector2[] points, bool arePointsCCW = true )
         {
 			var count = points.Length;
 
 			// set up previous and next links to effectively from a double-linked vert list
             initialize( count );
 
+			// loop breaker for polys that are not triangulatable
+			var iterations = 0;
+
 			// start at vert 0
             var index = 0;
+
 			// keep removing verts until just a triangle is left
-            while( count > 3 )
+            while( count > 3 && iterations < 500 )
 			{
+				iterations++;
 				// test if current vert is an ear
                 var isEar = true;
 
@@ -44,7 +50,7 @@ namespace Nez
                 var c = points[_triNext[index]];
 				
 				// an ear must be convex (here counterclockwise)
-                if( isTriangleCCW( a, b, c ) )
+				if( Vector2Ext.isTriangleCCW( a, b, c ) )
 				{
 					// loop over all verts not part of the tentative ear
                     var k = _triNext[_triNext[index]];
@@ -94,6 +100,9 @@ namespace Nez
 			triangleIndices.Add( _triPrev[index] );
 			triangleIndices.Add( index );
 			triangleIndices.Add( _triNext[index] );
+
+			if( !arePointsCCW )
+				triangleIndices.Reverse();
         }
 
 
@@ -104,7 +113,7 @@ namespace Nez
             if( _triNext.Length < count )
                 Array.Resize( ref _triNext, Math.Max( _triNext.Length * 2, count ) );
             if( _triPrev.Length < count )
-                Array.Resize( ref _triPrev, Math.Min( _triPrev.Length * 2, count ) );
+                Array.Resize( ref _triPrev, Math.Max( _triPrev.Length * 2, count ) );
 
             for( var i = 0; i < count; i++ )
 			{
@@ -135,10 +144,5 @@ namespace Nez
 			return true;
 		}
 
-
-		public static bool isTriangleCCW( Vector2 a, Vector2 b, Vector2 c )
-		{
-			return Vector2Ext.cross( b - a, c - b ) < 0;
-		}
     }
 }

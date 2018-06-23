@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
 
@@ -12,6 +11,15 @@ namespace Nez.Textures
 		public int top;
 		public int bottom;
 		public Rectangle[] ninePatchRects = new Rectangle[9];
+
+		/// <summary>
+		/// used to indicate if this nine patch has additional padding information
+		/// </summary>
+		public bool hasPadding;
+        public int padLeft;
+        public int padRight;
+        public int padTop;
+        public int padBottom;
 
 
 		public NinePatchSubtexture( Texture2D texture, Rectangle sourceRect, int left, int right, int top, int bottom ) : base( texture, sourceRect )

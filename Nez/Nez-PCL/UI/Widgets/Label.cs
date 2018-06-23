@@ -117,7 +117,16 @@ namespace Nez.UI
 				if( _style.background != null )
 					widthCalc -= _style.background.leftWidth + _style.background.rightWidth;
 
-				_wrappedString = _style.font.wrapText( _text, widthCalc );
+				_wrappedString = _style.font.wrapText( _text, widthCalc / _fontScaleX );
+			}
+			else if( _ellipsis != null && width > 0 )
+			{
+				// we have a max width and an ellipsis so we will truncate the text
+				var widthCalc = width;
+				if( _style.background != null )
+					widthCalc -= _style.background.leftWidth + _style.background.rightWidth;
+				
+				_wrappedString = _style.font.truncateText( _text, _ellipsis, widthCalc / _fontScaleX );
 			}
 			else
 			{
@@ -212,22 +221,24 @@ namespace Nez.UI
 		}
 
 
-		public void setFontScale( float fontScaleX, float fontScaleY )
+		public Label setFontScale( float fontScaleX, float fontScaleY )
 		{
 			_fontScaleX = fontScaleX;
 			_fontScaleY = fontScaleY;
 			invalidateHierarchy();
+			return this;
 		}
 
 
 		/// <summary>
 		/// When non-null the text will be truncated "..." if it does not fit within the width of the label. Wrapping will not occur
-		/// when ellipsis is enabled. Default is false.
+		/// when ellipsis is enabled. Default is null.
 		/// </summary>
 		/// <param name="ellipsis">Ellipsis.</param>
-		public void setEllipsis( String ellipsis )
+		public Label setEllipsis( string ellipsis )
 		{
-			this._ellipsis = ellipsis;
+			_ellipsis = ellipsis;
+			return this;
 		}
 
 
@@ -236,12 +247,13 @@ namespace Nez.UI
 		/// ellipsis is true. Default is false.
 		/// </summary>
 		/// <param name="ellipsis">Ellipsis.</param>
-		public void setEllipsis( bool ellipsis )
+		public Label setEllipsis( bool ellipsis )
 		{
 			if( ellipsis )
-				this._ellipsis = "...";
+				_ellipsis = "...";
 			else
-				this._ellipsis = null;
+				_ellipsis = null;
+			return this;
 		}
 
 
@@ -249,10 +261,11 @@ namespace Nez.UI
 		/// should the text be wrapped?
 		/// </summary>
 		/// <param name="shouldWrap">If set to <c>true</c> should wrap.</param>
-		public void setWrap( bool shouldWrap )
+		public Label setWrap( bool shouldWrap )
 		{
-			_wrapText = true;
+			_wrapText = shouldWrap;
 			invalidateHierarchy();
+			return this;
 		}
 
 		#endregion
@@ -260,6 +273,9 @@ namespace Nez.UI
 
 		public override void layout()
 		{
+			if( _prefSizeInvalid )
+				computePrefSize();
+
 			var isWrapped = _wrapText && _ellipsis == null;
 			if( isWrapped )
 			{
@@ -336,7 +352,7 @@ namespace Nez.UI
 		{
 			validate();
 
-			var color = new Color( this.color, this.color.A * parentAlpha );
+			var color = new Color( this.color, (int)(this.color.A * parentAlpha) );
 			if( _style.background != null )
 				_style.background.draw( graphics, x, y, width == 0 ? _prefSize.X : width, height, color );
 

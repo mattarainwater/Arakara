@@ -32,10 +32,15 @@ namespace Nez.UI
 			this.style = style;
 		}
 
-
-		public Slider( Skin skin, string styleName = null, float min = 0, float max = 1, float step = 0.1f ) : this( min, max, step, false, skin.get<SliderStyle>( styleName ) )
+		public Slider( float min, float max, float stepSize, bool vertical, Skin skin, string styleName = null ) : this( min, max, stepSize, vertical, skin.get<SliderStyle>(styleName) )
 		{}
 
+		public Slider( Skin skin, string styleName = null ) : this( 0, 1, 0.1f, false, skin.get<SliderStyle>( styleName ) )
+		{}
+
+		// Leaving this constructor for backwards-compatibility
+		public Slider( Skin skin, string styleName = null, float min = 0, float max = 1, float step = 0.1f ) : this( min, max, step, false, skin.get<SliderStyle>( styleName ) )
+		{}
 
 		#region IInputListener
 
@@ -143,9 +148,9 @@ namespace Nez.UI
 		protected virtual void onUnhandledDirectionPressed( Direction direction )
 		{
 			if( direction == Direction.Up || direction == Direction.Right )
-				setValue( _value + _stepSize );
+				setValue( _value + stepSize );
 			else
-				setValue( _value - _stepSize );
+				setValue( _value - stepSize );
 		}
 
 
@@ -175,12 +180,13 @@ namespace Nez.UI
 		#endregion
 
 
-		public void setStyle( SliderStyle style )
+		public Slider setStyle( SliderStyle style )
 		{
 			Assert.isTrue( style is SliderStyle, "style must be a SliderStyle" );
 
 			base.setStyle( style );
 			this.style = style;
+			return this;
 		}
 
 
@@ -225,7 +231,7 @@ namespace Nez.UI
 				var height = this.height - style.background.topHeight - style.background.bottomHeight;
 				var knobHeight = knob == null ? 0 : knob.minHeight;
 				position = mousePos.Y - style.background.bottomHeight - knobHeight * 0.5f;
-				value = _min + ( _max - _min ) * ( position / ( height - knobHeight ) );
+				value = min + ( max - min ) * ( position / ( height - knobHeight ) );
 				position = Math.Max( 0, position );
 				position = Math.Min( height - knobHeight, position );
 			}
@@ -234,7 +240,7 @@ namespace Nez.UI
 				var width = this.width - style.background.leftWidth - style.background.rightWidth;
 				var knobWidth = knob == null ? 0 : knob.minWidth;
 				position = mousePos.X - style.background.leftWidth - knobWidth * 0.5f;
-				value = _min + ( _max - _min ) * ( position / ( width - knobWidth ) );
+				value = min + ( max - min ) * ( position / ( width - knobWidth ) );
 				position = Math.Max( 0, position );
 				position = Math.Min( width - knobWidth, position );
 			}

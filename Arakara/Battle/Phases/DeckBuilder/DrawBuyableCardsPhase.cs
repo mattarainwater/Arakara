@@ -19,18 +19,16 @@ namespace Arakara.Battle.Phases.DeckBuilder
 
         private DeckBuilderActor _deckBuilderActor;
         private Entity _backdrop;
-        private CardEntityFactory _factory;
 
         public DrawBuyableCardsPhase(DeckBuilderActor actor) 
             : base(actor)
         {
             _deckBuilderActor = actor;
-            _factory = new CardEntityFactory();
         }
 
         protected override void update()
         {
-            _backdrop = Actor.entity.scene.createEntity("background", new Vector2(DimensionConstants.SCREEN_WIDTH / 4, DimensionConstants.SCREEN_HEIGHT / 4));
+            _backdrop = Actor.entity.scene.createEntity("background", new Vector2(DimensionConstants.DESIGN_WIDTH / 8, DimensionConstants.DESIGN_HEIGHT / 8));
             _backdrop.setTag(BUYABLE_TEMP_TAG);
             var sprite = _backdrop.addComponent(new Sprite(_deckBuilderActor.BackdropTexture));
             DrawBuyPoints();
@@ -42,7 +40,7 @@ namespace Arakara.Battle.Phases.DeckBuilder
 
         private void DrawBuyPoints()
         {
-            var buyableText = Actor.entity.scene.createEntity("buyableText", new Vector2(DimensionConstants.SCREEN_WIDTH / 4, DimensionConstants.SCREEN_HEIGHT / 4));
+            var buyableText = Actor.entity.scene.createEntity("buyableText", new Vector2(DimensionConstants.DESIGN_WIDTH / 8, DimensionConstants.DESIGN_HEIGHT / 8));
             buyableText.setTag(BUYABLE_TEMP_TAG);
             var buyableTextComponent = new Text(CommonResources.DefaultBitmapFont, GetBuyablePoints(), new Vector2(10, 10), Color.White);
             buyableText.addComponent(buyableTextComponent);
@@ -67,7 +65,7 @@ namespace Arakara.Battle.Phases.DeckBuilder
         private void CreateCardEntity(int index, Card card)
         {
             var cardPos = new Vector2(_backdrop.transform.position.X + (175 * index), _backdrop.transform.position.Y + 50);
-            var cardEntity = _factory.GetCardEntity(card, cardPos, _deckBuilderActor.DefaultCardTexture, 3);
+            var cardEntity = _deckBuilderActor.Factory.GetCardEntity(card, cardPos, 3);
             _deckBuilderActor.BuyableHandEntities.Add(cardEntity);
         }
     }

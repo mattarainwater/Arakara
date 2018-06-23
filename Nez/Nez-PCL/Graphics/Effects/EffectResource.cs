@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Microsoft.Xna.Framework;
 
@@ -15,6 +15,7 @@ namespace Nez
 		internal static byte[] noiseBytes { get { return getFileResourceBytes( "Content/nez/effects/Noise.mgfxo" ); } }
 		internal static byte[] twistBytes { get { return getFileResourceBytes( "Content/nez/effects/Twist.mgfxo" ); } }
 		internal static byte[] dotsBytes { get { return getFileResourceBytes( "Content/nez/effects/Dots.mgfxo" ); } }
+		internal static byte[] dissolveBytes { get { return getFileResourceBytes( "Content/nez/effects/Dissolve.mgfxo" ); } }
 
 		// post processor effects
 		internal static byte[] bloomCombineBytes { get { return getFileResourceBytes( "Content/nez/effects/BloomCombine.mgfxo" ); } }
@@ -32,6 +33,7 @@ namespace Nez
 
 		// forward lighting
 		internal static byte[] forwardLightingBytes { get { return getFileResourceBytes( "Content/nez/effects/ForwardLighting.mgfxo" ); } }
+		internal static byte[] polygonLightBytes { get { return getFileResourceBytes( "Content/nez/effects/PolygonLight.mgfxo" ); } }
 
 		// scene transitions
 		internal static byte[] squaresTransitionBytes { get { return getFileResourceBytes( "Content/nez/effects/transitions/Squares.mgfxo" ); } }
@@ -43,6 +45,7 @@ namespace Nez
 		internal static byte[] reflectionBytes { get { return getFileResourceBytes( "Content/nez/effects/Reflection.mgfxo" ); } }
 		internal static byte[] grayscaleBytes { get { return getFileResourceBytes( "Content/nez/effects/Grayscale.mgfxo" ); } }
 		internal static byte[] sepiaBytes { get { return getFileResourceBytes( "Content/nez/effects/Sepia.mgfxo" ); } }
+		internal static byte[] paletteCyclerBytes { get { return getFileResourceBytes( "Content/nez/effects/PaletteCycler.mgfxo" ); } }
 
 
 		/// <summary>
@@ -66,6 +69,10 @@ namespace Nez
 
 		internal static byte[] getMonoGameEmbeddedResourceBytes( string name )
 		{
+			#if FNA
+			name = name.Replace( ".ogl.mgfxo", ".fxb" );
+			#endif
+
 			var assembly = ReflectionUtils.getAssembly( typeof( MathHelper ) );
 			using( var stream = assembly.GetManifestResourceStream( name ) )
 			{
@@ -86,19 +93,33 @@ namespace Nez
 		/// <param name="path">Path.</param>
 		public static byte[] getFileResourceBytes( string path )
 		{
-			byte[] bytes;
+			#if FNA
+			path = path.Replace( ".mgfxo", ".fxb" );
+			#endif
 
+			byte[] bytes;
 			try
 			{
 				using( var stream = TitleContainer.OpenStream( path ) )
 				{
-					bytes = new byte[stream.Length];
-					stream.Read( bytes, 0, bytes.Length );
+					if( stream.CanSeek )
+					{
+						bytes = new byte[stream.Length];
+						stream.Read( bytes, 0, bytes.Length );
+					}
+					else
+					{
+						using( var ms = new MemoryStream() )
+						{
+							stream.CopyTo( ms );
+							bytes = ms.ToArray();
+						}
+					}
 				}
 			}
 			catch( Exception e )
 			{
-				var txt = string.Format( "OpenStream failed to find file at path: {0}. Did you add it to the Content folder?", path );
+				var txt = string.Format( "OpenStream failed to find file at path: {0}. Did you add it to the Content folder and set its properties to copy to output directory?", path );
 				throw new Exception( txt, e );
 			}
 

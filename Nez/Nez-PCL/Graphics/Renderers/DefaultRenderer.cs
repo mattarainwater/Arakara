@@ -1,12 +1,12 @@
-﻿using System;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-
-
-namespace Nez
+﻿namespace Nez
 {
 	public class DefaultRenderer : Renderer
 	{
+		/// <summary>
+		/// renders all renderLayers
+		/// </summary>
+		/// <param name="renderOrder">Render order.</param>
+		/// <param name="camera">Camera.</param>
 		public DefaultRenderer( int renderOrder = 0, Camera camera = null ) : base( renderOrder, camera )
 		{}
 
@@ -16,7 +16,7 @@ namespace Nez
 			var cam = camera ?? scene.camera;
 			beginRender( cam );
 
-			for( var i = 0; i < scene.renderableComponents.Count; i++ )
+			for( var i = 0; i < scene.renderableComponents.count; i++ )
 			{
 				var renderable = scene.renderableComponents[i];
 				if( renderable.enabled && renderable.isVisibleFromCamera( cam ) )

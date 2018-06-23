@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Arakara.Battle
 {
-    public class Faction
+    public enum Faction
     {
-        public int Id { get; set; }
-        public string FactionName { get; set; }
+        Ally,
+        Enemy
     }
 }

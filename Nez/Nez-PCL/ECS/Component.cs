@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 
 namespace Nez
@@ -24,7 +25,11 @@ namespace Nez
 		/// shortcut to entity.transform
 		/// </summary>
 		/// <value>The transform.</value>
-		public Transform transform { get { return entity.transform; } }
+		public Transform transform
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return entity.transform; }
+		}
 
 		/// <summary>
 		/// true if the Component is enabled and the Entity is enabled. When enabled this Components lifecycle methods will be called.
@@ -46,17 +51,21 @@ namespace Nez
 		bool _enabled = true;
 		internal int _updateOrder = 0;
 
-		public Component()
-		{}
-
 
 		#region Component Lifecycle
+
+		/// <summary>
+		/// called when this Component has had its Entity assigned but it is NOT yet added to the live Components list of the Entity yet. Useful
+		/// for things like physics Components that need to access the Transform to modify collision body properties.
+		/// </summary>
+		public virtual void initialize()
+		{}
+
 
 		/// <summary>
 		/// Called when this component is added to a scene after all pending component changes are committed. At this point, the entity field
 		/// is set and the entity.scene is also set.
 		/// </summary>
-		/// <param name="entity">Entity.</param>
 		public virtual void onAddedToEntity()
 		{}
 
@@ -72,7 +81,7 @@ namespace Nez
 		/// called when the entity's position changes. This allows components to be aware that they have moved due to the parent
 		/// entity moving.
 		/// </summary>
-		public virtual void onEntityTransformChanged()
+		public virtual void onEntityTransformChanged( Transform.Component comp )
 		{}
 
 

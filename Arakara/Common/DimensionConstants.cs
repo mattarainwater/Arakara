@@ -8,9 +8,6 @@ namespace Arakara.Common
 {
     public static class DimensionConstants
     {
-        //public const int SCREEN_WIDTH = 1920;
-        //public const int SCREEN_HEIGHT = 1080;
-
         public const int SCREEN_WIDTH = 1280;
         public const int SCREEN_HEIGHT = 720;
 
@@ -18,6 +15,14 @@ namespace Arakara.Common
 
         public const int DESIGN_WIDTH = 640;
         public const int DESIGN_HEIGHT = 360;
+
+        //public const int SCREEN_WIDTH = 1920;
+        //public const int SCREEN_HEIGHT = 1080;
+
+        //public const bool IS_FULL_SCREEN = true;
+
+        //public const int DESIGN_WIDTH = 960;
+        //public const int DESIGN_HEIGHT = 540;
 
         public const int CHARACTER_WIDTH = 64;
         public const int CHARACTER_HEIGHT = 64;

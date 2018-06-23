@@ -19,16 +19,16 @@ namespace Arakara.Scenes
         public override void onStart()
         {
             var dialogueActorEntity = createEntity("dialogueActor");
-            var textBoxTexture = contentManager.Load<Texture2D>("textbox");
-            var nameBoxTexture = contentManager.Load<Texture2D>("namebox");
-            var markerTexture = contentManager.Load<Texture2D>("marker");
+            var textBoxTexture = content.Load<Texture2D>("textbox");
+            var nameBoxTexture = content.Load<Texture2D>("namebox");
+            var markerTexture = content.Load<Texture2D>("marker");
             var dialogueActor = dialogueActorEntity.addComponent(new DialogueActor(textBoxTexture, nameBoxTexture, markerTexture));
 
             var dialogueEntity = createEntity("dialogue");
             _dialogue = new DialogueContainer(dialogueActor, OnComplete, DimensionConstants.DESIGN_WIDTH, DimensionConstants.DESIGN_HEIGHT);
             dialogueEntity.addComponent(_dialogue);
 
-            var texture = contentManager.Load<Texture2D>("prisca-portrait");
+            var texture = content.Load<Texture2D>("prisca-portrait");
             var leftPortrait = new DialoguePortrait(texture);
             leftPortrait.IsActive = true;
             var rightPortrait = new DialoguePortrait(texture);

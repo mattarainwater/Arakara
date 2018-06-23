@@ -44,13 +44,25 @@ namespace Nez
 		/// <summary>
 		/// global content manager for loading any assets that should stick around between scenes
 		/// </summary>
-		public static NezContentManager contentManager;
+		public static NezContentManager content;
 
 		/// <summary>
 		/// default SamplerState used by Materials. Note that this must be set at launch! Changing it after that time will result in only
 		/// Materials created after it was set having the new SamplerState
 		/// </summary>
 		public static SamplerState defaultSamplerState = SamplerState.PointClamp;
+
+		/// <summary>
+		/// default wrapped SamplerState. Determined by the Filter of the defaultSamplerState.
+		/// </summary>
+		/// <value>The default state of the wraped sampler.</value>
+		public static SamplerState defaultWrappedSamplerState { get { return defaultSamplerState.Filter == TextureFilter.Point ? SamplerState.PointWrap : SamplerState.LinearWrap; } }
+
+		/// <summary>
+		/// default GameServiceContainer access
+		/// </summary>
+		/// <value>The services.</value>
+		public static GameServiceContainer services { get { return _instance.Services; } }
 
 		/// <summary>
 		/// internal flag used to determine if EntitySystems should be used or not
@@ -63,7 +75,7 @@ namespace Nez
 		internal static Core _instance;
 
 		#if DEBUG
-		internal static ulong drawCalls;
+		internal static long drawCalls;
 		TimeSpan _frameCounterElapsedTime = TimeSpan.Zero;
 		int _frameCounter = 0;
 		string _windowTitle;
@@ -79,7 +91,7 @@ namespace Nez
 		ITimer _graphicsDeviceChangeTimer;
 
 		// globally accessible systems
-		FastList<AbstractGlobalManager> _globalManagers = new FastList<AbstractGlobalManager>();
+		FastList<IUpdatableManager> _globalManagers = new FastList<IUpdatableManager>();
 		CoroutineManager _coroutineManager = new CoroutineManager();
 		TimerManager _timerManager = new TimerManager();
 
@@ -94,7 +106,7 @@ namespace Nez
 		}
 
 
-		public Core( int width = 1280, int height = 720, bool isFullScreen = false, bool enableEntitySystems = true, string windowTitle = "Nez" )
+		public Core( int width = 1280, int height = 720, bool isFullScreen = false, bool enableEntitySystems = true, string windowTitle = "Nez", string contentDirectory = "Content" )
 		{
 			#if DEBUG
 			_windowTitle = windowTitle;
@@ -115,8 +127,8 @@ namespace Nez
 			Window.ClientSizeChanged += onGraphicsDeviceReset;
 			Window.OrientationChanged += onOrientationChanged;
 
-			Content.RootDirectory = "Content";
-			contentManager = new NezGlobalContentManager( Services, Content.RootDirectory );
+			Content.RootDirectory = contentDirectory;
+			content = new NezGlobalContentManager( Services, Content.RootDirectory );
 			IsMouseVisible = true;
 			IsFixedTimeStep = false;
 
@@ -128,11 +140,6 @@ namespace Nez
 			_globalManagers.add( _timerManager );
 			_globalManagers.add( new RenderTarget() );
 		}
-
-
-		[System.Obsolete( "It is no longer necessary to wire up the ClientSizeChanged event" )]
-		protected static void onClientSizeChanged( object sender, EventArgs e )
-		{}
 
 
 		void onOrientationChanged( object sender, EventArgs e )
@@ -182,7 +189,7 @@ namespace Nez
 
 			// prep the default Graphics system
 			graphicsDevice = GraphicsDevice;
-			var font = contentManager.Load<BitmapFont>( "nez://Nez.Content.NezDefaultBMFont.xnb" );
+			var font = content.Load<BitmapFont>( "nez://Nez.Content.NezDefaultBMFont.xnb" );
 			Graphics.instance = new Graphics( font );
 		}
 
@@ -207,7 +214,7 @@ namespace Nez
 			for( var i = _globalManagers.length - 1; i >= 0; i-- )
 				_globalManagers.buffer[i].update();
 
-			if( exitOnEscapeKeypress && Input.isKeyDown( Keys.Escape ) || Input.gamePads[0].isButtonReleased( Buttons.Back ) )
+			if( exitOnEscapeKeypress && ( Input.isKeyDown( Keys.Escape ) || Input.gamePads[0].isButtonReleased( Buttons.Back ) ) )
 			{
 				Exit();
 				return;
@@ -231,6 +238,13 @@ namespace Nez
 			#if DEBUG
 			TimeRuler.instance.endMark( "update" );
 			DebugConsole.instance.update();
+			drawCalls = 0;
+			#endif
+
+			#if FNA
+			// MonoGame only updates old-school XNA Components in Update which we dont care about. FNA's core FrameworkDispatcher needs
+			// Update called though so we do so here.
+			FrameworkDispatcher.Update();
 			#endif
 		}
 
@@ -260,7 +274,6 @@ namespace Nez
 
 			if( _scene != null )
 			{
-				_scene.preRender();
 				_scene.render();
 
 				#if DEBUG
@@ -279,13 +292,13 @@ namespace Nez
 				if( _scene != null && _sceneTransition.wantsPreviousSceneRender && !_sceneTransition.hasPreviousSceneRender )
 				{
 					_scene.postRender( _sceneTransition.previousSceneRender );
-					scene = null;
+					if( _sceneTransition._loadsNewScene )
+						scene = null;
 					startCoroutine( _sceneTransition.onBeginTransition() );
 				}
-				else
+				else if( _scene != null )
 				{
-					if( _scene != null )
-						_scene.postRender();
+					_scene.postRender();
 				}
 
 				_sceneTransition.render( Graphics.instance );
@@ -299,7 +312,9 @@ namespace Nez
 			if( !DebugConsole.instance.isOpen )
 				TimeRuler.instance.render();
 
-			//drawCalls = (ulong)graphicsDevice.Metrics.DrawCount;
+			#if !FNA
+			drawCalls = graphicsDevice.Metrics.DrawCount;
+			#endif
 			#endif
 		}
 
@@ -321,10 +336,11 @@ namespace Nez
 		/// temporarily runs SceneTransition allowing one Scene to transition to another smoothly with custom effects.
 		/// </summary>
 		/// <param name="sceneTransition">Scene transition.</param>
-		public static void startSceneTransition( SceneTransition sceneTransition )
+		public static T startSceneTransition<T>( T sceneTransition ) where T : SceneTransition
 		{
 			Assert.isNull( _instance._sceneTransition, "You cannot start a new SceneTransition until the previous one has completed" );
 			_instance._sceneTransition = sceneTransition;
+			return sceneTransition;
 		}
 
 
@@ -335,7 +351,7 @@ namespace Nez
 		/// </summary>
 		/// <returns>The global manager.</returns>
 		/// <param name="manager">Manager.</param>
-		public static void registerGlobalManager( AbstractGlobalManager manager )
+		public static void registerGlobalManager( IUpdatableManager manager )
 		{
 			_instance._globalManagers.add( manager );
 		}
@@ -346,9 +362,25 @@ namespace Nez
 		/// </summary>
 		/// <returns>The global manager.</returns>
 		/// <param name="manager">Manager.</param>
-		public static void unregisterGlobalManager( AbstractGlobalManager manager )
+		public static void unregisterGlobalManager( IUpdatableManager manager )
 		{
 			_instance._globalManagers.remove( manager );
+		}
+
+
+		/// <summary>
+		/// gets the global manager of type T
+		/// </summary>
+		/// <returns>The global manager.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public static T getGlobalManager<T>() where T : class, IUpdatableManager
+		{
+			for( var i = 0; i < _instance._globalManagers.length; i++ )
+			{
+				if( _instance._globalManagers.buffer[i] is T )
+					return _instance._globalManagers.buffer[i] as T;
+			}
+			return null;
 		}
 
 		#endregion

@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Nez.Textures;
 using Arakara.Battle.Phases;
+using Arakara.Factories.Entities;
 
 namespace Arakara.Components
 {
@@ -34,6 +35,8 @@ namespace Arakara.Components
         public Texture2D DisabledCardTexture { get; set; }
 
         public Texture2D BackdropTexture { get; set; }
+
+        public CardEntityFactory Factory { get; set; }
 
         public DeckBuilderActor(string name, 
             int maxHP, 
@@ -60,10 +63,12 @@ namespace Arakara.Components
         {
             base.onAddedToEntity();
 
-            DefaultCardTexture = entity.scene.contentManager.Load<Texture2D>("card");
-            DisabledCardTexture = entity.scene.contentManager.Load<Texture2D>("card_dark");
-            HoverCardTexture = entity.scene.contentManager.Load<Texture2D>("card_light");
-            BackdropTexture = entity.scene.contentManager.Load<Texture2D>("backdrop");
+            DefaultCardTexture = entity.scene.content.Load<Texture2D>("card");
+            DisabledCardTexture = entity.scene.content.Load<Texture2D>("card_dark");
+            HoverCardTexture = entity.scene.content.Load<Texture2D>("card_light");
+            BackdropTexture = entity.scene.content.Load<Texture2D>("backdrop");
+
+            Factory = new CardEntityFactory(DefaultCardTexture);
         }
     }
 }

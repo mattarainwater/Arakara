@@ -28,28 +28,27 @@ namespace Arakara.Scenes
 {
     public class TestGameScene : BaseScene
     {
-        private BattleContainer _battle;
-
         public override void onStart()
         {
+            var battleController = new BattleController();
+
             var battleEntity = createEntity("battle");
-            _battle = new BattleContainer(DimensionConstants.DESIGN_WIDTH, DimensionConstants.DESIGN_HEIGHT);
-            battleEntity.addComponent(_battle);
+            battleEntity.addComponent(battleController);
 
-            _battle.AddBattleEntity(MakeMC(), this);
+            battleController.AddActor(MakeMC());
 
-            _battle.AddBattleEntity(MakeKnight(), this);
-            _battle.AddBattleEntity(MakeNecromancer(), this);
+            battleController.AddActor(MakeKnight());
+            battleController.AddActor(MakeNecromancer());
 
-            _battle.ToggleBattleActive();
-
-            var pcWin = new BattleEvent(new OnFactionWinTrigger(1));
+            var pcWin = new BattleEvent(new OnFactionWinTrigger(Faction.Ally));
             pcWin.AddEffect(new SceneTransitionEffect(1, LoadWinScreen));
-            _battle.Controller.AddEvent(pcWin);
+            battleController.AddEvent(pcWin);
 
-            var enemiesWin = new BattleEvent(new OnFactionWinTrigger(2));
+            var enemiesWin = new BattleEvent(new OnFactionWinTrigger(Faction.Enemy));
             enemiesWin.AddEffect(new SceneTransitionEffect(1, LoadLoseScreen));
-            _battle.Controller.AddEvent(enemiesWin);
+            battleController.AddEvent(enemiesWin);
+
+            battleController.IsActive = true;
         }
 
         private Scene LoadWinScreen()
@@ -62,14 +61,10 @@ namespace Arakara.Scenes
             return new MessageScene("You Lose!");
         }
 
-        private Entity MakeMC()
+        private BattleActor MakeMC()
         {
             var mainCharacterEntity = createEntity("mc");
-            var mainCharacterActor = new DeckBuilderActor("Prisca", 20, new Faction
-            {
-                FactionName = "PC",
-                Id = 1
-            }, 
+            var mainCharacterActor = new DeckBuilderActor("Prisca", 20, Faction.Ally, 
             new List<Card>()
             {
                 new Card
@@ -213,78 +208,54 @@ namespace Arakara.Scenes
 
             mainCharacterEntity.addComponent(mainCharacterActor);
 
-            mainCharacterActor.AddPhase(typeof(DrawCardsPhase));
-            mainCharacterActor.AddPhase(typeof(SelectCardPhase));
-            mainCharacterActor.AddPhase(typeof(Battle.Phases.Common.SelectTargetPhase));
-            mainCharacterActor.AddPhase(typeof(AnimationPhase));
-            mainCharacterActor.AddPhase(typeof(ApplyEffectsPhase));
-            mainCharacterActor.AddPhase(typeof(WaitPhase));
-            mainCharacterActor.AddPhase(typeof(DrawBuyableCardsPhase));
-            mainCharacterActor.AddPhase(typeof(SelectBuyableCardPhase));
-            mainCharacterActor.AddPhase(typeof(Battle.Phases.DeckBuilder.CleanUpPhase));
-            mainCharacterActor.AddPhase(typeof(ApplyStatusEffectsPhase));
+            mainCharacterActor.AddPhase(new DrawCardsPhase(mainCharacterActor));
+            mainCharacterActor.AddPhase(new SelectCardPhase(mainCharacterActor));
+            mainCharacterActor.AddPhase(new Battle.Phases.Common.SelectTargetPhase(mainCharacterActor));
+            mainCharacterActor.AddPhase(new AnimationPhase(mainCharacterActor));
+            mainCharacterActor.AddPhase(new ApplyEffectsPhase(mainCharacterActor));
+            mainCharacterActor.AddPhase(new WaitPhase(mainCharacterActor));
+            mainCharacterActor.AddPhase(new DrawBuyableCardsPhase(mainCharacterActor));
+            mainCharacterActor.AddPhase(new SelectBuyableCardPhase(mainCharacterActor));
+            mainCharacterActor.AddPhase(new Battle.Phases.DeckBuilder.CleanUpPhase(mainCharacterActor));
+            mainCharacterActor.AddPhase(new ApplyStatusEffectsPhase(mainCharacterActor));
 
-            var texture = contentManager.Load<Texture2D>("prisca_big");
-            var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
-            var sprite = new Sprite<Animations>(subtextures[0]);
+            var texture = content.Load<Texture2D>("prisca_5");
+            var subtextures = Subtexture.subtexturesFromAtlas(texture, 128, 128);
+            var sprite = new Sprite<Animations>(subtextures[5]);
+            sprite.scale = Vector2.One * 2;
             mainCharacterEntity.addComponent(sprite);
             var attackAnimationFrames = new List<Subtexture>
             {
-                subtextures[0],
-                subtextures[1],
-                subtextures[2],
-                subtextures[2],
-                subtextures[2],
-                subtextures[3],
-                subtextures[3],
-                subtextures[3],
-                subtextures[4],
+                subtextures[5],
             };
             var idleAnimationFrames = new List<Subtexture>
             {
-                subtextures[0],
-                subtextures[1],
-                subtextures[1],
-                subtextures[2],
-                subtextures[2],
-                subtextures[1],
-                subtextures[1],
-                subtextures[0]
+                subtextures[5],
             };
             var potionAnimationFrames = new List<Subtexture>
             {
-                subtextures[0],
                 subtextures[5],
-                subtextures[6],
-                subtextures[6],
-                subtextures[6],
-                subtextures[7],
-                subtextures[0]
             };
             var woundedAnimationFrames = new List<Subtexture>
             {
-                subtextures[8],
-                subtextures[8],
-                subtextures[8],
-                subtextures[8],
-                subtextures[8]
+                subtextures[5],
             };
-            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames) { loop = false, fps = 30 }, Vector2.Zero);
-            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true }, Vector2.Zero);
-            sprite.addAnimation(Animations.Support1, new SpriteAnimation(potionAnimationFrames) { loop = false }, Vector2.Zero);
-            sprite.addAnimation(Animations.Hit, new SpriteAnimation(woundedAnimationFrames) { loop = false }, Vector2.Zero);
-            sprite.flipX = true;
+            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames) { loop = false, fps = 30 });
+            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true });
+            sprite.addAnimation(Animations.Support1, new SpriteAnimation(potionAnimationFrames) { loop = false });
+            sprite.addAnimation(Animations.Hit, new SpriteAnimation(woundedAnimationFrames) { loop = false });
+            sprite.flipX = false;
             sprite.setOrigin(Vector2.Zero);
             sprite.renderLayer = 1000;
 
-            return mainCharacterEntity;
+            return mainCharacterActor;
         }
 
-        private Entity MakeKnight()
+        private BattleActor MakeKnight()
         {
             var enemyEntity = createEntity("enemy");
 
-            var texture = contentManager.Load<Texture2D>("guard_big");
+            var texture = content.Load<Texture2D>("guard_big");
             var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
             var sprite = new Sprite<Animations>(subtextures[0]);
             enemyEntity.addComponent(sprite);
@@ -300,16 +271,12 @@ namespace Arakara.Scenes
             {
                 subtextures[0]
             };
-            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
-            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = false }, Vector2.Zero);
+            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false });
+            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = false });
             sprite.setOrigin(Vector2.Zero);
             sprite.renderLayer = 1000;
 
-            var aIActor = new AIActor("Guard", 15, new Faction
-                {
-                    FactionName = "Enemies",
-                    Id = 2
-                },
+            var aIActor = new AIActor("Guard", 15, Faction.Enemy,
                 new List<BattleAction>
                 {
                     new BattleAction
@@ -325,22 +292,22 @@ namespace Arakara.Scenes
 
             enemyEntity.addComponent(aIActor);
 
-            aIActor.AddPhase(typeof(SelectActionPhase));
-            aIActor.AddPhase(typeof(Battle.Phases.AI.SelectTargetPhase));
-            aIActor.AddPhase(typeof(AnimationPhase));
-            aIActor.AddPhase(typeof(ApplyEffectsPhase));
-            aIActor.AddPhase(typeof(WaitPhase));
-            aIActor.AddPhase(typeof(Battle.Phases.AI.CleanUpPhase));
-            aIActor.AddPhase(typeof(ApplyStatusEffectsPhase));
+            aIActor.AddPhase(new SelectActionPhase(aIActor));
+            aIActor.AddPhase(new Battle.Phases.AI.SelectTargetPhase(aIActor));
+            aIActor.AddPhase(new AnimationPhase(aIActor));
+            aIActor.AddPhase(new ApplyEffectsPhase(aIActor));
+            aIActor.AddPhase(new WaitPhase(aIActor));
+            aIActor.AddPhase(new Battle.Phases.AI.CleanUpPhase(aIActor));
+            aIActor.AddPhase(new ApplyStatusEffectsPhase(aIActor));
 
-            return enemyEntity;
+            return aIActor;
         }
 
-        private Entity MakeNecromancer()
+        private BattleActor MakeNecromancer()
         {
             var enemyEntity = createEntity("enemy");
 
-            var texture = contentManager.Load<Texture2D>("necromancer_big");
+            var texture = content.Load<Texture2D>("necromancer_big");
             var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
             var sprite = new Sprite<Animations>(subtextures[0]);
             enemyEntity.addComponent(sprite);
@@ -364,16 +331,12 @@ namespace Arakara.Scenes
                 subtextures[3],
                 subtextures[0]
             };
-            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false }, Vector2.Zero);
-            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true }, Vector2.Zero);
+            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false });
+            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true });
             sprite.setOrigin(Vector2.Zero);
             sprite.renderLayer = 1000;
 
-            var aIActor = new AIActor("Warlock", 10, new Faction
-            {
-                FactionName = "Enemies",
-                Id = 2
-            },
+            var aIActor = new AIActor("Warlock", 10, Faction.Enemy,
                 new List<BattleAction>
                 {
                     new BattleAction
@@ -396,15 +359,15 @@ namespace Arakara.Scenes
 
             enemyEntity.addComponent(aIActor);
 
-            aIActor.AddPhase(typeof(SelectActionPhase));
-            aIActor.AddPhase(typeof(Battle.Phases.AI.SelectTargetPhase));
-            aIActor.AddPhase(typeof(AnimationPhase));
-            aIActor.AddPhase(typeof(ApplyEffectsPhase));
-            aIActor.AddPhase(typeof(WaitPhase));
-            aIActor.AddPhase(typeof(Battle.Phases.AI.CleanUpPhase));
-            aIActor.AddPhase(typeof(ApplyStatusEffectsPhase));
+            aIActor.AddPhase(new SelectActionPhase(aIActor));
+            aIActor.AddPhase(new Battle.Phases.AI.SelectTargetPhase(aIActor));
+            aIActor.AddPhase(new AnimationPhase(aIActor));
+            aIActor.AddPhase(new ApplyEffectsPhase(aIActor));
+            aIActor.AddPhase(new WaitPhase(aIActor));
+            aIActor.AddPhase(new Battle.Phases.AI.CleanUpPhase(aIActor));
+            aIActor.AddPhase(new ApplyStatusEffectsPhase(aIActor));
 
-            return enemyEntity;
+            return aIActor;
         }
     }
 }

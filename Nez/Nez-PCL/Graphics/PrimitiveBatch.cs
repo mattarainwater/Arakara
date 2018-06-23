@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.IO;
 
 
 namespace Nez
@@ -18,6 +17,8 @@ namespace Nez
 		bool _hasBegun;
 
 		bool _isDisposed;
+		VertexPositionColor[] _lineVertices;
+		int _lineVertsCount;
 		VertexPositionColor[] _triangleVertices;
 		int _triangleVertsCount;
 
@@ -25,6 +26,7 @@ namespace Nez
 		public PrimitiveBatch( int bufferSize = 500 )
 		{
 			_triangleVertices = new VertexPositionColor[bufferSize - bufferSize % 3];
+			_lineVertices = new VertexPositionColor[bufferSize - bufferSize % 2];
 
 			// set up a new basic effect, and enable vertex colors.
 			_basicEffect = new BasicEffect( Core.graphicsDevice );
@@ -56,7 +58,7 @@ namespace Nez
 		/// </summary>
 		public void begin()
 		{
-			var projection = Matrix.CreateOrthographicOffCenter( 0, Core.graphicsDevice.Viewport.Width, Core.graphicsDevice.Viewport.Height, 0, 0, 1 );
+			var projection = Matrix.CreateOrthographicOffCenter( 0, Core.graphicsDevice.Viewport.Width, Core.graphicsDevice.Viewport.Height, 0, 0, -1 );
 			var view = Matrix.CreateLookAt( Vector3.Zero, Vector3.Forward, Vector3.Up );
 
 			begin( ref projection, ref view );
@@ -64,8 +66,8 @@ namespace Nez
 
 
 		/// <summary>
-		/// Begin is called to tell the PrimitiveBatch what kind of primitives will be
-		/// drawn, and to prepare the graphics card to render those primitives.
+		/// Begin is called to tell the PrimitiveBatch what kind of primitives will be drawn, and to prepare the graphics card to render those primitives.
+		/// Use camera.projectionMatrix and camera.transformMatrix if the batch should be in camera space.
 		/// </summary>
 		/// <param name="projection">The projection.</param>
 		/// <param name="view">The view.</param>
@@ -84,6 +86,18 @@ namespace Nez
 
 
 		/// <summary>
+		/// Begin is called to tell the PrimitiveBatch what kind of primitives will be drawn, and to prepare the graphics card to render those primitives.
+		/// Use camera.projectionMatrix and camera.transformMatrix if the batch should be in camera space.
+		/// </summary>
+		/// <param name="projection">The projection.</param>
+		/// <param name="view">The view.</param>
+		public void begin( Matrix projection, Matrix view )
+		{
+			begin( ref projection, ref view );
+		}
+
+
+		/// <summary>
 		/// End is called once all the primitives have been drawn using AddVertex.
 		/// it will call Flush to actually submit the draw call to the graphics card, and
 		/// then tell the basic effect to end.
@@ -95,6 +109,7 @@ namespace Nez
 
 			// Draw whatever the user wanted us to draw
 			flushTriangles();
+			flushLines();
 			_hasBegun = false;
 		}
 
@@ -102,14 +117,27 @@ namespace Nez
 		public void addVertex( Vector2 vertex, Color color, PrimitiveType primitiveType )
 		{
 			Assert.isTrue( _hasBegun, "Invalid state. Begin must be called before AddVertex can be called." );
-			Assert.isFalse( primitiveType == PrimitiveType.LineStrip || primitiveType == PrimitiveType.TriangleStrip || primitiveType == PrimitiveType.LineList, "The specified primitiveType is not supported by PrimitiveBatch" );
+			Assert.isFalse( primitiveType == PrimitiveType.LineStrip || primitiveType == PrimitiveType.TriangleStrip, "The specified primitiveType is not supported by PrimitiveBatch" );
 
-			if( _triangleVertsCount >= _triangleVertices.Length )
-				flushTriangles();
+			if( primitiveType == PrimitiveType.TriangleList )
+			{
+				if( _triangleVertsCount >= _triangleVertices.Length )
+					flushTriangles();
 
-			_triangleVertices[_triangleVertsCount].Position = new Vector3( vertex, -0.1f );
-			_triangleVertices[_triangleVertsCount].Color = color;
-			_triangleVertsCount++;
+				_triangleVertices[_triangleVertsCount].Position = new Vector3( vertex, 0 );
+				_triangleVertices[_triangleVertsCount].Color = color;
+				_triangleVertsCount++;
+			}
+
+			if( primitiveType == PrimitiveType.LineList )
+			{
+				if( _lineVertsCount >= _lineVertices.Length )
+					flushLines();
+
+				_lineVertices[_lineVertsCount].Position = new Vector3( vertex, 0 );
+				_lineVertices[_lineVertsCount].Color = color;
+				_lineVertsCount++;
+			}
 		}
 
 
@@ -125,6 +153,22 @@ namespace Nez
 				Core.graphicsDevice.SamplerStates[0] = SamplerState.AnisotropicClamp;
 				Core.graphicsDevice.DrawUserPrimitives( PrimitiveType.TriangleList, _triangleVertices, 0, primitiveCount );
 				_triangleVertsCount -= primitiveCount * 3;
+			}
+		}
+
+
+		void flushLines()
+		{
+			if( !_hasBegun )
+				throw new InvalidOperationException( "Begin must be called before Flush can be called." );
+			
+			if( _lineVertsCount >= 2 )
+			{
+				int primitiveCount = _lineVertsCount / 2;
+				// submit the draw call to the graphics card
+				Core.graphicsDevice.SamplerStates[0] = SamplerState.AnisotropicClamp;
+				Core.graphicsDevice.DrawUserPrimitives( PrimitiveType.LineList, _lineVertices, 0, primitiveCount );
+				_lineVertsCount -= primitiveCount * 2;
 			}
 		}
 
@@ -225,9 +269,9 @@ namespace Nez
 			// Calculate angle of directional vector
 			float angle = (float)Math.Atan2( rotation.X, -rotation.Y );
 			// Create matrix for rotation
-			Matrix rotMatrix = Matrix.CreateRotationZ( angle );
+			Matrix2D rotMatrix = Matrix2D.createRotation( angle );
 			// Create translation matrix for end-point
-			Matrix endMatrix = Matrix.CreateTranslation( end.X, end.Y, 0 );
+			Matrix2D endMatrix = Matrix2D.createTranslation( end.X, end.Y );
 
 			// Setup arrow end shape
 			Vector2[] verts = new Vector2[3];
@@ -236,9 +280,9 @@ namespace Nez
 			verts[2] = new Vector2( halfWidth, -length );
 
 			// Rotate end shape
-			Vector2.Transform( verts, ref rotMatrix, verts );
+			Vector2Ext.transform( verts, ref rotMatrix, verts );
 			// Translate end shape
-			Vector2.Transform( verts, ref endMatrix, verts );
+			Vector2Ext.transform( verts, ref endMatrix, verts );
 
 			// Draw arrow end shape
 			drawPolygon( verts, 3, color );
@@ -246,7 +290,7 @@ namespace Nez
 			if( drawStartIndicator )
 			{
 				// Create translation matrix for start
-				Matrix startMatrix = Matrix.CreateTranslation( start.X, start.Y, 0 );
+				Matrix2D startMatrix = Matrix2D.createTranslation( start.X, start.Y );
 				// Setup arrow start shape
 				Vector2[] baseVerts = new Vector2[4];
 				baseVerts[0] = new Vector2( -halfWidth, length / 4 );
@@ -255,9 +299,9 @@ namespace Nez
 				baseVerts[3] = new Vector2( -halfWidth, 0 );
 
 				// Rotate start shape
-				Vector2.Transform( baseVerts, ref rotMatrix, baseVerts );
+				Vector2Ext.transform( baseVerts, ref rotMatrix, baseVerts );
 				// Translate start shape
-				Vector2.Transform( baseVerts, ref startMatrix, baseVerts );
+				Vector2Ext.transform( baseVerts, ref startMatrix, baseVerts );
 				// Draw start shape
 				drawPolygon( baseVerts, 4, color );
 			}

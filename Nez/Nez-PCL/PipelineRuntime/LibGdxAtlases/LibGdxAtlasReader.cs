@@ -1,10 +1,8 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Nez.Content;
-using System.Collections.Generic;
+using Nez.Pipeline.Content;
 using Microsoft.Xna.Framework;
-using System.Diagnostics;
 using Nez.TextureAtlases;
 using Nez.Textures;
 
@@ -40,6 +38,31 @@ namespace Nez.LibGdxAtlases
 						subtextures[i] = new NinePatchSubtexture( texture, rect, reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32() );
 					else
 						subtextures[i] = new Subtexture( texture, rect );
+
+					var hasPads = reader.ReadBoolean();
+					if( hasPads )
+					{
+						( (NinePatchSubtexture)subtextures[i] ).hasPadding = true;
+						( (NinePatchSubtexture)subtextures[i] ).padLeft = reader.ReadInt32();
+						( (NinePatchSubtexture)subtextures[i] ).padRight = reader.ReadInt32();
+						( (NinePatchSubtexture)subtextures[i] ).padTop = reader.ReadInt32();
+						( (NinePatchSubtexture)subtextures[i] ).padBottom = reader.ReadInt32();
+					}
+
+					var index = reader.ReadInt32();
+
+					// animation
+					if ( index != -1 )
+					{
+						List<Subtexture> frames;
+						if ( !atlasContainer.animations.TryGetValue( name, out frames ) )
+						{
+							frames = new List<Subtexture>();
+							atlasContainer.animations[name] = frames;
+						}
+
+						frames.Insert( index, subtextures[i] );
+					}
 
 					regionNames[i] = name;
 				}

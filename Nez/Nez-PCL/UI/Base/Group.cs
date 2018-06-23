@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
 
 namespace Nez.UI
 {
-	public class Group : Element
+	public class Group : Element, ICullable
 	{
 		internal List<Element> children = new List<Element>();
 		protected bool transform = false;
 		Matrix _previousBatcherTransform;
-
+		Rectangle? _cullingArea;
 
 		public T addElement<T>( T element ) where T : Element
 		{
@@ -166,38 +165,86 @@ namespace Nez.UI
 
 		public void drawChildren( Graphics graphics, float parentAlpha )
 		{
-			parentAlpha *= color.A;
-			if( transform )
-			{
-				for( var i = 0; i < children.Count; i++ )
-				{
-					if( !children[i].isVisible() )
-						continue;
-					
-					children[i].draw( graphics, parentAlpha );
-				}
-			}
-			else
-			{
-				// No transform for this group, offset each child.
-				float offsetX = x, offsetY = y;
-				x = 0;
-				y = 0;
-				for( var i = 0; i < children.Count; i++ )
-				{
-					if( !children[i].isVisible() )
-						continue;
-					
-					float cx = children[i].x, cy = children[i].y;
-					children[i].x = cx + offsetX;
-					children[i].y = cy + offsetY;
-					children[i].draw( graphics, parentAlpha );
-					children[i].x = cx;
-					children[i].y = cy;
-				}
-				x = offsetX;
-				y = offsetY;
-			}
+			parentAlpha *= color.A / 255.0f;
+		
+			if( _cullingArea.HasValue )
+            {
+                float cullLeft = _cullingArea.Value.X;
+                float cullRight = cullLeft + _cullingArea.Value.Width;
+                float cullBottom = _cullingArea.Value.Y;
+                float cullTop = cullBottom + _cullingArea.Value.Height;
+
+                if( transform )
+                {
+                    for( int i = 0, n = children.Count; i < n; i++ )
+                    {
+                        var child = children[i];
+                        if (!child.isVisible()) continue;
+                        float cx = child.x, cy = child.y;
+                        if( cx <= cullRight && cy <= cullTop && cx + child.width >= cullLeft &&
+                            cy + child.height >= cullBottom )
+                        {
+                            child.draw(graphics, parentAlpha);
+                        }
+                    }
+                }
+                else
+                {
+                    float offsetX = x, offsetY = y;
+                    x = 0;
+                    y = 0;
+                    for( int i = 0, n = children.Count; i < n; i++ )
+                    {
+                        var child = children[i];
+                        if( !child.isVisible() ) continue;
+                        float cx = child.x, cy = child.y;
+                        if (cx <= cullRight && cy <= cullTop && cx + child.width >= cullLeft &&
+                            cy + child.height >= cullBottom)
+                        {
+                            child.x = cx + offsetX;
+                            child.y = cy + offsetY;
+                            child.draw(graphics, parentAlpha);
+                            child.x = cx;
+                            child.y = cy;
+                        }
+                    }
+                    x = offsetX;
+                    y = offsetY;
+                }
+            }
+            else
+            {
+                // No culling, draw all children.
+                if ( transform )
+                {
+                    for( int i = 0, n = children.Count; i < n; i++ )
+                    {
+                        var child = children[i];
+                        if( !child.isVisible() ) continue;
+                        child.draw(graphics, parentAlpha);
+                    }
+                }
+                else
+                {
+                    // No transform for this group, offset each child.
+                    float offsetX = x, offsetY = y;
+                    x = 0;
+                    y = 0;
+                    for( int i = 0, n = children.Count; i < n; i++ )
+                    {
+                        var child = children[i];
+                        if( !child.isVisible() ) continue;
+                        float cx = child.x, cy = child.y;
+                        child.x = cx + offsetX;
+                        child.y = cy + offsetY;
+                        child.draw(graphics, parentAlpha);
+                        child.x = cx;
+                        child.y = cy;
+                    }
+                    x = offsetX;
+                    y = offsetY;
+                }
+            }
 		}
 
 
@@ -218,7 +265,7 @@ namespace Nez.UI
 
 		public void debugRenderChildren( Graphics graphics, float parentAlpha )
 		{
-			parentAlpha *= color.A;
+			parentAlpha *= color.A / 255.0f;
 			if( transform )
 			{
 				for( var i = 0; i < children.Count; i++ )
@@ -246,12 +293,11 @@ namespace Nez.UI
 					if( !children[i].getDebug() && !( children[i] is Group ) )
 						continue;
 
-					float cx = children[i].x, cy = children[i].y;
-					children[i].x = cx + offsetX;
-					children[i].y = cy + offsetY;
+					children[i].x += offsetX;
+					children[i].y += offsetY;
 					children[i].debugRender( graphics );
-					children[i].x = cx;
-					children[i].y = cy;
+					children[i].x -= offsetX;
+					children[i].y -= offsetY;
 				}
 				x = offsetX;
 				y = offsetY;
@@ -263,20 +309,20 @@ namespace Nez.UI
 		/// Returns the transform for this group's coordinate system
 		/// </summary>
 		/// <returns>The transform.</returns>
-		protected Matrix computeTransform()
+		protected Matrix2D computeTransform()
 		{
-			var mat = Matrix.Identity;
+			var mat = Matrix2D.identity;
 
 			if( originX != 0 || originY != 0 )
-				mat = Matrix.Multiply( mat, Matrix.CreateTranslation( -originX, -originY, 0 ) );
+				mat = Matrix2D.multiply( mat, Matrix2D.createTranslation( -originX, -originY ) );
 			
 			if( rotation != 0 )
-				mat = Matrix.Multiply( mat, Matrix.CreateRotationZ( MathHelper.ToRadians( rotation ) ) );
+				mat = Matrix2D.multiply( mat, Matrix2D.createRotation( MathHelper.ToRadians( rotation ) ) );
 
 			if( scaleX != 1 || scaleY != 1 )
-				mat = Matrix.Multiply( mat, Matrix.CreateScale( scaleX, scaleY, 1 ) );
+				mat = Matrix2D.multiply( mat, Matrix2D.createScale( scaleX, scaleY ) );
 
-			mat = Matrix.Multiply( mat, Matrix.CreateTranslation( x + originX, y + originY, 0 ) );
+			mat = Matrix2D.multiply( mat, Matrix2D.createTranslation( x + originX, y + originY ) );
 
 			// Find the first parent that transforms
 			Group parentGroup = parent;
@@ -288,7 +334,7 @@ namespace Nez.UI
 			}
 
 			if( parentGroup != null )
-				mat = Matrix.Multiply( mat, parentGroup.computeTransform() );
+				mat = Matrix2D.multiply( mat, parentGroup.computeTransform() );
 
 			return mat;
 		}
@@ -387,6 +433,10 @@ namespace Nez.UI
 
 		#endregion
 
+		public void setCullingArea( Rectangle cullingArea )
+		{
+			_cullingArea = cullingArea;
+		}
 	}
 }
 

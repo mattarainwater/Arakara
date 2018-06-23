@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
 using System.Reflection;
@@ -13,7 +13,7 @@ namespace Nez.Console
 {
 	public partial class DebugConsole
 	{
-		internal static DebugConsole instance;
+		public static DebugConsole instance;
 
 		/// <summary>
 		/// controls the scale of the console
@@ -63,9 +63,11 @@ namespace Nez.Console
 		float _repeatCounter = 0;
 		Keys? _repeatKey = null;
 		bool _canOpen;
+		public static Keys consoleKey = Keys.OemTilde;
 		#if DEBUG
 		internal RuntimeInspector _runtimeInspector;
 		#endif
+
 
 		static DebugConsole()
 		{
@@ -99,10 +101,20 @@ namespace Nez.Console
 		}
 
 
+		public void log( string format, params object[] args )
+		{
+			log( string.Format( format, args ) );
+		}
+
+
 		public void log( object obj )
 		{
-			var str = obj.ToString();
+			log( obj.ToString() );
+		}
 
+
+		public void log( string str )
+		{
 			// split up multi-line logs and log each line seperately
 			var parts = str.Split( new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries );
 			if( parts.Length > 1 )
@@ -163,7 +175,7 @@ namespace Nez.Console
 			{
 				_canOpen = true;
 			}
-			else if( Input.isKeyPressed( Keys.OemTilde, Keys.Oem8 ) )
+			else if( Input.isKeyPressed( consoleKey, Keys.Oem8 ) )
 			{
 				isOpen = true;
 				_currentState = Keyboard.GetState();
@@ -219,7 +231,7 @@ namespace Nez.Console
 			if( key != Keys.Tab && key != Keys.LeftShift && key != Keys.RightShift && key != Keys.RightAlt && key != Keys.LeftAlt && key != Keys.RightControl && key != Keys.LeftControl )
 				_tabIndex = -1;
 
-			if( key != Keys.OemTilde && key != Keys.Oem8 && key != Keys.Enter && _repeatKey != key )
+			if( key != consoleKey && key != Keys.Oem8 && key != Keys.Enter && _repeatKey != key )
 			{
 				_repeatKey = key;
 				_repeatCounter = 0;
@@ -442,8 +454,12 @@ namespace Nez.Console
 
 				case Keys.Oem8:
 				case Keys.OemTilde:
-					isOpen = _canOpen = false;
 				break;
+			}
+
+			if( key == consoleKey )
+			{
+				isOpen = _canOpen = false;
 			}
 		}
 
@@ -509,7 +525,7 @@ namespace Nez.Console
 
 			// take into account text padding. move our location up a bit and expand the Rect to accommodate
 			commandEntryRect.Location -= new Point( 0, TEXT_PADDING_Y * 2 );
-			commandEntryRect.Size += new Point( 0, TEXT_PADDING_Y * 2 );
+			commandEntryRect.Height += TEXT_PADDING_Y * 2;
 
 			Graphics.instance.batcher.drawRect( commandEntryRect, Color.Black * OPACITY );
 			var commandLineString = "> " + _currentText;
@@ -544,9 +560,9 @@ namespace Nez.Console
 #endregion
 
 
-#region Execute
+		#region Execute
 
-		public void executeCommand( string command, string[] args )
+		void executeCommand( string command, string[] args )
 		{
 			if( _commands.ContainsKey( command ) )
 				_commands[command].action( args );
@@ -555,7 +571,7 @@ namespace Nez.Console
 		}
 
 
-		public void executeFunctionKeyAction( int num )
+		void executeFunctionKeyAction( int num )
 		{
 			if( _functionKeyActions[num] != null )
 				_functionKeyActions[num]();
@@ -567,10 +583,10 @@ namespace Nez.Console
 			instance._functionKeyActions[functionKey - 1] = action;
 		}
 
-#endregion
+		#endregion
 
 
-#region Parse Commands
+		#region Parse Commands
 
 		void buildCommandsList()
 		{
@@ -588,7 +604,9 @@ namespace Nez.Console
 				var appDomainType = typeof( string ).GetTypeInfo().Assembly.GetType( "System.AppDomain" );
 				var domain = appDomainType.GetRuntimeProperty( "CurrentDomain" ).GetMethod.Invoke( null, new object[]{} );
 				var assembliesMethod = ReflectionUtils.getMethodInfo( domain, "GetAssemblies" );
-				var assemblies = assembliesMethod.Invoke( domain, new object[]{ false } ) as Assembly[];
+				// not sure about arguments, detect in runtime
+				var methodCallParams = assembliesMethod.GetParameters().Length == 0 ? new object[] { } : new object[] { false };
+				var assemblies = assembliesMethod.Invoke( domain, methodCallParams ) as Assembly[];
 
 				var ignoredAssemblies = new string[] { "mscorlib", "MonoMac", "MonoGame.Framework", "Mono.Security", "System", "OpenTK", "ObjCImplementations", "Nez" };
 				foreach( var assembly in assemblies )
@@ -733,7 +751,7 @@ namespace Nez.Console
 		}
 
 
-#region Parsing Arguments
+		#region Parsing Arguments
 
 		static string argString( string arg )
 		{
@@ -778,9 +796,9 @@ namespace Nez.Console
 			}
 		}
 
-#endregion
+		#endregion
 
-#endregion
+		#endregion
 
 	}
 }

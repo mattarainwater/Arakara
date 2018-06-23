@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Xna.Framework;
 
 
@@ -69,6 +69,7 @@ namespace Nez
 		float _friction = 0.5f;
 		float _glue = 0.01f;
 		float _inverseMass;
+		Collider _collider;
 
 
 		public ArcadeRigidbody()
@@ -159,6 +160,12 @@ namespace Nez
 		}
 
 
+		public override void onAddedToEntity()
+		{
+			_collider = entity.getComponent<Collider>();
+		}
+
+
 		void IUpdatable.update()
 		{
 			if( isImmovable )
@@ -170,15 +177,20 @@ namespace Nez
 			if( shouldUseGravity )
 				velocity += Physics.gravity * Time.deltaTime;
 			
-			entity.colliders.unregisterAllCollidersWithPhysicsSystem();
 			entity.transform.position += velocity * Time.deltaTime;
 
 			CollisionResult collisionResult;
 			// fetch anything that we might collide with at our new position
-			var neighbors = Physics.boxcastBroadphase( entity.colliders.mainCollider.bounds, entity.colliders.mainCollider.collidesWithLayers );
+			var neighbors = Physics.boxcastBroadphaseExcludingSelf( _collider, _collider.collidesWithLayers );
 			foreach( var neighbor in neighbors )
 			{
-				if( entity.colliders.mainCollider.collidesWith( neighbor, out collisionResult ) )
+				// if the neighbor collider is of the same entity, ignore it
+				if( neighbor.entity == entity )
+				{
+					continue;
+				}
+
+				if( _collider.collidesWith( neighbor, out collisionResult ) )
 				{
 					// if the neighbor has an ArcadeRigidbody we handle full collision response. If not, we calculate things based on the
 					// neighbor being immovable.
@@ -198,8 +210,6 @@ namespace Nez
 					}
 				}
 			}
-
-			entity.colliders.registerAllCollidersWithPhysicsSystem();
 		}
 
 
@@ -212,9 +222,7 @@ namespace Nez
 		{
 			if( isImmovable )
 			{
-				other.entity.colliders.unregisterAllCollidersWithPhysicsSystem();
 				other.entity.transform.position += minimumTranslationVector;
-				other.entity.colliders.registerAllCollidersWithPhysicsSystem();
 			}
 			else if( other.isImmovable )
 			{
@@ -223,10 +231,7 @@ namespace Nez
 			else
 			{
 				entity.transform.position -= minimumTranslationVector * 0.5f;
-
-				other.entity.colliders.unregisterAllCollidersWithPhysicsSystem();
 				other.entity.transform.position += minimumTranslationVector * 0.5f;
-				other.entity.colliders.registerAllCollidersWithPhysicsSystem();
 			}
 		}
 

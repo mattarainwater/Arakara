@@ -1,8 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework.Graphics;
-
-
-namespace Nez
+﻿namespace Nez
 {
 	/// <summary>
 	/// Renderer that only renders all but one renderLayer. Useful to keep UI rendering separate from the rest of the game when used in conjunction
@@ -25,7 +21,7 @@ namespace Nez
 			var cam = camera ?? scene.camera;
 			beginRender( cam );
 
-			for( var i = 0; i < scene.renderableComponents.Count; i++ )
+			for( var i = 0; i < scene.renderableComponents.count; i++ )
 			{
 				var renderable = scene.renderableComponents[i];
 				if( !excludedRenderLayers.contains( renderable.renderLayer ) && renderable.enabled && renderable.isVisibleFromCamera( cam ) )
@@ -41,7 +37,9 @@ namespace Nez
 
 		protected override void debugRender( Scene scene, Camera cam )
 		{
-			for( var i = 0; i < scene.renderableComponents.Count; i++ )
+			base.debugRender( scene, cam );
+
+			for( var i = 0; i < scene.renderableComponents.count; i++ )
 			{
 				var renderable = scene.renderableComponents[i];
 				if( !excludedRenderLayers.contains( renderable.renderLayer ) && renderable.enabled && renderable.isVisibleFromCamera( cam ) )

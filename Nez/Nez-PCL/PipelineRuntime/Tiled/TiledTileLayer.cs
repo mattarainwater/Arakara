@@ -16,15 +16,9 @@ namespace Nez.Tiled
 		public Color color = Color.White;
 
 
-		public int tileWidth
-		{
-			get { return tiledMap.tileWidth; }
-		}
+		public int tileWidth { get { return tiledMap.tileWidth; } }
 
-		public int tileHeight
-		{
-			get { return tiledMap.tileHeight; }
-		}
+		public int tileHeight { get { return tiledMap.tileHeight; } }
 
 
 		public TiledTileLayer( TiledMap map, string name, int width, int height, TiledTile[] tiles ) : base( name )
@@ -36,6 +30,10 @@ namespace Nez.Tiled
 			tiledMap = map;
 			tiles = populateTilePositions();
 		}
+
+
+		public TiledTileLayer( TiledMap map, string name, int width, int height ) : this( map, name, width, height, new TiledTile[width * height] )
+		{ }
 
 
 		/// <summary>
@@ -56,51 +54,32 @@ namespace Nez.Tiled
 				}
 			}
 
-			// now that all the tile positions are populated we loop back through and look for any tiles that are from a image collection tileset.
-			// these need special adjusting to fix the y-offset
-			for( var i = 0; i < tiles.Length; i++ )
-			{
-				if( tiles[i] == null || !( tiles[i].tileset is TiledImageCollectionTileset ) )
-					continue;
-				
-				var tilesetTile = tiles[i].tilesetTile;
-				if( tilesetTile != null && tiles[i].textureRegion != null )
-				{
-					// TODO: make this work for rotated/flipped tiles. Currently it only works if they are default aligned and with a height
-					// that is a multiple of the tilemap.tileHeight
-					var offset = ( tiles[i].textureRegion.sourceRect.Height - tiledMap.tileHeight ) / tiledMap.tileHeight;
-					tiles[i].y -= offset;
-				}
-			}
-
 			return tiles;
-		}
-
-
-		public override void draw( Batcher batcher )
-		{
-			var renderOrderFunction = getRenderOrderFunction();
-			foreach( var tile in renderOrderFunction() )
-			{
-				if( tile == null )
-					continue;
-				
-				var region = tile.textureRegion;
-				if( region != null )
-					renderLayer( batcher, tiledMap, tile, region );
-			}
 		}
 
 
 		public override void draw( Batcher batcher, Vector2 position, float layerDepth, RectangleF cameraClipBounds )
 		{
 			// offset it by the entity position since the tilemap will always expect positions in its own coordinate space
-			cameraClipBounds.location -= position;
+			cameraClipBounds.location -= ( position + offset );
 
-			var minX = tiledMap.worldToTilePositionX( cameraClipBounds.left );
-			var minY = tiledMap.worldToTilePositionY( cameraClipBounds.top );
-			var maxX = tiledMap.worldToTilePositionX( cameraClipBounds.right );
-			var maxY = tiledMap.worldToTilePositionY( cameraClipBounds.bottom );
+			int minX, minY, maxX, maxY;
+			if( tiledMap.requiresLargeTileCulling )
+			{
+				// we expand our cameraClipBounds by the excess tile width/height of the largest tiles to ensure we include tiles whose
+				// origin might be outside of the cameraClipBounds
+				minX = tiledMap.worldToTilePositionX( cameraClipBounds.left - ( tiledMap.largestTileWidth - tiledMap.tileWidth ) );
+				minY = tiledMap.worldToTilePositionY( cameraClipBounds.top - ( tiledMap.largestTileHeight - tiledMap.tileHeight ) );
+				maxX = tiledMap.worldToTilePositionX( cameraClipBounds.right + ( tiledMap.largestTileWidth - tiledMap.tileWidth ) );
+				maxY = tiledMap.worldToTilePositionY( cameraClipBounds.bottom + ( tiledMap.largestTileHeight - tiledMap.tileHeight ) );
+			}
+			else
+			{
+				minX = tiledMap.worldToTilePositionX( cameraClipBounds.left );
+				minY = tiledMap.worldToTilePositionY( cameraClipBounds.top );
+				maxX = tiledMap.worldToTilePositionX( cameraClipBounds.right );
+				maxY = tiledMap.worldToTilePositionY( cameraClipBounds.bottom );
+			}
 
 			// loop through and draw all the non-culled tiles
 			for( var y = minY; y <= maxY; y++ )
@@ -108,12 +87,22 @@ namespace Nez.Tiled
 				for( var x = minX; x <= maxX; x++ )
 				{
 					var tile = getTile( x, y );
-
 					if( tile == null )
 						continue;
 
 					var tileRegion = tile.textureRegion;
 
+					// culling for arbitrary size tiles if necessary
+					if( tiledMap.requiresLargeTileCulling )
+					{
+						// TODO: this only checks left and bottom. we should check top and right as well to deal with rotated, odd-sized tiles
+						var tileworldpos = tiledMap.tileToWorldPosition( new Point( x, y ) );
+						if( tileworldpos.X + tileRegion.sourceRect.Width < cameraClipBounds.left || tileworldpos.Y - tileRegion.sourceRect.Height > cameraClipBounds.bottom )
+							continue;
+					}
+
+					// for the y position, we need to take into account if the tile is larger than the tileHeight and shift. Tiled uses
+					// a bottom-left coordinate system and MonoGame a top-left
 					var tx = tile.x * tiledMap.tileWidth + (int)position.X;
 					var ty = tile.y * tiledMap.tileHeight + (int)position.Y;
 					var rotation = 0f;
@@ -129,7 +118,8 @@ namespace Nez.Tiled
 						{
 							spriteEffects ^= SpriteEffects.FlipVertically;
 							rotation = MathHelper.PiOver2;
-							tx += tiledMap.tileWidth;
+							tx += tiledMap.tileHeight + ( tileRegion.sourceRect.Height - tiledMap.tileHeight );
+							ty -= ( tileRegion.sourceRect.Width - tiledMap.tileWidth );
 						}
 						else if( tile.flippedHorizonally )
 						{
@@ -141,7 +131,8 @@ namespace Nez.Tiled
 						{
 							spriteEffects ^= SpriteEffects.FlipHorizontally;
 							rotation = MathHelper.PiOver2;
-							tx += tiledMap.tileWidth;
+							tx += tiledMap.tileWidth + ( tileRegion.sourceRect.Height - tiledMap.tileHeight );
+							ty += ( tiledMap.tileWidth - tileRegion.sourceRect.Width );
 						}
 						else
 						{
@@ -151,53 +142,18 @@ namespace Nez.Tiled
 						}
 					}
 
-					batcher.draw( tileRegion.texture2D, new Vector2( tx, ty ), tileRegion.sourceRect, color, rotation, Vector2.Zero, 1, spriteEffects, layerDepth );
+					// if we had no rotations (diagonal flipping) shift our y-coord to account for any non-tileSized tiles to account for
+					// Tiled being bottom-left origin
+					if( rotation == 0 )
+						ty += ( tiledMap.tileHeight - tileRegion.sourceRect.Height );
+
+					batcher.draw( tileRegion, new Vector2( tx, ty ) + offset, color, rotation, Vector2.Zero, 1, spriteEffects, layerDepth );
 				}
 			}
 		}
 
 
-		void renderLayer( Batcher batcher, TiledMap map, TiledTile tile, Subtexture region )
-		{
-			switch( map.orientation )
-			{
-				case TiledMapOrientation.Orthogonal:
-					renderOrthogonal( batcher, tile, region );
-					break;
-				case TiledMapOrientation.Isometric:
-					renderIsometric( batcher, tile, region );
-					break;
-				case TiledMapOrientation.Staggered:
-					throw new NotImplementedException( "Staggered maps are currently not supported" );
-			}
-		}
-
-
-		void renderOrthogonal( Batcher batcher, TiledTile tile, Subtexture region )
-		{
-			// not exactly sure why we need to compensate 1 pixel here. Could be a bug in MonoGame?
-			var tx = tile.x * tiledMap.tileWidth;
-			var ty = tile.y * ( tiledMap.tileHeight - 1 );
-
-			batcher.draw( region.texture2D, new Rectangle( tx, ty, region.sourceRect.Width, region.sourceRect.Height ), region.sourceRect, color );
-		}
-
-
-		void renderIsometric( Batcher batcher, TiledTile tile, Subtexture region )
-		{
-			var tx = ( tile.x * ( tiledMap.tileWidth / 2 ) ) - ( tile.y * ( tiledMap.tileWidth / 2 ) )
-                //Center
-			         + ( tiledMap.width * ( tiledMap.tileWidth / 2 ) )
-                //Compensate Bug?
-			         - ( tiledMap.tileWidth / 2 );
-                
-			var ty = ( tile.y * ( tiledMap.tileHeight / 2 ) ) + ( tile.x * ( tiledMap.tileHeight / 2 ) )
-                //Compensate Bug?
-			         - ( tiledMap.tileWidth + tiledMap.tileHeight );
-
-			batcher.draw( region.texture2D, new Rectangle( tx, ty, region.sourceRect.Width, region.sourceRect.Height ), region.sourceRect, color );
-		}
-
+		#region Tile management
 
 		/// <summary>
 		/// gets the TiledTile at the x/y coordinates. Note that these are tile coordinates not world coordinates!
@@ -212,6 +168,33 @@ namespace Nez.Tiled
 
 
 		/// <summary>
+		/// gets the TiledTile at the x/y coordinates. Note that these are tile coordinates not world coordinates!
+		/// </summary>
+		/// <returns>The tile.</returns>
+		/// <param name="x">The x coordinate.</param>
+		/// <param name="y">The y coordinate.</param>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public T getTile<T>( int x, int y ) where T : TiledTile
+		{
+			return tiles[x + y * width] as T;
+		}
+
+
+		/// <summary>
+		/// sets the tile and updates its tileset
+		/// </summary>
+		/// <returns>The tile.</returns>
+		/// <param name="tile">Tile.</param>
+		public TiledTile setTile( TiledTile tile )
+		{
+			tiles[tile.x + tile.y * width] = tile;
+			tile.tileset = tiledMap.getTilesetForTileId( tile.id );
+
+			return tile;
+		}
+
+
+		/// <summary>
 		/// nulls out the tile at the x/y coordinates
 		/// </summary>
 		/// <param name="x">The x coordinate.</param>
@@ -220,6 +203,8 @@ namespace Nez.Tiled
 		{
 			tiles[x + y * width] = null;
 		}
+
+		#endregion
 
 
 		/// <summary>
@@ -363,62 +348,79 @@ namespace Nez.Tiled
 		}
 
 
-		Func<IEnumerable<TiledTile>> getRenderOrderFunction()
+		/// <summary>
+		/// casts a line from start to end returning the first solid tile it intersects. Note that start and end and clamped to the tilemap
+		/// bounds so make sure you pass in valid positions else you may get odd results!
+		/// </summary>
+		/// <param name="start">Start.</param>
+		/// <param name="end">End.</param>
+		public TiledTile linecast( Vector2 start, Vector2 end )
 		{
-			switch( tiledMap.renderOrder )
+			var direction = end - start;
+
+			// worldToTilePosition clamps to the tilemaps bounds so no need to worry about overlow
+			var startCell = tiledMap.worldToTilePosition( start );
+			var endCell = tiledMap.worldToTilePosition( end );
+
+			start.X /= tiledMap.tileWidth;
+			start.Y /= tiledMap.tileHeight;
+
+			// what tile are we on
+			var intX = startCell.X;
+			var intY = startCell.Y;
+
+			// ensure our start cell exists
+			if( intX < 0 || intX >= tiledMap.width || intY < 0 || intY >= tiledMap.height )
+				return null;
+
+			// which way we go
+			var stepX = Math.Sign( direction.X );
+			var stepY = Math.Sign( direction.Y );
+
+			// Calculate cell boundaries. when the step is positive, the next cell is after this one meaning we add 1.
+			// If negative, cell is before this one in which case dont add to boundary
+			var boundaryX = intX + ( stepX > 0 ? 1 : 0 );
+			var boundaryY = intY + ( stepY > 0 ? 1 : 0 );
+
+			// determine the value of t at which the ray crosses the first vertical tile boundary. same for y/horizontal.
+			// The minimum of these two values will indicate how much we can travel along the ray and still remain in the current tile
+			// may be infinite for near vertical/horizontal rays
+			var tMaxX = ( boundaryX - start.X ) / direction.X;
+			var tMaxY = ( boundaryY - start.Y ) / direction.Y;
+			if( direction.X == 0f )
+				tMaxX = float.PositiveInfinity;
+			if( direction.Y == 0f )
+				tMaxY = float.PositiveInfinity;
+
+			// how far do we have to walk before crossing a cell from a cell boundary. may be infinite for near vertical/horizontal rays
+			var tDeltaX = stepX / direction.X;
+			var tDeltaY = stepY / direction.Y;
+
+			// start walking and returning the intersecting tiles
+			var tile = tiles[intX + intY * width];
+			if( tile != null )
+				return tile;
+
+			while( intX != endCell.X || intY != endCell.Y )
 			{
-				case TiledRenderOrder.LeftDown:
-					return getTilesLeftDown;
-				case TiledRenderOrder.LeftUp:
-					return getTilesLeftUp;
-				case TiledRenderOrder.RightDown:
-					return getTilesRightDown;
-				case TiledRenderOrder.RightUp:
-					return getTilesRightUp;
+				if( tMaxX < tMaxY )
+				{
+					intX += stepX;
+					tMaxX += tDeltaX;
+				}
+				else
+				{
+					intY += stepY;
+					tMaxY += tDeltaY;
+				}
+
+				tile = tiles[intX + intY * width];
+				if( tile != null )
+					return tile;
 			}
 
-			throw new NotSupportedException( string.Format( "{0} is not supported", tiledMap.renderOrder ) );
+			return null;
 		}
 
-
-		IEnumerable<TiledTile> getTilesRightDown()
-		{
-			for( var y = 0; y < height; y++ )
-			{
-				for( var x = 0; x < width; x++ )
-					yield return getTile( x, y );
-			}
-		}
-
-
-		IEnumerable<TiledTile> getTilesRightUp()
-		{
-			for( var y = height - 1; y >= 0; y-- )
-			{
-				for( var x = 0; x < width; x++ )
-					yield return getTile( x, y );
-			}
-		}
-
-
-		IEnumerable<TiledTile> getTilesLeftDown()
-		{
-			for( var y = 0; y < height; y++ )
-			{
-				for( var x = width - 1; x >= 0; x-- )
-					yield return getTile( x, y );
-			}
-		}
-
-
-		IEnumerable<TiledTile> getTilesLeftUp()
-		{
-			for( var y = height - 1; y >= 0; y-- )
-			{
-				for( var x = width - 1; x >= 0; x-- )
-					yield return getTile( x, y );
-			}
-		}
-	
 	}
 }

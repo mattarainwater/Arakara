@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
@@ -22,26 +21,49 @@ namespace Nez.Textures
 		public readonly Rectangle sourceRect;
 
 		/// <summary>
+		/// UVs for the texture region
+		/// </summary>
+		public readonly RectangleF uvs;
+
+		/// <summary>
 		/// center of the sourceRect if it had a 0,0 origin. This is basically the center in sourceRect-space.
 		/// </summary>
 		/// <value>The center.</value>
-		public Vector2 center;
-		
+		public readonly Vector2 center;
 
-		public Subtexture( Texture2D texture, Rectangle sourceRect )
+		/// <summary>
+		/// the origin that a RenderableComponent should use when using this Subtexture. Defaults to the center.
+		/// </summary>
+		public Vector2 origin;
+
+
+		public Subtexture( Texture2D texture, Rectangle sourceRect, Vector2 origin )
 		{
-			this.texture2D = texture;
+			texture2D = texture;
 			this.sourceRect = sourceRect;
 			center = new Vector2( sourceRect.Width * 0.5f, sourceRect.Height * 0.5f );
+			this.origin = origin;
+
+			var inverseTexW = 1.0f / texture2D.Width;
+			var inverseTexH = 1.0f / texture2D.Height;
+
+			uvs.x = sourceRect.X * inverseTexW;
+			uvs.y = sourceRect.Y * inverseTexH;
+			uvs.width = sourceRect.Width * inverseTexW;
+			uvs.height = sourceRect.Height * inverseTexH;
 		}
 
 
+		public Subtexture( Texture2D texture, Rectangle sourceRect ) : this( texture, sourceRect, sourceRect.getHalfSize() )
+		{ }
+
+
 		public Subtexture( Texture2D texture ) : this( texture, new Rectangle( 0, 0, texture.Width, texture.Height ) )
-		{}
+		{ }
 
 
 		public Subtexture( Texture2D texture, int x, int y, int width, int height ) : this( texture, new Rectangle( x, y, width, height ) )
-		{}
+		{ }
 
 
 		/// <summary>
@@ -53,7 +75,7 @@ namespace Nez.Textures
 		/// <param name="width">Width.</param>
 		/// <param name="height">Height.</param>
 		public Subtexture( Texture2D texture, float x, float y, float width, float height ) : this( texture, (int)x, (int)y, (int)width, (int)height )
-		{}
+		{ }
 
 
 		/// <summary>
@@ -84,11 +106,23 @@ namespace Nez.Textures
 
 			destArray[3] = new Rectangle( renderRect.X, topY, marginLeft, stretchedCenterHeight ); // middle-left
 			destArray[4] = new Rectangle( leftX, topY, stretchedCenterWidth, stretchedCenterHeight ); // middle-center
-			destArray[5] = new Rectangle( rightX, topY, marginRight, stretchedCenterHeight); // middle-right
+			destArray[5] = new Rectangle( rightX, topY, marginRight, stretchedCenterHeight ); // middle-right
 
 			destArray[6] = new Rectangle( renderRect.X, bottomY, marginLeft, marginBottom ); // bottom-left
 			destArray[7] = new Rectangle( leftX, bottomY, stretchedCenterWidth, marginBottom ); // bottom-center
 			destArray[8] = new Rectangle( rightX, bottomY, marginRight, marginBottom ); // bottom-right
+		}
+
+
+		/// <summary>
+		/// clones the Subtexture
+		/// </summary>
+		public Subtexture clone()
+		{
+			return new Subtexture( texture2D, sourceRect )
+			{
+				origin = origin
+			};
 		}
 
 
@@ -116,7 +150,7 @@ namespace Nez.Textures
 					// skip everything before the first cellOffset
 					if( i++ < cellOffset )
 						continue;
-					
+
 					subtextures.Add( new Subtexture( texture, new Rectangle( x * cellWidth, y * cellHeight, cellWidth, cellHeight ) ) );
 
 					// once we hit the max number of cells to include bail out. were done.
@@ -139,6 +173,6 @@ namespace Nez.Textures
 		{
 			return string.Format( "{0}", sourceRect );
 		}
-	
+
 	}
 }

@@ -44,7 +44,7 @@ namespace Nez.Tiled
 		public bool flippedHorizonally;
 		public bool flippedVertically;
 		public bool flippedDiagonally;
-		internal TiledTileset tileset;
+		public TiledTileset tileset;
 
 		/// <summary>
 		/// we use this for 3 states: HasValue is false means we havent yet checked for the TiledTilesetTile, less than 0 means there is no
@@ -56,6 +56,18 @@ namespace Nez.Tiled
 		public TiledTile( int id )
 		{
 			this.id = id;
+		}
+
+
+		/// <summary>
+		/// sets a new Tile id for this tile and invalidates the previous tilesetTileIndex
+		/// </summary>
+		/// <returns>The tile identifier.</returns>
+		/// <param name="id">Identifier.</param>
+		public void setTileId( int id )
+		{
+			this.id = id;
+			_tilesetTileIndex = null;
 		}
 
 

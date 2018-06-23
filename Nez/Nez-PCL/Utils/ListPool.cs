@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 
 namespace Nez
@@ -9,7 +8,7 @@ namespace Nez
 	/// </summary>
 	public static class ListPool<T>
 	{
-		static Queue<List<T>> _objectQueue = new Queue<List<T>>();
+		static readonly Queue<List<T>> _objectQueue = new Queue<List<T>>();
 
 
 		/// <summary>

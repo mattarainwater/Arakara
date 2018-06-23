@@ -1,23 +1,17 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 
 namespace Nez
 {
 	/// <summary>
-	/// by default, a RenderableComponent faces up/right. You can use the flipX/Y or face* method to adjust that to suit your needs.
+	/// concrete implementation of IRenderable. Contains convenience 
+	/// 
 	/// Subclasses MUST either override width/height or bounds!
 	/// </summary>
-	public abstract class RenderableComponent : Component, IComparable<RenderableComponent>
+	public abstract class RenderableComponent : Component, IRenderable, IComparable<RenderableComponent>
 	{
 		#region properties and fields
-
-		/// <summary>
-		/// used by Renderers to specify how this sprite should be rendered. If non-null, it is automatically disposed of when the Component
-		/// is removed from the Entity.
-		/// </summary>
-		public virtual Material material { get; set; }
 
 		/// <summary>
 		/// width of the RenderableComponent. subclasses that do not override the bounds property must implement this!
@@ -32,19 +26,21 @@ namespace Nez
 		public virtual float height { get { return bounds.height; } }
 
 		/// <summary>
-		/// offset from the parent entity. Useful for adding multiple Renderables to an Entity that need specific positioning.
+		/// the AABB that wraps this object. Used for camera culling.
 		/// </summary>
-		/// <value>The local position.</value>
-		public Vector2 localOffset
+		/// <value>The bounds.</value>
+		public virtual RectangleF bounds
 		{
-			get { return _localOffset; }
-			set { setLocalOffset( value ); }
-		}
+			get
+			{
+				if( _areBoundsDirty )
+				{
+					_bounds.calculateBounds( entity.transform.position, _localOffset, Vector2.Zero, entity.transform.scale, entity.transform.rotation, width, height );
+					_areBoundsDirty = false;
+				}
 
-		public Vector2 origin
-		{
-			get { return _origin; }
-			set { setOrigin( value ); }
+				return _bounds;
+			}
 		}
 
 		/// <summary>
@@ -58,16 +54,6 @@ namespace Nez
 		}
 
 		/// <summary>
-		/// color passed along to the Batcher when rendering
-		/// </summary>
-		public Color color = Color.White;
-
-		/// <summary>
-		/// Batchers passed along to the Batcher when rendering. flipX/flipY are helpers for setting this.
-		/// </summary>
-		public SpriteEffects spriteEffects = SpriteEffects.None;
-
-		/// <summary>
 		/// lower renderLayers are in the front and higher are in the back, just like layerDepth but not clamped to 0-1. Note that this means
 		/// higher renderLayers are sent to the Batcher first. An important fact when using the stencil buffer.
 		/// </summary>
@@ -79,63 +65,23 @@ namespace Nez
 		}
 
 		/// <summary>
-		/// determines if the sprite should be rendered normally or flipped horizontally
+		/// color passed along to the Batcher when rendering
 		/// </summary>
-		/// <value><c>true</c> if flip x; otherwise, <c>false</c>.</value>
-		public bool flipX
-		{
-			get
-			{
-				return ( spriteEffects & SpriteEffects.FlipHorizontally ) == SpriteEffects.FlipHorizontally;
-			}
-			set
-			{
-				spriteEffects = value ? ( spriteEffects | SpriteEffects.FlipHorizontally ) : ( spriteEffects & ~SpriteEffects.FlipHorizontally );
-			}
-		}
+		public Color color = Color.White;
 
 		/// <summary>
-		/// determines if the sprite should be rendered normally or flipped vertically
+		/// used by Renderers to specify how this sprite should be rendered
 		/// </summary>
-		/// <value><c>true</c> if flip y; otherwise, <c>false</c>.</value>
-		public bool flipY
-		{
-			get
-			{
-				return ( spriteEffects & SpriteEffects.FlipVertically ) == SpriteEffects.FlipVertically;
-			}
-			set
-			{
-				spriteEffects = value ? ( spriteEffects | SpriteEffects.FlipVertically ) : ( spriteEffects & ~SpriteEffects.FlipVertically );
-			}
-		}
+		public virtual Material material { get; set; }
 
 		/// <summary>
-		/// the AABB that wraps this object
+		/// offset from the parent entity. Useful for adding multiple Renderables to an Entity that need specific positioning.
 		/// </summary>
-		/// <value>The bounds.</value>
-		public virtual RectangleF bounds
+		/// <value>The local position.</value>
+		public Vector2 localOffset
 		{
-			get
-			{
-				if( _areBoundsDirty )
-				{
-					_bounds.calculateBounds( entity.transform.position, _localOffset, _origin, entity.transform.scale, entity.transform.rotation, width, height );
-					_areBoundsDirty = false;
-				}
-
-				return _bounds;
-			}
-		}
-
-		/// <summary>
-		/// helper property for setting the origin in normalized fashion (0-1 for x and y)
-		/// </summary>
-		/// <value>The origin normalized.</value>
-		public Vector2 originNormalized
-		{
-			get { return new Vector2( _origin.X / width, _origin.Y / height ); }
-			set { setOrigin( new Vector2( value.X * width, value.Y * height ) ); }
+			get { return _localOffset; }
+			set { setLocalOffset( value ); }
 		}
 
 		/// <summary>
@@ -160,7 +106,6 @@ namespace Nez
 		}
 
 		protected Vector2 _localOffset;
-		protected Vector2 _origin;
 		protected float _layerDepth;
 		protected int _renderLayer;
 		protected RectangleF _bounds;
@@ -170,9 +115,9 @@ namespace Nez
 		#endregion
 
 
-		#region Component overrides and RenderableComponent
+		#region Component overrides and IRenderable
 
-		public override void onEntityTransformChanged()
+		public override void onEntityTransformChanged( Transform.Component comp )
 		{
 			_areBoundsDirty = true;
 		}
@@ -193,32 +138,32 @@ namespace Nez
 		public override void debugRender( Graphics graphics )
 		{
 			// if we have no collider draw our bounds
-			if( entity.colliders.Count == 0 )
-				graphics.batcher.drawHollowRect( bounds, Color.Yellow );
+			if( entity.getComponent<Collider>() == null )
+				graphics.batcher.drawHollowRect( bounds, Debug.Colors.renderableBounds );
 
 			// draw a square for our pivot/origin
-			graphics.batcher.drawPixel( entity.transform.position + _localOffset, Color.DarkOrchid, 4 );
+			graphics.batcher.drawPixel( entity.transform.position + _localOffset, Debug.Colors.renderableCenter, 4 );
 		}
 
 
 		/// <summary>
-		/// called when the Renderable enters the camera frame. Note that these methods will not be called if your render method does not use
-		/// isVisibleFromCamera for its culling check.
+		/// called when the Renderable enters the camera frame. Note that these methods will not be called if your Renderer does not use
+		/// isVisibleFromCamera for its culling check. All default Renderers do.
 		/// </summary>
 		protected virtual void onBecameVisible()
-		{}
+		{ }
 
 
 		/// <summary>
-		/// called when the renderable exits the camera frame. Note that these methods will not be called if your render method does not use
-		/// isVisibleFromCamera for its culling check.
+		/// called when the renderable exits the camera frame. Note that these methods will not be called if your Renderer does not use
+		/// isVisibleFromCamera for its culling check. All default Renderers do.
 		/// </summary>
 		protected virtual void onBecameInvisible()
-		{}
+		{ }
 
 
 		public override void onRemovedFromEntity()
-		{}
+		{ }
 
 
 		/// <summary>
@@ -241,50 +186,8 @@ namespace Nez
 		public RenderableComponent setMaterial( Material material )
 		{
 			this.material = material;
-			return this;
-		}
-
-
-		/// <summary>
-		/// offset from the parent entity. Useful for adding multiple Renderables to an Entity that need specific positioning.
-		/// </summary>
-		/// <returns>The local offset.</returns>
-		/// <param name="offset">Offset.</param>
-		public RenderableComponent setLocalOffset( Vector2 offset )
-		{
-			if( _localOffset != offset )
-			{
-				_localOffset = offset;
-				_areBoundsDirty = true;
-			}
-			return this;
-		}
-
-
-		/// <summary>
-		/// sets the origin for the Renderable
-		/// </summary>
-		/// <returns>The origin.</returns>
-		/// <param name="origin">Origin.</param>
-		public RenderableComponent setOrigin( Vector2 origin )
-		{
-			if( _origin != origin )
-			{
-				_origin = origin;
-				_areBoundsDirty = true;
-			}
-			return this;
-		}
-
-
-		/// <summary>
-		/// helper for setting the origin in normalized fashion (0-1 for x and y)
-		/// </summary>
-		/// <returns>The origin normalized.</returns>
-		/// <param name="origin">Origin.</param>
-		public RenderableComponent setOriginNormalized( Vector2 value )
-		{
-			setOrigin( new Vector2( value.X * width, value.Y * height ) );
+			if( entity != null && entity.scene != null )
+				entity.scene.renderableComponents.setRenderLayerNeedsComponentSort( renderLayer );
 			return this;
 		}
 
@@ -293,7 +196,7 @@ namespace Nez
 		/// standard Batcher layerdepth. 0 is in front and 1 is in back. Changing this value will trigger a sort of the renderableComponents
 		/// </summary>
 		/// <returns>The layer depth.</returns>
-		/// <param name="value">Value.</param>
+		/// <param name="layerDepth">Value.</param>
 		public RenderableComponent setLayerDepth( float layerDepth )
 		{
 			_layerDepth = Mathf.clamp01( layerDepth );
@@ -336,6 +239,22 @@ namespace Nez
 			return this;
 		}
 
+
+		/// <summary>
+		/// offset from the parent entity. Useful for adding multiple Renderables to an Entity that need specific positioning.
+		/// </summary>
+		/// <returns>The local offset.</returns>
+		/// <param name="offset">Offset.</param>
+		public RenderableComponent setLocalOffset( Vector2 offset )
+		{
+			if( _localOffset != offset )
+			{
+				_localOffset = offset;
+				_areBoundsDirty = true;
+			}
+			return this;
+		}
+
 		#endregion
 
 
@@ -349,49 +268,6 @@ namespace Nez
 		public T getMaterial<T>() where T : Material
 		{
 			return material as T;
-		}
-
-
-		/// <summary>
-		/// Draws the Renderable with an outline. Note that this should be called on disabled Renderables since they shouldnt take part in default
-		/// rendering if they need an ouline.
-		/// </summary>
-		/// <param name="graphics">Graphics.</param>
-		/// <param name="camera">Camera.</param>
-		/// <param name="offset">Offset.</param>
-		public void drawOutline( Graphics graphics, Camera camera, int offset = 1 )
-		{
-			drawOutline( graphics, camera, Color.Black, offset );
-		}
-
-
-		public void drawOutline( Graphics graphics, Camera camera, Color outlineColor, int offset = 1 )
-		{
-			// save the stuff we are going to modify so we can restore it later
-			var originalPosition = _localOffset;
-			var originalColor = color;
-			var originalLayerDepth = _layerDepth;
-
-			// set our new values
-			color = outlineColor;
-			_layerDepth += 0.01f;
-
-			for( var i = -1; i < 2; i++ )
-			{
-				for( var j = -1; j < 2; j++ )
-				{
-					if( i != 0 || j != 0 )
-					{
-						_localOffset = originalPosition + new Vector2( i * offset, j * offset );
-						render( graphics, camera );
-					}
-				}
-			}
-
-			// restore changed state
-			_localOffset = originalPosition;
-			color = originalColor;
-			_layerDepth = originalLayerDepth;
 		}
 
 		#endregion
@@ -410,10 +286,18 @@ namespace Nez
 			if( res == 0 )
 			{
 				res = other.layerDepth.CompareTo( layerDepth );
-				if( res == 0 && other.material != null )
-					return other.material.CompareTo( material );
-			}
+				if( res == 0 )
+				{
+					// both null or equal
+					if( ReferenceEquals( material, other.material ) )
+						return 0;
 
+					if( other.material == null )
+						return -1;
+
+					return 1;
+				}
+			}
 			return res;
 		}
 

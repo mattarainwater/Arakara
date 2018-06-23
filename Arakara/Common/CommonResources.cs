@@ -1,4 +1,6 @@
-﻿using Nez.BitmapFonts;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Nez.BitmapFonts;
+using Nez.Textures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +12,7 @@ namespace Arakara.Common
     public static class CommonResources
     {
         public static BitmapFont DefaultBitmapFont { get; set; }
+
+        public static List<Subtexture> Icons { get; set; }
     }
 }

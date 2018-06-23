@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 
@@ -82,7 +81,7 @@ namespace Nez
 
 		public override void onAddedToEntity()
 		{
-			_cursorTexture = entity.scene.contentManager.Load<Texture2D>( "nez/textures/gooCursor" );
+			_cursorTexture = entity.scene.content.Load<Texture2D>( "nez/textures/gooCursor" );
 			_textureCenter = new Vector2( _cursorTexture.Width / 2, _cursorTexture.Height / 2 );
 		}
 

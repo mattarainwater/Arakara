@@ -63,7 +63,6 @@ namespace Nez.UI
 		/// <summary>
 		/// Adds the given Label to the content table
 		/// </summary>
-		/// <returns>The text.</returns>
 		/// <param name="label">Label.</param>
 		public Dialog addText( Label label )
 		{
@@ -95,10 +94,10 @@ namespace Nez.UI
 		/// <param name="stage">Stage.</param>
 		public Dialog show( Stage stage )
 		{
+			stage.addElement( this );
 			setPosition( Mathf.round( ( stage.getWidth() - getWidth() ) / 2 ), Mathf.round( ( stage.getHeight() - getHeight() ) / 2 ) );
 
 			pack();
-			stage.addElement( this );
 
 			return this;
 		}

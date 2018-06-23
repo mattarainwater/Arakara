@@ -35,9 +35,6 @@ namespace Arakara.Components
 
         public List<BattleActor> SelectedTargets { get; set; }
 
-        private TargetPolygon _targetablePolygon;
-        private TurnMarkerPolygon _turnMarkerPolygon;
-
         public BattleActor(int size = 1)
         {
             Statuses = new BattleStatusCollection();
@@ -59,9 +56,8 @@ namespace Arakara.Components
             IdleAnimation = Animations.Idle;
         }
 
-        public void AddPhase(Type phaseType)
+        public void AddPhase(Phase phase)
         {
-            var phase = (Phase)Activator.CreateInstance(phaseType, this);
             Phases.AddLast(phase);
         }
 
@@ -70,37 +66,12 @@ namespace Arakara.Components
             var nameText = entity.addComponent(new Text(CommonResources.DefaultBitmapFont, Name, new Vector2(0f, -5), Color.Gray));
             nameText.renderLayer = 70;
 
-            var targetPolygon = new TargetPolygon();
-            _targetablePolygon = entity.addComponent(targetPolygon);
-            _targetablePolygon.enabled = false;
-
-            var turnMarkerPolygon = new TurnMarkerPolygon();
-            _turnMarkerPolygon = entity.addComponent(turnMarkerPolygon);
-            _turnMarkerPolygon.enabled = false;
-
             Animator = entity.getComponent<Sprite<Animations>>();
             Animator.play(IdleAnimation);
         }
 
         public void update()
         {
-            if(Targetable)
-            {
-                _targetablePolygon.enabled = true;
-            }
-            else
-            {
-                _targetablePolygon.enabled = false;
-            }
-
-            if(IsActive)
-            {
-                _turnMarkerPolygon.enabled = true;
-            }
-            else
-            {
-                _turnMarkerPolygon.enabled = false;
-            }
         }
 
         public void ProcessTurn()

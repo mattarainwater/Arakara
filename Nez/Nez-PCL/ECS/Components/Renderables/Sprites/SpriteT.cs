@@ -1,6 +1,5 @@
 ﻿using System;
 using Nez.Textures;
-using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
 
@@ -8,11 +7,12 @@ namespace Nez.Sprites
 {
 	/// <summary>
 	/// Sprite class handles the display and animation of a sprite. It uses a suggested Enum as a key (you can use an int as well if you
-	/// prefer). If you do use an Enum it is recommended to pass in a IEqualityComparer when using an enum like CoreEvents does.
+	/// prefer). If you do use an Enum it is recommended to pass in a IEqualityComparer when using an enum like CoreEvents does. See also
+	/// the EnumEqualityComparerGenerator.tt T4 template for automatically generating the IEqualityComparer.
 	/// </summary>
 	public class Sprite<TEnum> : Sprite, IUpdatable where TEnum : struct, IComparable, IFormattable
 	{
-		public System.Action<TEnum> onAnimationCompletedEvent;
+		public event Action<TEnum> onAnimationCompletedEvent;
 		public bool isPlaying { get; private set; }
 		public int currentFrame { get; private set; }
 
@@ -26,7 +26,7 @@ namespace Nez.Sprites
 			set { play( value ); }
 		}
 
-		Dictionary<TEnum,SpriteAnimation> _animations;
+		Dictionary<TEnum, SpriteAnimation> _animations;
 
 		// playback state
 		SpriteAnimation _currentAnimation;
@@ -44,15 +44,15 @@ namespace Nez.Sprites
 		/// when the Scene is running.
 		/// </summary>
 		/// <param name="customComparer">Custom comparer.</param>
-		public Sprite( IEqualityComparer<TEnum> customComparer = null ) : base( new Subtexture( null, 0, 0, 0, 0 ) )
+		public Sprite( IEqualityComparer<TEnum> customComparer = null ) : base( Graphics.instance.pixelTexture )
 		{
-			_animations = new Dictionary<TEnum,SpriteAnimation>( customComparer );
+			_animations = new Dictionary<TEnum, SpriteAnimation>( customComparer );
 		}
 
 
 		public Sprite( IEqualityComparer<TEnum> customComparer, Subtexture subtexture ) : base( subtexture )
 		{
-			_animations = new Dictionary<TEnum,SpriteAnimation>( customComparer );
+			_animations = new Dictionary<TEnum, SpriteAnimation>( customComparer );
 		}
 
 
@@ -61,14 +61,15 @@ namespace Nez.Sprites
 		/// </summary>
 		/// <param name="subtexture">Subtexture.</param>
 		public Sprite( Subtexture subtexture ) : this( null, subtexture )
-		{}
+		{ }
 
 
 		/// <summary>
 		/// Sprite needs a Subtexture at constructor time so the first frame of the passed in animation will be used for this constructor
 		/// </summary>
-		/// <param name="subtexture">Subtexture.</param>
-		public Sprite( TEnum animationKey, SpriteAnimation animation ) : this( null, animation.frames[0].subtexture )
+		/// <param name="animationKey">Animation key.</param>
+		/// <param name="animation">Animation.</param>
+		public Sprite( TEnum animationKey, SpriteAnimation animation ) : this( null, animation.frames[0] )
 		{
 			addAnimation( animationKey, animation );
 		}
@@ -134,11 +135,10 @@ namespace Nez.Sprites
 						case AnimationCompletionBehavior.RemainOnFinalFrame:
 							return;
 						case AnimationCompletionBehavior.RevertToFirstFrame:
-							subtexture = _currentAnimation.frames[0].subtexture;
-							origin = _currentAnimation.frames[0].origin;
+							setSubtexture( _currentAnimation.frames[0] );
 							return;
 						case AnimationCompletionBehavior.HideSprite:
-							subtexture = null;
+							_subtexture = null;
 							_currentAnimation = null;
 							return;
 					}
@@ -176,8 +176,7 @@ namespace Nez.Sprites
 			if( desiredFrame != currentFrame )
 			{
 				currentFrame = desiredFrame;
-				subtexture = _currentAnimation.frames[currentFrame].subtexture;
-				origin = _currentAnimation.frames[currentFrame].origin;
+				setSubtexture( _currentAnimation.frames[currentFrame] );
 				handleFrameChanged();
 
 				// ping-pong needs special care. we don't want to double the frame time when wrapping so we man-handle the totalElapsedTime
@@ -194,24 +193,21 @@ namespace Nez.Sprites
 		#endregion
 
 
-		public Sprite<TEnum> addAnimation( TEnum key, SpriteAnimation animation, Vector2? origin = null )
+		public Sprite<TEnum> addAnimation( TEnum key, SpriteAnimation animation )
 		{
 			// if we have no subtexture use the first frame we find
-			if( subtexture == null && animation.frames.Count > 0 )
-            {
-                subtexture = animation.frames[0].subtexture;
-            }
+			if( _subtexture == null && animation.frames.Count > 0 )
+				setSubtexture( animation.frames[0] );
 			_animations[key] = animation;
 
-            if(origin.HasValue)
-            {
-                foreach (var frame in animation.frames)
-                {
-                    frame.origin = origin.Value;
-                }
-            }
-
 			return this;
+		}
+
+
+		public SpriteAnimation getAnimation( TEnum key )
+		{
+			Assert.isTrue( _animations.ContainsKey( key ), "{0} is not present in animations", key );
+			return _animations[key];
 		}
 
 
@@ -222,7 +218,7 @@ namespace Nez.Sprites
 		/// </summary>
 		/// <param name="animationKey">Animation key.</param>
 		/// <param name="startFrame">Start frame.</param>
-		public void play( TEnum animationKey, int startFrame = 0 )
+		public SpriteAnimation play( TEnum animationKey, int startFrame = 0 )
 		{
 			Assert.isTrue( _animations.ContainsKey( animationKey ), "Attempted to play an animation that doesnt exist" );
 
@@ -234,16 +230,12 @@ namespace Nez.Sprites
 			isPlaying = true;
 			_isReversed = false;
 			currentFrame = startFrame;
-			subtexture = _currentAnimation.frames[currentFrame].subtexture;
-			origin = _currentAnimation.frames[currentFrame].origin;
+			setSubtexture( _currentAnimation.frames[currentFrame] );
 
 			_totalElapsedTime = (float)startFrame * _currentAnimation.secondsPerFrame;
+			return animation;
 		}
 
-        public bool hasAnimation ( TEnum animationKey )
-        {
-            return _animations.ContainsKey(animationKey);
-        }
 
 		public bool isAnimationPlaying( TEnum animationKey )
 		{

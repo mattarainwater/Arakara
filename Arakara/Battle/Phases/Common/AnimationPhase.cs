@@ -20,8 +20,8 @@ namespace Arakara.Battle.Phases.Common
         {
             _isAnimating = true;
             Actor.Animator.play(Actor.CurrentAction.Animation);
-            Actor.Animator.onAnimationCompletedEvent = (t) => {
-                Actor.Animator.onAnimationCompletedEvent = null;
+            Actor.Animator.onAnimationCompletedEvent += (t) => {
+                Actor.Animator.onAnimationCompletedEvent += null;
                 _isAnimating = false;
             };
         }

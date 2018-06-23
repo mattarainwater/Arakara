@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+#if !FNA
 using Microsoft.Xna.Framework.Input.Touch;
+#endif
 
 
 namespace Nez
@@ -41,7 +43,9 @@ namespace Nez
 		List<GestureSample> _currentGestures = new List<GestureSample>();
 		#endif
 
+		#pragma warning disable 0649
 		bool _isConnected;
+		#pragma warning restore 0649
 
 
 		void onGraphicsDeviceReset()

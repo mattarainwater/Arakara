@@ -1,10 +1,12 @@
-﻿using System;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
 
 namespace Nez.Textures
 {
+	/// <summary>
+	/// various utilties for creating textures on the fly. These can be pretty heavy on the CPU so it's best to not try to use them every frame.
+	/// </summary>
 	public static class TextureUtils
 	{
 		public enum EdgeDetectionFilter
@@ -159,7 +161,7 @@ namespace Nez.Textures
 
 					var normal = Vector3.Normalize( new Vector3( dX * invertR, dY * invertG, 1 / normalStrength ) );
 					normal = normal * 0.5f + new Vector3( 0.5f );
-					destData[i + j * width] = new Color( normal.X, normal.Y, normal.Z, srcData[i + j * width].A );
+					destData[i + j * width] = new Color( normal.X, normal.Y, normal.Z, srcData[i + j * width].A / 255.0f );
 				}
 			}
 

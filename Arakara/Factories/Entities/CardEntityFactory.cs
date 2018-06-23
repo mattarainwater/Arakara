@@ -15,15 +15,18 @@ namespace Arakara.Factories.Entities
 {
     public class CardEntityFactory
     {
-        public CardEntityFactory()
+        private Texture2D _cardSprite;
+
+        public CardEntityFactory(Texture2D cardSprite)
         {
+            _cardSprite = cardSprite;
         }
 
-        public Entity GetCardEntity(Card card, Vector2 position, Texture2D cardSprite, int layer)
+        public Entity GetCardEntity(Card card, Vector2 position, int layer)
         {
             var cardEntity = Core.scene.createEntity("card", position);
 
-            var sprite = new Sprite(cardSprite);
+            var sprite = new Sprite(_cardSprite);
             sprite.origin = Vector2.Zero;
             sprite.setRenderLayer(layer);
             cardEntity.addComponent(sprite);

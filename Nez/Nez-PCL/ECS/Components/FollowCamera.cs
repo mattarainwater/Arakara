@@ -46,19 +46,21 @@ namespace Nez
 		public Vector2 mapSize;
 
 		Entity _targetEntity;
+		Collider _targetCollider;
 		Vector2 _desiredPositionDelta;
 		CameraStyle _cameraStyle;
 		RectangleF _worldSpaceDeadzone;
 
 		
-		public FollowCamera( Entity targetEntity, Camera camera )
+		public FollowCamera( Entity targetEntity, Camera camera, CameraStyle cameraStyle = CameraStyle.LockOn  )
 		{
 			_targetEntity = targetEntity;
+			_cameraStyle = cameraStyle;
 			this.camera = camera;
 		}
 
 
-		public FollowCamera( Entity targetEntity ) : this( targetEntity, null )
+		public FollowCamera( Entity targetEntity, CameraStyle cameraStyle = CameraStyle.LockOn ) : this( targetEntity, null, cameraStyle )
 		{}
 
 
@@ -83,7 +85,7 @@ namespace Nez
 		void IUpdatable.update()
 		{
 			// translate the deadzone to be in world space
-			var halfScreen = entity.scene.sceneRenderTargetSize.ToVector2() * 0.5f;
+			var halfScreen = camera.bounds.size * 0.5f;
 			_worldSpaceDeadzone.x = camera.position.X - halfScreen.X + deadzone.x + focusOffset.X;
 			_worldSpaceDeadzone.y = camera.position.Y - halfScreen.Y + deadzone.y + focusOffset.Y;
 			_worldSpaceDeadzone.width = deadzone.width;
@@ -160,10 +162,15 @@ namespace Nez
 			}
 			else
 			{
-				if( _targetEntity == null || _targetEntity.colliders.mainCollider == null )
-					return;
+				// make sure we have a targetCollider for CameraWindow. If we dont bail out.
+				if( _targetCollider == null )
+				{
+					_targetCollider = _targetEntity.getComponent<Collider>();
+					if( _targetCollider == null )
+						return;
+				}
 				
-				var targetBounds = _targetEntity.colliders.mainCollider.bounds;
+				var targetBounds = _targetEntity.getComponent<Collider>().bounds;
 				if( !_worldSpaceDeadzone.contains( targetBounds ) )
 				{
 					// x-axis
@@ -209,6 +216,7 @@ namespace Nez
 		/// <param name="height">Height.</param>
 		public void setCenteredDeadzone( int width, int height )
 		{
+			Assert.isFalse( camera == null, "camera is null. We cant get its bounds if its null. Either set it or wait until after this Component is added to the Entity." );
 			var cameraBounds = camera.bounds;
 			deadzone = new RectangleF( ( cameraBounds.width - width ) / 2, ( cameraBounds.height - height ) / 2, width, height );
 		}

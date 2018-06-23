@@ -47,6 +47,31 @@ namespace Nez
 		}
 
 
+		/// <summary>
+		/// gets a portion of the Rectangle with a width/height of size that is on the Edge of the Rectangle but still contained within it.
+		/// </summary>
+		/// <returns>The rect edge portion.</returns>
+		/// <param name="rect">Rect.</param>
+		/// <param name="edge">Edge.</param>
+		/// <param name="size">Size.</param>
+		public static Rectangle getRectEdgePortion( this Rectangle rect, Edge edge, int size = 1 )
+		{
+			switch( edge )
+			{
+				case Edge.Top:
+					return new Rectangle( rect.X, rect.Y, rect.Width, size );
+				case Edge.Bottom:
+					return new Rectangle( rect.X, rect.Y + rect.Height - size, rect.Width, size );
+				case Edge.Left:
+					return new Rectangle( rect.X, rect.Y, size, rect.Height );
+				case Edge.Right:
+					return new Rectangle( rect.X + rect.Width - size, rect.Y, size, rect.Height );
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+
 		public static void expandSide( ref Rectangle rect, Edge edge, int amount )
 		{
 			// ensure we have a positive value
@@ -184,15 +209,15 @@ namespace Nez
 				var worldPosX = parentPosition.X + position.X;
 				var worldPosY = parentPosition.Y + position.Y;
 
-				Matrix tempMat;
+				Matrix2D tempMat;
 				// set the reference point to world reference taking origin into account
-				var transformMatrix = Matrix.CreateTranslation( -worldPosX - origin.X, -worldPosY - origin.Y, 0f );
-				Matrix.CreateScale( scale.X, scale.Y, 1f, out tempMat ); // scale ->
-				Matrix.Multiply( ref transformMatrix, ref tempMat, out transformMatrix );
-				Matrix.CreateRotationZ( rotation, out tempMat ); // rotate ->
-				Matrix.Multiply( ref transformMatrix, ref tempMat, out transformMatrix );
-				Matrix.CreateTranslation( worldPosX, worldPosY, 0f, out tempMat ); // translate back
-				Matrix.Multiply( ref transformMatrix, ref tempMat, out transformMatrix );
+				var transformMatrix = Matrix2D.createTranslation( -worldPosX - origin.X, -worldPosY - origin.Y );
+				Matrix2D.createScale( scale.X, scale.Y, out tempMat ); // scale ->
+				Matrix2D.multiply( ref transformMatrix, ref tempMat, out transformMatrix );
+				Matrix2D.createRotation( rotation, out tempMat ); // rotate ->
+				Matrix2D.multiply( ref transformMatrix, ref tempMat, out transformMatrix );
+				Matrix2D.createTranslation( worldPosX, worldPosY, out tempMat ); // translate back
+				Matrix2D.multiply( ref transformMatrix, ref tempMat, out transformMatrix );
 
 				// TODO: this is a bit silly. we can just leave the worldPos translation in the Matrix and avoid this
 				// get all four corners in world space
@@ -202,10 +227,10 @@ namespace Nez
 				var bottomRight = new Vector2( worldPosX + width, worldPosY + height );
 
 				// transform the corners into our work space
-				Vector2.Transform( ref topLeft, ref transformMatrix, out topLeft );
-				Vector2.Transform( ref topRight, ref transformMatrix, out topRight );
-				Vector2.Transform( ref bottomLeft, ref transformMatrix, out bottomLeft );
-				Vector2.Transform( ref bottomRight, ref transformMatrix, out bottomRight );
+				Vector2Ext.transform( ref topLeft, ref transformMatrix, out topLeft );
+				Vector2Ext.transform( ref topRight, ref transformMatrix, out topRight );
+				Vector2Ext.transform( ref bottomLeft, ref transformMatrix, out bottomLeft );
+				Vector2Ext.transform( ref bottomRight, ref transformMatrix, out bottomRight );
 
 				// find the min and max values so we can concoct our bounding box
 				var minX = (int)Mathf.minOf( topLeft.X, bottomRight.X, topRight.X, bottomLeft.X );
@@ -409,6 +434,7 @@ namespace Nez
 			return result;
 		}
 
+
 		/// <summary>
 		/// returns true if the boxes are colliding
 		/// moveX and moveY will return the movement that b1 must move to avoid the collision
@@ -586,6 +612,16 @@ namespace Nez
 			return new Vector2( rect.X + rect.Width / 2, rect.Y + rect.Height / 2 );
 		}
 
+
+		/// <summary>
+		/// gets the half size of the rect
+		/// </summary>
+		/// <returns>The half size.</returns>
+		/// <param name="rect">Rect.</param>
+		public static Vector2 getHalfSize( this Rectangle rect )
+		{
+			return new Vector2( rect.Width * 0.5f, rect.Height * 0.5f );
+		}
 
 		/// <summary>
 		/// gets the max point of the rectangle, the bottom-right corner

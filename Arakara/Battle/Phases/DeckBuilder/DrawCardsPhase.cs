@@ -17,7 +17,6 @@ namespace Arakara.Battle.Phases.DeckBuilder
         private bool _drawing;
         private int _handSize;
         private DeckBuilderActor _deckBuilderActor;
-        private CardEntityFactory _factory;
 
         public DrawCardsPhase(DeckBuilderActor actor)
             : base(actor)
@@ -25,7 +24,6 @@ namespace Arakara.Battle.Phases.DeckBuilder
             _handSize = 3;
             _deckBuilderActor = actor;
             _drawing = false;
-            _factory = new CardEntityFactory();
         }
 
         protected override void initialize()
@@ -70,7 +68,11 @@ namespace Arakara.Battle.Phases.DeckBuilder
         private void CreateCardEntity(int index, Card card)
         {
             var cardPos = new Vector2(Actor.transform.position.X + (125 * (index - 1)), Actor.transform.position.Y - 175);
-            var cardEntity = _factory.GetCardEntity(card, cardPos, _deckBuilderActor.DefaultCardTexture, 10);
+            var cardEntity = _deckBuilderActor.Factory.GetCardEntity(card, cardPos, 10);
+            if(index == 0 || index == 2)
+            {
+                //cardEntity.transform.scale = new Vector2(.8f, .8f);
+            }
             _deckBuilderActor.HandEntities.Add(cardEntity);
         }
 

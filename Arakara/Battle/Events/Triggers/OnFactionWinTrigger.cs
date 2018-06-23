@@ -8,16 +8,16 @@ namespace Arakara.Battle.Events.Triggers
 {
     public class OnFactionWinTrigger : BattleEventTrigger
     {
-        public int FactionId { get; set; }
+        public Faction Faction { get; set; }
 
-        public OnFactionWinTrigger(int factionId)
+        public OnFactionWinTrigger(Faction faction)
         {
-            FactionId = factionId;
+            Faction = faction;
         }
 
         public override bool IsTriggered(BattleController controller)
         {
-            return controller.Actors.All(x => x.Faction.Id == FactionId);
+            return controller.Actors.All(x => x.Faction == Faction);
         }
     }
 }

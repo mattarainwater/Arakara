@@ -46,7 +46,7 @@ namespace Arakara.Battle.Effects
                 effectDisplayContainer.MakeEffectDisplay(displayText, displayColor);
 
                 var animator = target.getComponent<Sprite<Animations>>();
-                if(animator.hasAnimation(Animations.Hit) && dodge != 0)
+                if(animator.getAnimation(Animations.Hit) != null && dodge != 0)
                 {
                     animator.play(Animations.Hit);
                     Core.schedule(1f, (t) => {

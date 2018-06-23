@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Nez.Textures;
 using Microsoft.Xna.Framework;
-
+using System.Runtime.CompilerServices;
 
 namespace Nez
 {
@@ -71,11 +71,11 @@ namespace Nez
 		protected Material _currentMaterial;
 
 
-		public Renderer( int renderOrder ) : this( renderOrder, null )
+		protected Renderer( int renderOrder ) : this( renderOrder, null )
 		{}
 
 
-		public Renderer( int renderOrder, Camera camera )
+		protected Renderer( int renderOrder, Camera camera )
 		{
 			this.camera = camera;
 			this.renderOrder = renderOrder;
@@ -109,7 +109,8 @@ namespace Nez
 		/// </summary>
 		/// <param name="renderable">Renderable.</param>
 		/// <param name="cam">Cam.</param>
-		protected void renderAfterStateCheck( RenderableComponent renderable, Camera cam )
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		protected void renderAfterStateCheck( IRenderable renderable, Camera cam )
 		{
 			// check for Material changes
 			if( renderable.material != null && renderable.material != _currentMaterial )
@@ -157,7 +158,7 @@ namespace Nez
 			Graphics.instance.batcher.end();
 			Graphics.instance.batcher.begin( Core.scene.camera.transformMatrix );
 
-			for( var i = 0; i < scene.entities.Count; i++ )
+			for( var i = 0; i < scene.entities.count; i++ )
 			{
 				var entity = scene.entities[i];
 				if( entity.enabled )

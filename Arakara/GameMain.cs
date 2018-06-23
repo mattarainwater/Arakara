@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Nez;
 using Nez.BitmapFonts;
+using Nez.Textures;
 using System.Collections.Generic;
 
 namespace Arakara
@@ -21,7 +22,8 @@ namespace Arakara
         {
             base.Initialize();
             CommonResources.DefaultBitmapFont = Graphics.instance.bitmapFont;
-            scene = new TestDialogueScene();
+            CommonResources.Icons = Subtexture.subtexturesFromAtlas(content.Load<Texture2D>("icons"), 32, 32);
+            scene = new TestGameScene();
             VirtualButtons.SetupInput();
         }
     }

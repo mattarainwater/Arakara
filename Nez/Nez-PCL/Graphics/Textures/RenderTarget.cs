@@ -1,11 +1,10 @@
-﻿using System;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
 
 namespace Nez.Textures
 {
-	public class RenderTarget : AbstractGlobalManager
+	public class RenderTarget : IUpdatableManager
 	{
 		/// <summary>
 		/// internal class with additional lastFrameUsed field for managing temporary RenderTargets
@@ -102,7 +101,7 @@ namespace Nez.Textures
 		/// </summary>
 		public static RenderTarget2D create()
 		{
-			return create( Screen.backBufferWidth, Screen.backBufferHeight, Screen.backBufferFormat, Screen.preferredDepthStencilFormat );
+			return create( Screen.width, Screen.height, Screen.backBufferFormat, Screen.preferredDepthStencilFormat );
 		}
 
 
@@ -112,7 +111,7 @@ namespace Nez.Textures
 		/// <param name="preferredDepthFormat">Preferred depth format.</param>
 		public static RenderTarget2D create( DepthFormat preferredDepthFormat )
 		{
-			return create( Screen.backBufferWidth, Screen.backBufferHeight, Screen.backBufferFormat, preferredDepthFormat );
+			return create( Screen.width, Screen.height, Screen.backBufferFormat, preferredDepthFormat );
 		}
 
 
@@ -154,7 +153,7 @@ namespace Nez.Textures
 		#endregion
 
 
-		public override void update()
+		void IUpdatableManager.update()
 		{
 			// remove any TrackedRenderTarget2Ds that havent been used for 2 frames or more
 			for( var i = _renderTargetPool.Count - 1; i >= 0; i-- )

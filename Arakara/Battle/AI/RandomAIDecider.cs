@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Arakara.Components;
 using Nez;
+using Tenswee.Common.Extensions;
 
 namespace Arakara.Battle.AI
 {
@@ -12,7 +13,7 @@ namespace Arakara.Battle.AI
     {
         public override BattleAction ChooseAction(BattleActor self, List<BattleAction> actions, BattleController controller)
         {
-            return actions.RandomElement();
+            return actions.PickRandom();
         }
     }
 }

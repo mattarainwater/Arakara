@@ -6,6 +6,11 @@ namespace Nez
 {
 	public static class ListExt
 	{
+		/// <summary>
+		/// shuffles the list in place
+		/// </summary>
+		/// <param name="list">List.</param>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
 		public static void shuffle<T>( this IList<T> list )
 		{
 			var n = list.Count;
@@ -36,12 +41,52 @@ namespace Nez
 			return true;
 		}
 
-        public static T RandomElement<T>(this IList<T> list)
-        {
-            int k = Nez.Random.range(0, list.Count);
 
-            return list[k];
-        }
+		/// <summary>
+		/// returns the last item in the list. List should have at least one item.
+		/// </summary>
+		/// <param name="list">List.</param>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public static T lastItem<T>( this IList<T> list )
+		{
+			return list[list.Count - 1];
+		}
+
+
+		/// <summary>
+		/// gets a random item from the list. Does not empty check the list!
+		/// </summary>
+		/// <returns>The item.</returns>
+		/// <param name="list">List.</param>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public static T randomItem<T>( this IList<T> list )
+		{
+			return list[Nez.Random.range( 0, list.Count )];
+		}
+
+
+		/// <summary>
+		/// gets random items from the list. Does not empty check the list or verify that list count is greater than item count! The returned List can be put back in the pool via ListPool.free.
+		/// </summary>
+		/// <returns>The item.</returns>
+		/// <param name="list">List.</param>
+		/// <param name="itemCount">The number of random items to return from the list.</param>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public static List<T> randomItems<T>( this IList<T> list, int itemCount )
+		{
+			var set = new HashSet<T>();
+			while ( set.Count != itemCount )
+			{
+				var item = list.randomItem();
+				if ( !set.Contains( item ) )
+					set.Add( item );
+			}
+
+			var items = ListPool<T>.obtain();
+			items.AddRange( set );
+			return items;
+		}
+
 	}
 }
 

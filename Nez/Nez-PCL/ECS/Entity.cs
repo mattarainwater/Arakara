@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
-using System.Linq;
 
 
 namespace Nez
@@ -29,11 +29,6 @@ namespace Nez
 		/// list of all the components currently attached to this entity
 		/// </summary>
 		public readonly ComponentList components;
-
-		/// <summary>
-		/// list of all the Colliders currently attached to this entity
-		/// </summary>
-		public readonly ColliderList colliders;
 
 		/// <summary>
 		/// use this however you want to. It can later be used to query the scene for all Entities with a specific tag
@@ -83,10 +78,113 @@ namespace Nez
 		#endregion
 
 
+		#region Transform passthroughs
+
+		public Transform parent
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.parent; }
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			set { transform.setParent( value ); }
+		}
+
+		public int childCount
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.childCount; }
+		}
+
+		public Vector2 position
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.position; }
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			set { transform.setPosition( value ); }
+		}
+
+		public Vector2 localPosition
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.localPosition; }
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			set { transform.setLocalPosition( value ); }
+		}
+
+		public float rotation
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.rotation; }
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			set { transform.setRotation( value ); }
+		}
+
+		public float rotationDegrees
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.rotationDegrees; }
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			set { transform.setRotationDegrees( value ); }
+		}
+
+		public float localRotation
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.localRotation; }
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			set { transform.setLocalRotation( value ); }
+		}
+
+		public float localRotationDegrees
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.localRotationDegrees; }
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			set { transform.setLocalRotationDegrees( value ); }
+		}
+
+		public Vector2 scale
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.scale; }
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			set { transform.setScale( value ); }
+		}
+
+		public Vector2 localScale
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.localScale; }
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			set { transform.setLocalScale( value ); }
+		}
+
+
+		public Matrix2D worldInverseTransform
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.worldInverseTransform; }
+		}
+
+
+		public Matrix2D localToWorldTransform
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.localToWorldTransform; }
+		}
+
+
+		public Matrix2D worldToLocalTransform
+		{
+			[MethodImpl( MethodImplOptions.AggressiveInlining )]
+			get { return transform.worldToLocalTransform; }
+		}
+
+		#endregion
+
+
 		public Entity()
 		{
 			components = new ComponentList( this );
-			colliders = new ColliderList( this );
 			transform = new Transform( this );
 
 			if( Core.entitySystemsEnabled )
@@ -100,11 +198,10 @@ namespace Nez
 		}
 
 
-		internal void onTransformChanged()
+		internal void onTransformChanged( Transform.Component comp )
 		{
 			// notify our children of our changed position
-			components.onEntityTransformChanged();
-			colliders.onEntityTransformChanged();
+			components.onEntityTransformChanged( comp );
 		}
 
 
@@ -144,15 +241,9 @@ namespace Nez
 				_enabled = isEnabled;
 
 				if( _enabled )
-				{
 					components.onEntityEnabled();
-					colliders.onEntityEnabled();
-				}
 				else
-				{
 					components.onEntityDisabled();
-					colliders.onEntityDisabled();
-				}
 			}
 
 			return this;
@@ -192,7 +283,7 @@ namespace Nez
 			transform.parent = null;
 
 			// destroy any children we have
-			for( var i = 0; i < transform.childCount; i++ )
+			for( var i = transform.childCount - 1; i >= 0; i-- )
 			{
 				var child = transform.getChild( i );
 				child.entity.destroy();
@@ -227,8 +318,6 @@ namespace Nez
 
 			for( var i = 0; i < transform.childCount; i++ )
 				transform.getChild( i ).entity.attachToScene( newScene );
-
-			Debug.log( "attaching {0}. total children: {1}", name, transform.childCount );
 		}
 
 
@@ -237,7 +326,7 @@ namespace Nez
 		/// the copyFrom method should be called which will clone all Components, Colliders and Transform children for you. Note that cloned
 		/// objects will not be added to any Scene! You must add them yourself!
 		/// </summary>
-		public Entity clone( Vector2 position = default( Vector2 ) )
+		public virtual Entity clone( Vector2 position = default( Vector2 ) )
 		{
 			var entity = Activator.CreateInstance( GetType() ) as Entity;
 			entity.name = name + "(clone)";
@@ -264,16 +353,10 @@ namespace Nez
 			transform.rotation = entity.transform.rotation;
 
 			// clone Components
-			for( var i = 0; i < entity.components.Count; i++ )
+			for( var i = 0; i < entity.components.count; i++ )
 				addComponent( entity.components[i].clone() );
 			for( var i = 0; i < entity.components._componentsToAdd.Count; i++ )
 				addComponent( entity.components._componentsToAdd[i].clone() );
-
-			// clone Colliders
-			for( var i = 0; i < entity.colliders.Count; i++ )
-				colliders.add( entity.colliders[i].clone() );
-			for( var i = 0; i < entity.colliders._collidersToAdd.Count; i++ )
-				colliders.add( entity.colliders._collidersToAdd[i].clone() );
 
 			// clone any children of the Entity.transform
 			for( var i = 0; i < entity.transform.childCount; i++ )
@@ -287,37 +370,13 @@ namespace Nez
 		}
 
 
-		/// <summary>
-		/// adds a Collider to the list and registers it with the Physics system
-		/// </summary>
-		/// <param name="collider">Collider.</param>
-		/// <typeparam name="T">The 1st type parameter.</typeparam>
-		public T addCollider<T>( T collider ) where T : Collider
-		{
-			return colliders.add( collider );
-		}
-
-
-		/// <summary>
-		/// removes the Collider and unregisters it from the Pysics system
-		/// </summary>
-		/// <param name="collider">Collider.</param>
-		public void removeCollider( Collider collider )
-		{
-			colliders.remove( collider );
-		}
-
-
 		#region Entity lifecycle methods
 
 		/// <summary>
 		/// Called when this entity is added to a scene after all pending entity changes are committed
 		/// </summary>
 		public virtual void onAddedToScene()
-		{
-			// if we have a collider, we need to let it register with the Physics system when we are added to a scene
-			colliders.onEntityAddedToScene();
-		}
+		{}
 
 
 		/// <summary>
@@ -325,8 +384,6 @@ namespace Nez
 		/// </summary>
 		public virtual void onRemovedFromScene()
 		{
-			colliders.onEntityRemovedFromScene();
-
 			// if we were destroyed, remove our components. If we were just detached we need to keep our components on the Entity.
 			if( _isDestroyed )
 				components.removeAllComponents();
@@ -338,8 +395,6 @@ namespace Nez
 		/// </summary>
 		public virtual void update()
 		{
-			components.updateLists();
-			colliders.updateLists();
 			components.update();
 		}
 
@@ -351,7 +406,6 @@ namespace Nez
 		public virtual void debugRender( Graphics graphics )
 		{
 			components.debugRender( graphics );
-			colliders.debugRender( graphics );
 		}
 
 		#endregion
@@ -360,7 +414,7 @@ namespace Nez
 		#region Component Management
 
 		/// <summary>
-		/// Adds a Component to the components list. Returns Scene for chaining.
+		/// Adds a Component to the components list. Returns the Component.
 		/// </summary>
 		/// <returns>Scene.</returns>
 		/// <param name="component">Component.</param>
@@ -369,12 +423,13 @@ namespace Nez
 		{
 			component.entity = this;
 			components.add( component );
+			component.initialize();
 			return component;
 		}
 
 
 		/// <summary>
-		/// Adds a Component to the components list. Returns Scene for chaining.
+		/// Adds a Component to the components list. Returns the Component.
 		/// </summary>
 		/// <returns>Scene.</returns>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
@@ -383,6 +438,7 @@ namespace Nez
 			var component = new T();
 			component.entity = this;
 			components.add( component );
+			component.initialize();
 			return component;
 		}
 
@@ -395,6 +451,21 @@ namespace Nez
 		public T getComponent<T>() where T : Component
 		{
 			return components.getComponent<T>( false );
+		}
+
+
+		/// <summary>
+		/// Gets the first Component of type T and returns it. If no Component is found the Component will be created.
+		/// </summary>
+		/// <returns>The component.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public T getOrCreateComponent<T>() where T : Component, new()
+		{
+			var comp = components.getComponent<T>( true );
+			if( comp == null )
+				comp = addComponent<T>();
+
+			return comp;
 		}
 
 
@@ -423,7 +494,7 @@ namespace Nez
 
 
 		/// <summary>
-		/// Gets all the components of type T
+		/// Gets all the components of type T. The returned List can be put back in the pool via ListPool.free.
 		/// </summary>
 		/// <returns>The component.</returns>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
@@ -447,34 +518,14 @@ namespace Nez
 			}
 
 			return false;
-        }
+		}
 
 
-        /// <summary>
-        /// removes all Components of type T from the components list
-        /// </summary>
-        /// <param name="component">The Components to remove</param>
-        public bool removeComponents<T>() where T : Component
-        {
-            var comps = getComponents<T>();
-            if (comps != null && comps.Any())
-            {
-                foreach(var comp in comps)
-                {
-                    removeComponent(comp);
-                }
-                return true;
-            }
-
-            return false;
-        }
-
-
-        /// <summary>
-        /// removes a Component from the components list
-        /// </summary>
-        /// <param name="component">The Component to remove</param>
-        public void removeComponent( Component component )
+		/// <summary>
+		/// removes a Component from the components list
+		/// </summary>
+		/// <param name="component">The Component to remove</param>
+		public void removeComponent( Component component )
 		{
 			components.remove( component );
 		}
@@ -485,25 +536,54 @@ namespace Nez
 		/// </summary>
 		public void removeAllComponents()
 		{
-			for( var i = 0; i < components.Count; i++ )
+			for( var i = 0; i < components.count; i++ )
 				removeComponent( components[i] );
 		}
 
 		#endregion
 
 
-		#region Movement helpers
+		#region Collider management
 
-		/// <summary>
-		/// simple movement helper that should be used if you have Colliders attached to this Entity. It handles keeping the Colliders
-		/// in sync in the Physics system.
-		/// </summary>
-		/// <param name="motion">Motion.</param>
-		public void move( Vector2 motion )
+		[Obsolete( "Colliders are now Components. Use addComponent instead." )]
+		public T addCollider<T>( T collider ) where T : Collider
 		{
-			colliders.unregisterAllCollidersWithPhysicsSystem();
-			transform.position += motion;
-			colliders.registerAllCollidersWithPhysicsSystem();
+			return addComponent( collider );
+		}
+
+
+		[Obsolete( "Colliders are now Components. Use removeComponent instead." )]
+		public void removeCollider( Collider collider )
+		{
+			removeComponent( collider );
+		}
+
+
+		[Obsolete( "Colliders are now Components. Use the normal Component methods to manage Colliders." )]
+		public void removeAllColliders()
+		{
+			throw new NotImplementedException();
+		}
+
+
+		[Obsolete( "Colliders are now Components. Use the normal Component methods to manage Colliders." )]
+		public T getCollider<T>( bool onlyReturnInitializedColliders = false ) where T : Collider
+		{
+			return getComponent<T>( onlyReturnInitializedColliders );
+		}
+
+
+		[Obsolete( "Colliders are now Components. Use the normal Component methods to manage Colliders." )]
+		public void getColliders( List<Collider> colliders )
+		{
+			getComponents( colliders );
+		}
+
+
+		[Obsolete( "Colliders are now Components. Use the normal Component methods to manage Colliders." )]
+		public List<Collider> getColliders()
+		{
+			return getComponents<Collider>();
 		}
 
 		#endregion

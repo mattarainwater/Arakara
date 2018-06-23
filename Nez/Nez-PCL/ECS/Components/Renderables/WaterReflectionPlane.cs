@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
 
@@ -49,7 +48,7 @@ namespace Nez
 		{
 			// we need to send the top of of the plane to the Effect
 			var screenSpaceTop = entity.scene.camera.worldToScreenPoint( entity.transform.position );
-			( material as WaterReflectionMaterial ).typedEffect.screenSpaceVerticalOffset = screenSpaceTop.Y / entity.scene.sceneRenderTargetSize.Y;
+			_waterReflectionMaterial.effect.screenSpaceVerticalOffset = screenSpaceTop.Y / entity.scene.sceneRenderTargetSize.Y;
 
 			graphics.batcher.draw( _texture, bounds, new Rectangle( 0, 0, 1, 1 ), color );
 		}

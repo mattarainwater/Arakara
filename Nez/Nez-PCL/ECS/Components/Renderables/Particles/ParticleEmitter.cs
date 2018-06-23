@@ -1,17 +1,13 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
-using Nez.Textures;
-using System.IO;
 
 
 namespace Nez.Particles
 {
 	public class ParticleEmitter : RenderableComponent, IUpdatable
 	{
-		public override float width { get { return 5f; } }
-		public override float height { get { return 5f; } }
+		public override RectangleF bounds { get { return _bounds; } }
 
 		public bool isPaused { get { return _isPaused; } }
 		public bool isPlaying { get { return _active && !_isPaused; } }
@@ -68,14 +64,14 @@ namespace Nez.Particles
 			collisionConfig.minKillSpeedSquared = float.MinValue;
 			collisionConfig.radiusScale = 0.8f;
 
-			initialize();
+			init();
 		}
 
 
 		/// <summary>
 		/// creates the Batcher and loads the texture if it is available
 		/// </summary>
-		void initialize()
+		void init()
 		{
 			// prep our custom BlendState and set the Material with it
 			var blendState = new BlendState();
@@ -130,6 +126,10 @@ namespace Nez.Particles
 				}
 			}
 
+			var min = new Vector2( float.MaxValue, float.MaxValue );
+			var max = new Vector2( float.MinValue, float.MinValue );
+			var maxParticleSize = float.MinValue;
+
 			// loop through all the particles updating their location and color
 			for( var i = _particles.Count - 1; i >= 0; i-- )
 			{
@@ -142,6 +142,29 @@ namespace Nez.Particles
 					Pool<Particle>.free( currentParticle );
 					_particles.RemoveAt( i );
 				}
+				else
+				{
+					// particle is good. collect min/max positions for the bounds
+					var pos = _emitterConfig.simulateInWorldSpace ? currentParticle.spawnPosition : rootPosition;
+					pos += currentParticle.position;
+					Vector2.Min( ref min, ref pos, out min );
+					Vector2.Max( ref max, ref pos, out max );
+					maxParticleSize = System.Math.Max( maxParticleSize, currentParticle.particleSize );
+				}
+			}
+
+			_bounds.location = min;
+			_bounds.width = max.X - min.X;
+			_bounds.height = max.Y - min.Y;
+
+			if( _emitterConfig.subtexture == null )
+			{
+				_bounds.inflate( 1 * maxParticleSize, 1 * maxParticleSize );
+			}
+			else
+			{
+				maxParticleSize /= _emitterConfig.subtexture.sourceRect.Width;
+				_bounds.inflate( _emitterConfig.subtexture.sourceRect.Width * maxParticleSize, _emitterConfig.subtexture.sourceRect.Height * maxParticleSize );
 			}
 		}
 
@@ -161,28 +184,9 @@ namespace Nez.Particles
 				var pos = _emitterConfig.simulateInWorldSpace ? currentParticle.spawnPosition : rootPosition;
 
 				if( _emitterConfig.subtexture == null )
-					graphics.batcher.draw( graphics.pixelTexture, pos + currentParticle.position, graphics.pixelTexture.sourceRect, currentParticle.color, currentParticle.rotation, Vector2.One, currentParticle.particleSize * 0.5f, SpriteEffects.None, layerDepth );
+					graphics.batcher.draw( graphics.pixelTexture, pos + currentParticle.position, currentParticle.color, currentParticle.rotation, Vector2.One, currentParticle.particleSize * 0.5f, SpriteEffects.None, layerDepth );
 				else
-					graphics.batcher.draw( _emitterConfig.subtexture, pos + currentParticle.position, _emitterConfig.subtexture.sourceRect, currentParticle.color, currentParticle.rotation, _emitterConfig.subtexture.center, currentParticle.particleSize / _emitterConfig.subtexture.sourceRect.Width, SpriteEffects.None, layerDepth );
-			}
-		}
-
-
-		public override void debugRender( Graphics graphics )
-		{
-			// we still render when we are paused
-			if( !_active && !_isPaused )
-				return;
-
-			var rootPosition = entity.transform.position + _localOffset;
-
-			// loop through all the particles updating their location and color
-			for( var i = 0; i < _particles.Count; i++ )
-			{
-				var currentParticle = _particles[i];
-				var pos = _emitterConfig.simulateInWorldSpace ? currentParticle.spawnPosition : rootPosition;
-
-				graphics.batcher.drawHollowRect( pos + currentParticle.position - new Vector2( currentParticle.particleSize * 0.5f, currentParticle.particleSize * 0.5f ), currentParticle.particleSize, currentParticle.particleSize, Color.IndianRed );
+					graphics.batcher.draw( _emitterConfig.subtexture, pos + currentParticle.position, currentParticle.color, currentParticle.rotation, _emitterConfig.subtexture.center, currentParticle.particleSize / _emitterConfig.subtexture.sourceRect.Width, SpriteEffects.None, layerDepth );
 			}
 		}
 
@@ -251,7 +255,7 @@ namespace Nez.Particles
 		{
 			var rootPosition = entity.transform.position + _localOffset;
 
-			initialize();
+			init();
 			_active = true;
 			for( var i = 0; i < count; i++ )
 				addParticle( rootPosition );

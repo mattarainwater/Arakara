@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using System.Diagnostics;
 
 
 namespace Nez.PhysicsShapes
@@ -8,25 +7,55 @@ namespace Nez.PhysicsShapes
 	public class Circle : Shape
 	{
 		public float radius;
+		internal float _originalRadius;
 
 
 		public Circle( float radius )
 		{
 			this.radius = radius;
+			_originalRadius = radius;
+		}
+
+
+		#region Shape abstract methods
+
+		/// <summary>
+		/// internal hack used by Particles so they can reuse a Circle for all collision checks
+		/// </summary>
+		/// <param name="radius">Radius.</param>
+		/// <param name="position">Position.</param>
+		internal void recalculateBounds( float radius, Vector2 position )
+		{
+			_originalRadius = radius;
+			this.radius = radius;
+			this.position = position;
+			bounds = new RectangleF( position.X - radius, position.Y - radius, radius * 2f, radius * 2f );
 		}
 
 
 		internal override void recalculateBounds( Collider collider )
 		{
-			position = collider.absolutePosition;
-			bounds = new RectangleF( collider.entity.transform.position.X + collider.localOffset.X + collider.origin.X - radius, collider.entity.transform.position.Y + collider.localOffset.Y + collider.origin.Y - radius, radius * 2f, radius * 2f );
-		}
+			// if we dont have rotation or dont care about TRS we use localOffset as the center so we'll start with that
+			center = collider.localOffset;
 
+			if( collider.shouldColliderScaleAndRotateWithTransform )
+			{
+				// we only scale lineraly being a circle so we'll use the max value
+				var scale = collider.entity.transform.scale;
+				var hasUnitScale = scale.X == 1 && scale.Y == 1;
+				var maxScale = Math.Max( scale.X, scale.Y );
+				radius = _originalRadius * maxScale;
 
-		internal void recalculateBounds( float radius, Vector2 position )
-		{
-			this.radius = radius;
-			this.position = position;
+				if( collider.entity.transform.rotation != 0 )
+				{
+					// to deal with rotation with an offset origin we just move our center in a circle around 0,0 with our offset making the 0 angle
+					var offsetAngle = Mathf.atan2( collider.localOffset.Y, collider.localOffset.X ) * Mathf.rad2Deg;
+					var offsetLength = hasUnitScale ? collider._localOffsetLength : ( collider.localOffset * collider.entity.transform.scale ).Length();
+					center = Mathf.pointOnCircle( Vector2.Zero, offsetLength, collider.entity.transform.rotationDegrees + offsetAngle );
+				}
+			}
+
+			position = collider.entity.transform.position + center;
 			bounds = new RectangleF( position.X - radius, position.Y - radius, radius * 2f, radius * 2f );
 		}
 
@@ -34,7 +63,9 @@ namespace Nez.PhysicsShapes
 		public override bool overlaps( Shape other )
 		{
 			CollisionResult result;
-			if( other is Box )
+
+			// Box is only optimized for unrotated
+			if( other is Box && ( other as Box ).isUnrotated )
 				return Collisions.rectToCircle( ref other.bounds, position, radius );
 
 			if( other is Circle )
@@ -49,7 +80,7 @@ namespace Nez.PhysicsShapes
 
 		public override bool collidesWithShape( Shape other, out CollisionResult result )
 		{
-			if( other is Box )
+			if( other is Box && ( other as Box ).isUnrotated )
 				return ShapeCollisions.circleToBox( this, other as Box, out result );
 
 			if( other is Circle )
@@ -70,6 +101,19 @@ namespace Nez.PhysicsShapes
 
 
 		/// <summary>
+		/// Gets whether or not the provided point lie within the bounds of this <see cref="Circle"/>.
+		/// </summary>
+		/// <param name="point">the point</param>
+		/// <returns><c>true</c> if the provided coordinates lie inside this <see cref="Circle"/>; <c>false</c> otherwise.</returns>
+		public override bool containsPoint( Vector2 point )
+		{
+			return ( ( point - position ).LengthSquared() <= radius * radius );
+		}
+
+		#endregion
+
+
+		/// <summary>
 		/// Gets the point at the edge of this <see cref="Circle"/> from the provided angle
 		/// </summary>
 		/// <param name="angle">an angle in radians</param>
@@ -86,20 +130,9 @@ namespace Nez.PhysicsShapes
 		/// <param name="x">The x coordinate of the point to check for containment.</param>
 		/// <param name="y">The y coordinate of the point to check for containment.</param>
 		/// <returns><c>true</c> if the provided coordinates lie inside this <see cref="Circle"/>; <c>false</c> otherwise.</returns>
-		public bool contains( float x, float y )
+		public bool containsPoint( float x, float y )
 		{
-			return contains( new Vector2( x, y ) );
-		}
-
-
-		/// <summary>
-		/// Gets whether or not the provided point lie within the bounds of this <see cref="Circle"/>.
-		/// </summary>
-		/// <param name="oint">the point</param>
-		/// <returns><c>true</c> if the provided coordinates lie inside this <see cref="Circle"/>; <c>false</c> otherwise.</returns>
-		public bool contains( Vector2 point )
-		{
-			return ( ( point - position ).LengthSquared() <= radius * radius );
+			return containsPoint( new Vector2( x, y ) );
 		}
 
 
@@ -107,9 +140,15 @@ namespace Nez.PhysicsShapes
 		/// Gets whether or not the provided <see cref="Vector2"/> lies within the bounds of this <see cref="Circle"/>.
 		/// </summary>
 		/// <param name="point">Point.</param>
-		public bool contains( ref Vector2 point )
+		public bool containsPoint( ref Vector2 point )
 		{
 			return ( point - position ).LengthSquared() <= radius * radius;
+		}
+
+
+		public override bool pointCollidesWithShape( Vector2 point, out CollisionResult result )
+		{
+			return ShapeCollisions.pointToCircle( point, this, out result );
 		}
 
 	}

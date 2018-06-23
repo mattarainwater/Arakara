@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Nez.PhysicsShapes;
 
@@ -48,7 +49,7 @@ namespace Nez.Spatial
 		{
 			_cellSize = cellSize;
 			_inverseCellSize = 1f / _cellSize;
-			_raycastParser = new RaycastResultParser( cellSize );
+			_raycastParser = new RaycastResultParser();
 		}
 
 
@@ -58,6 +59,7 @@ namespace Nez.Spatial
 		/// <returns>The coords.</returns>
 		/// <param name="x">The x coordinate.</param>
 		/// <param name="y">The y coordinate.</param>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		Point cellCoords( int x, int y )
 		{
 			return new Point( Mathf.floorToInt( x * _inverseCellSize ), Mathf.floorToInt( y * _inverseCellSize ) );
@@ -70,6 +72,7 @@ namespace Nez.Spatial
 		/// <returns>The coords.</returns>
 		/// <param name="x">The x coordinate.</param>
 		/// <param name="y">The y coordinate.</param>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		Point cellCoords( float x, float y )
 		{
 			return new Point( Mathf.floorToInt( x * _inverseCellSize ), Mathf.floorToInt( y * _inverseCellSize ) );
@@ -83,6 +86,7 @@ namespace Nez.Spatial
 		/// <param name="x">The x coordinate.</param>
 		/// <param name="y">The y coordinate.</param>
 		/// <param name="createCellIfEmpty">If set to <c>true</c> create cell if empty.</param>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		List<Collider> cellAtPosition( int x, int y, bool createCellIfEmpty = false )
 		{
 			List<Collider> cell = null;
@@ -273,14 +277,19 @@ namespace Nez.Spatial
 			// TODO: check gridBounds to ensure the ray starts/ends in the grid. watch out for end cells since they report out of bounds due to int comparison
 
 			// what voxel are we on
-			var intX = Mathf.fastFloorToInt( start.X );
-			var intY = Mathf.fastFloorToInt( start.Y );
+			var intX = Mathf.floorToInt( start.X );
+			var intY = Mathf.floorToInt( start.Y );
 
 			// which way we go
 			var stepX = Math.Sign( ray.direction.X );
 			var stepY = Math.Sign( ray.direction.Y );
 
-			// Calculate cell boundaries. when the step is positive, the next cell is after this one meening we add 1.
+            // we make sure that if we're on the same line or row we don't step 
+            // in the unneeded direction
+			if (intX == endCell.X) stepX = 0;
+			if (intY == endCell.Y) stepY = 0;
+
+			// Calculate cell boundaries. when the step is positive, the next cell is after this one meaning we add 1.
 			// If negative, cell is before this one in which case dont add to boundary
 			var boundaryX = intX + ( stepX > 0 ? 1 : 0 );
 			var boundaryY = intY + ( stepY > 0 ? 1 : 0 );
@@ -290,9 +299,9 @@ namespace Nez.Spatial
 			// may be infinite for near vertical/horizontal rays
 			var tMaxX = ( boundaryX - start.X ) / ray.direction.X;
 			var tMaxY = ( boundaryY - start.Y ) / ray.direction.Y;
-			if( ray.direction.X == 0f )
+			if( ray.direction.X == 0f || stepX == 0)
 				tMaxX = float.PositiveInfinity;
-			if( ray.direction.Y == 0f )
+            if( ray.direction.Y == 0f || stepY == 0 )
 				tMaxY = float.PositiveInfinity;
 
 			// how far do we have to walk before crossing a cell from a cell boundary. may be infinite for near vertical/horizontal rays
@@ -302,7 +311,7 @@ namespace Nez.Spatial
 			// start walking and returning the intersecting cells.
 			var cell = cellAtPosition( intX, intY );
 			//debugDrawCellDetails( intX, intY, cell != null ? cell.Count : 0 );
-			if( _raycastParser.checkRayIntersection( intX, intY, cell ) )
+			if( cell != null && _raycastParser.checkRayIntersection( intX, intY, cell ) )
 			{
 				_raycastParser.reset();
 				return _raycastParser.hitCounter;
@@ -322,8 +331,7 @@ namespace Nez.Spatial
 				}
 
 				cell = cellAtPosition( intX, intY );
-				//debugDrawCellDetails( intX, intY, cell != null ? cell.Count : 0 );
-				if( _raycastParser.checkRayIntersection( intX, intY, cell ) )
+				if( cell != null && _raycastParser.checkRayIntersection( intX, intY, cell ) )
 				{
 					_raycastParser.reset();
 					return _raycastParser.hitCounter;
@@ -459,12 +467,14 @@ namespace Nez.Spatial
 		/// <returns>The key.</returns>
 		/// <param name="x">The x coordinate.</param>
 		/// <param name="y">The y coordinate.</param>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		long getKey( int x, int y )
 		{
-			return (long)x << 32 | (long)(uint)y;
+			return unchecked((long)x << 32 | (uint)y);
 		}
 
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public void add( int x, int y, List<Collider> list )
 		{
 			_store.Add( getKey( x, y ), list );
@@ -475,6 +485,7 @@ namespace Nez.Spatial
 		/// removes the collider from the Lists the Dictionary stores using a brute force approach
 		/// </summary>
 		/// <param name="obj">Object.</param>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public void remove( Collider obj )
 		{
 			foreach( var list in _store.Values )
@@ -485,6 +496,7 @@ namespace Nez.Spatial
 		}
 
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool tryGetValue( int x, int y, out List<Collider> list )
 		{
 			return _store.TryGetValue( getKey( x, y ), out list );
@@ -495,6 +507,7 @@ namespace Nez.Spatial
 		/// gets all the Colliders currently in the dictionary
 		/// </summary>
 		/// <returns>The all objects.</returns>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public HashSet<Collider> getAllObjects()
 		{
 			var set = new HashSet<Collider>();
@@ -533,13 +546,6 @@ namespace Nez.Spatial
 		int _layerMask;
 
 
-		public RaycastResultParser( int cellSize )
-		{
-			//_cellSize = cellSize;
-			//_hitTesterRect = new Rectangle( 0, 0, _cellSize, _cellSize );
-		}
-
-
 		public void start( ref Ray2D ray, RaycastHit[] hits, int layerMask )
 		{
 			_ray = ray;
@@ -550,7 +556,7 @@ namespace Nez.Spatial
 
 
 		/// <summary>
-		/// returns true if the hits array gets filled
+		/// returns true if the hits array gets filled. cell must not be null!
 		/// </summary>
 		/// <returns><c>true</c>, if ray intersection was checked, <c>false</c> otherwise.</returns>
 		/// <param name="ray">Ray.</param>
@@ -559,11 +565,9 @@ namespace Nez.Spatial
 		/// <param name="cell">Cell.</param>
 		/// <param name="hits">Hits.</param>
 		/// <param name="hitCounter">Hit counter.</param>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool checkRayIntersection( int cellX, int cellY, List<Collider> cell )
 		{
-			if( cell == null )
-				return false;
-			
 			float fraction;
 			for( var i = 0; i < cell.Count; i++ )
 			{
@@ -589,14 +593,14 @@ namespace Nez.Spatial
 				var colliderBounds = potential.bounds;
 				if( colliderBounds.rayIntersects( ref _ray, out fraction ) && fraction <= 1.0f )
 				{
-					// check to see if the raycast hit at a 0 fraction which would indicate that it started inside the collider
-					if( !Physics.raycastsStartInColliders && fraction == 0f )
-						continue;
-
-					// TODO: if this is a BoxCollider we are all done. if it isnt we need to check for a more detailed collision
 					if( potential.shape.collidesWithLine( _ray.start, _ray.end, out _tempHit ) )
 					{
+						// check to see if the raycast started inside the collider if we should excluded those rays
+						if( !Physics.raycastsStartInColliders && potential.shape.containsPoint( _ray.start ) )
+							continue;
+						
 						// TODO: make sure the collision point is in the current cell and if it isnt store it off for later evaluation
+						// this would be for giant objects with odd shapes that bleed into adjacent cells
 						//_hitTesterRect.X = cellX * _cellSize;
 						//_hitTesterRect.Y = cellY * _cellSize;
 						//if( !_hitTesterRect.Contains( _tempHit.point ) )
@@ -626,6 +630,7 @@ namespace Nez.Spatial
 		}
 
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public void reset()
 		{
 			_hits = null;

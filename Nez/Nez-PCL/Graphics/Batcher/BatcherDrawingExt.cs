@@ -131,12 +131,12 @@ namespace Nez
 		public static void drawCircle( this Batcher batcher, Vector2 position, float radius, Color color, float thickness = 1f, int resolution = 12 )
 		{
 			var last = Vector2.UnitX * radius;
-			var lastP = Mathf.perpendicularVector( last );
+			var lastP = Vector2Ext.perpendicular( last );
 
 			for( int i = 1; i <= resolution; i++ )
 			{
 				var at = Mathf.angleToVector( i * MathHelper.PiOver2 / resolution, radius );
-				var atP = Mathf.perpendicularVector( at );
+				var atP = Vector2Ext.perpendicular( at );
 
 				drawLine( batcher, position + last, position + at, color, thickness );
 				drawLine( batcher, position - last, position - at, color, thickness );
@@ -149,9 +149,9 @@ namespace Nez
 		}
 
 
-		public static void drawCircle( this Batcher batcher, float x, float y, float radius, Color color, int resolution )
+		public static void drawCircle( this Batcher batcher, float x, float y, float radius, Color color, int thickness = 1, int resolution = 12 )
 		{
-			drawCircle( batcher, new Vector2( x, y ), radius, color, resolution );
+			drawCircle( batcher, new Vector2( x, y ), radius, color, thickness, resolution );
 		}
 
 		#endregion
@@ -177,7 +177,6 @@ namespace Nez
 
 		public static void drawRect( this Batcher batcher, Rectangle rect, Color color )
 		{
-			_tempRect = rect;
 			batcher.draw( Graphics.instance.pixelTexture, rect, Graphics.instance.pixelTexture.sourceRect, color );
 		}
 
@@ -186,46 +185,35 @@ namespace Nez
 
 		#region Hollow Rect
 
-		public static void drawHollowRect( this Batcher batcher, float x, float y, float width, float height, Color color )
+		public static void drawHollowRect( this Batcher batcher, float x, float y, float width, float height, Color color, float thickness = 1 )
 		{
-			_tempRect.X = (int)x;
-			_tempRect.Y = (int)y;
-			_tempRect.Width = (int)width;
-			_tempRect.Height = 1;
+			var tl = new Vector2( x, y ).round();
+			var tr = new Vector2( x + width, y ).round();
+			var br = new Vector2( x + width, y + height ).round();
+			var bl = new Vector2( x, y + height ).round();
 
-			batcher.draw( Graphics.instance.pixelTexture, _tempRect, Graphics.instance.pixelTexture.sourceRect, color );
-
-			_tempRect.Y += (int)height - 1;
-
-			batcher.draw( Graphics.instance.pixelTexture, _tempRect, Graphics.instance.pixelTexture.sourceRect, color );
-
-			_tempRect.Y -= (int)height - 1;
-			_tempRect.Width = 1;
-			_tempRect.Height = (int)height;
-
-			batcher.draw( Graphics.instance.pixelTexture, _tempRect, Graphics.instance.pixelTexture.sourceRect, color );
-
-			_tempRect.X += (int)width - 1;
-
-			batcher.draw( Graphics.instance.pixelTexture, _tempRect, Graphics.instance.pixelTexture.sourceRect, color );
+			batcher.drawLine( tl, tr, color, thickness );
+			batcher.drawLine( tr, br, color, thickness );
+			batcher.drawLine( br, bl, color, thickness );
+			batcher.drawLine( bl, tl, color, thickness );
 		}
 
 
-		public static void drawHollowRect( this Batcher batcher, Vector2 position, float width, float height, Color color )
+		public static void drawHollowRect( this Batcher batcher, Vector2 position, float width, float height, Color color, float thickness = 1 )
 		{
-			drawHollowRect( batcher, position.X, position.Y, width, height, color );
+			drawHollowRect( batcher, position.X, position.Y, width, height, color, thickness );
 		}
 
 
-		public static void drawHollowRect( this Batcher batcher, Rectangle rect, Color color )
+		public static void drawHollowRect( this Batcher batcher, Rectangle rect, Color color, float thickness = 1 )
 		{
-			drawHollowRect( batcher, rect.X, rect.Y, rect.Width, rect.Height, color );
+			drawHollowRect( batcher, rect.X, rect.Y, rect.Width, rect.Height, color, thickness );
 		}
 
 
-		public static void drawHollowRect( this Batcher batcher, RectangleF rect, Color color )
+		public static void drawHollowRect( this Batcher batcher, RectangleF rect, Color color, float thickness = 1 )
 		{
-			drawHollowRect( batcher, rect.x, rect.y, rect.width, rect.height, color );
+			drawHollowRect( batcher, rect.x, rect.y, rect.width, rect.height, color, thickness );
 		}
 
 		#endregion

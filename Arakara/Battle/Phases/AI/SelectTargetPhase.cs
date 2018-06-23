@@ -19,7 +19,7 @@ namespace Arakara.Battle.Phases.AI
 
         protected override void update()
         {
-            var enemyActor = Actor.Controller.Actors.FirstOrDefault(y => y.Faction.Id != Actor.Faction.Id);
+            var enemyActor = Actor.Controller.Actors.FirstOrDefault(y => y.Faction != Actor.Faction);
             Actor.SelectTarget(enemyActor);
             IsFinished = true;
         }

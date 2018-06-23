@@ -1,37 +1,23 @@
-﻿using System;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-using Nez.BitmapFonts;
+﻿using Microsoft.Xna.Framework;
+using Nez.Sprites;
 
 
 namespace Nez
 {
-	public class Text : RenderableComponent
+	public class Text : Sprite
 	{
-		public enum HorizontalAlign
+		public override RectangleF bounds
 		{
-			Left,
-			Center,
-			Right
-		};
+			get
+			{
+				if( _areBoundsDirty )
+				{
+					_bounds.calculateBounds( entity.transform.position, _localOffset, _origin, entity.transform.scale, entity.transform.rotation, _size.X, _size.Y );
+					_areBoundsDirty = false;
+				}
 
-
-		public enum VerticalAlign
-		{
-			Top,
-			Center,
-			Bottom
-		};
-
-
-		public override float width
-		{
-			get { return _size.X; }
-		}
-
-		public override float height
-		{
-			get { return _size.Y; }
+				return _bounds;
+			}
 		}
 
 		/// <summary>
@@ -41,12 +27,7 @@ namespace Nez
 		public string text
 		{
 			get { return _text; }
-			set
-			{
-				_text = value;
-				updateSize();
-				updateCentering();
-			}
+			set { setText( value ); }
 		}
 
 		/// <summary>
@@ -56,11 +37,7 @@ namespace Nez
 		public HorizontalAlign horizontalOrigin
 		{
 			get { return _horizontalAlign; }
-			set
-			{
-				_horizontalAlign = value;
-				updateCentering();
-			}
+			set { setHorizontalAlign( value ); }
 		}
 
 		/// <summary>
@@ -70,11 +47,7 @@ namespace Nez
 		public VerticalAlign verticalOrigin
 		{
 			get { return _verticalAlign; }
-			set
-			{
-				_verticalAlign = value;
-				updateCentering();
-			}
+			set { setVerticalAlign( value ); }
 		}
 
 
@@ -85,11 +58,11 @@ namespace Nez
 		Vector2 _size;
 
 
-		public Text( IFont font, string text, Vector2 position, Color color )
+		public Text( IFont font, string text, Vector2 localOffset, Color color )
 		{
 			_font = font;
 			_text = text;
-			_localOffset = position;
+			_localOffset = localOffset;
 			this.color = color;
 			_horizontalAlign = HorizontalAlign.Left;
 			_verticalAlign = VerticalAlign.Top;
@@ -169,8 +142,9 @@ namespace Nez
 
 
 		public override void render( Graphics graphics, Camera camera )
-		{
-			graphics.batcher.drawString( _font, _text, entity.transform.position + _localOffset, color, entity.transform.rotation, origin, entity.transform.scale, spriteEffects, layerDepth );
+        {
+            var renderScale = scale == Vector2.Zero ? entity.transform.scale : entity.transform.scale * scale;
+            graphics.batcher.drawString( _font, _text, entity.transform.position + _localOffset, color, entity.transform.rotation, origin, renderScale, spriteEffects, layerDepth );
 		}
 
 	}

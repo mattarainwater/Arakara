@@ -1,27 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 
 namespace Nez
 {
-	public class ComponentList : IEnumerable<Component>, IEnumerable
+	public class ComponentList
 	{
 		// global updateOrder sort for the IUpdatable list
-		static Comparison<IUpdatable> compareUpdatableOrder = ( a, b ) => { return a.updateOrder.CompareTo( b.updateOrder ); };
-
+		static IUpdatableComparer compareUpdatableOrder = new IUpdatableComparer();
 
 		Entity _entity;
 
 		/// <summary>
 		/// list of components added to the entity
 		/// </summary>
-		List<Component> _components = new List<Component>();
+		FastList<Component> _components = new FastList<Component>();
 
 		/// <summary>
 		/// list of all Components that want update called
 		/// </summary>
-		List<IUpdatable> _updatableComponents = new List<IUpdatable>();
+		FastList<IUpdatable> _updatableComponents = new FastList<IUpdatable>();
 
 		/// <summary>
 		/// The list of components that were added this frame. Used to group the components so we can process them simultaneously
@@ -43,8 +41,17 @@ namespace Nez
 
 		public ComponentList( Entity entity )
 		{
-			this._entity = entity;
+			_entity = entity;
 		}
+
+
+		#region array access
+
+		public int count { get { return _components.length; } }
+
+		public Component this[int index] { get { return _components.buffer[index]; } }
+
+		#endregion
 
 
 		public void markEntityListUnsorted()
@@ -61,6 +68,15 @@ namespace Nez
 
 		public void remove( Component component )
 		{
+			Debug.warnIf( _componentsToRemove.Contains( component ), "You are trying to remove a Component ({0}) that you already removed", component );
+
+			// this may not be a live Component so we have to watch out for if it hasnt been processed yet but it is being removed in the same frame
+			if( _componentsToAdd.Contains( component ) )
+			{
+				_componentsToAdd.Remove( component );
+				return;
+			}
+			
 			_componentsToRemove.Add( component );
 		}
 
@@ -70,11 +86,11 @@ namespace Nez
 		/// </summary>
 		public void removeAllComponents()
 		{
-			for( var i = 0; i < _components.Count; i++ )
-				handleRemove( _components[i] );
+			for( var i = 0; i < _components.length; i++ )
+				handleRemove( _components.buffer[i] );
 
-			_components.Clear();
-			_updatableComponents.Clear();
+			_components.clear();
+			_updatableComponents.clear();
 			_componentsToAdd.Clear();
 			_componentsToRemove.Clear();
 		}
@@ -82,9 +98,9 @@ namespace Nez
 
 		internal void deregisterAllComponents()
 		{
-			for( var i = 0; i < _components.Count; i++ )
+			for( var i = 0; i < _components.length; i++ )
 			{
-				var component = _components[i];
+				var component = _components.buffer[i];
 
 				// deal with renderLayer list if necessary
 				if( component is RenderableComponent )
@@ -92,7 +108,7 @@ namespace Nez
 
 				// deal with IUpdatable
 				if( component is IUpdatable )
-					_updatableComponents.Remove( component as IUpdatable );
+					_updatableComponents.remove( component as IUpdatable );
 
 				if( Core.entitySystemsEnabled )
 				{
@@ -105,14 +121,14 @@ namespace Nez
 
 		internal void registerAllComponents()
 		{
-			for( var i = 0; i < _components.Count; i++ )
+			for( var i = 0; i < _components.length; i++ )
 			{
-				var component = _components[i];
+				var component = _components.buffer[i];
 				if( component is RenderableComponent )
 					_entity.scene.renderableComponents.add( component as RenderableComponent );
 
 				if( component is IUpdatable )
-					_updatableComponents.Add( component as IUpdatable );
+					_updatableComponents.add( component as IUpdatable );
 
 				if( Core.entitySystemsEnabled )
 				{
@@ -123,15 +139,18 @@ namespace Nez
 		}
 
 
-		public void updateLists()
+		/// <summary>
+		/// handles any Components that need to be removed or added
+		/// </summary>
+		void updateLists()
 		{
 			// handle removals
 			if( _componentsToRemove.Count > 0 )
 			{
-				for( var i = 0; i < _componentsToRemove.Count; i++ )
+				for( int i = 0, count = _componentsToRemove.Count; i < count; i++ )
 				{
 					handleRemove( _componentsToRemove[i] );
-					_components.Remove( _componentsToRemove[i] );
+					_components.remove( _componentsToRemove[i] );
 				}
 				_componentsToRemove.Clear();
 			}
@@ -139,14 +158,14 @@ namespace Nez
 			// handle additions
 			if( _componentsToAdd.Count > 0 )
 			{
-				for( var i = 0; i < _componentsToAdd.Count; i++ )
+				for( int i = 0, count = _componentsToAdd.Count; i < count; i++ )
 				{
 					var component = _componentsToAdd[i];
 					if( component is RenderableComponent )
 						_entity.scene.renderableComponents.add( component as RenderableComponent );
 
 					if( component is IUpdatable )
-						_updatableComponents.Add( component as IUpdatable );
+						_updatableComponents.add( component as IUpdatable );
 
 					if( Core.entitySystemsEnabled )
 					{
@@ -154,7 +173,7 @@ namespace Nez
 						_entity.scene.entityProcessors.onComponentAdded( _entity );
 					}
 
-					_components.Add( component );
+					_components.add( component );
 					_tempBufferList.Add( component );
 				}
 
@@ -168,7 +187,7 @@ namespace Nez
 					var component = _tempBufferList[i];
 					component.onAddedToEntity();
 
-					// component.enabled check both the Entity and the Component
+					// component.enabled checks both the Entity and the Component
 					if( component.enabled )
 						component.onEnabled();
 				}
@@ -178,7 +197,7 @@ namespace Nez
 
 			if( _isComponentListUnsorted )
 			{
-				_updatableComponents.Sort( compareUpdatableOrder );
+				_updatableComponents.sort( compareUpdatableOrder );
 				_isComponentListUnsorted = false;
 			}
 		}
@@ -192,7 +211,7 @@ namespace Nez
 
 			// deal with IUpdatable
 			if( component is IUpdatable )
-				_updatableComponents.Remove( component as IUpdatable );
+				_updatableComponents.remove( component as IUpdatable );
 
 			if( Core.entitySystemsEnabled )
 			{
@@ -205,12 +224,6 @@ namespace Nez
 		}
 
 
-		public int Count
-		{
-			get { return _components.Count; }
-		}
-
-
 		/// <summary>
 		/// Gets the first component of type T and returns it. Optionally skips checking un-initialized Components (Components who have not yet had their
 		/// onAddedToEntity method called). If no components are found returns null.
@@ -218,11 +231,12 @@ namespace Nez
 		/// <returns>The component.</returns>
 		/// <param name="onlyReturnInitializedComponents">If set to <c>true</c> only return initialized components.</param>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public T getComponent<T>( bool onlyReturnInitializedComponents ) where T : Component
 		{
-			for( var i = 0; i < _components.Count; i++ )
+			for( var i = 0; i < _components.length; i++ )
 			{
-				var component = _components[i];
+				var component = _components.buffer[i];
 				if( component is T )
 					return component as T;
 			}
@@ -247,11 +261,12 @@ namespace Nez
 		/// </summary>
 		/// <param name="components">Components.</param>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public void getComponents<T>( List<T> components ) where T : class
 		{
-			for( var i = 0; i < _components.Count; i++ )
+			for( var i = 0; i < _components.length; i++ )
 			{
-				var component = _components[i];
+				var component = _components.buffer[i];
 				if( component is T )
 					components.Add( component as T );
 			}
@@ -271,6 +286,7 @@ namespace Nez
 		/// </summary>
 		/// <returns>The components.</returns>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public List<T> getComponents<T>() where T : class
 		{
 			var components = ListPool<T>.obtain();
@@ -280,70 +296,57 @@ namespace Nez
 		}
 
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		internal void update()
 		{
-			for( var i = 0; i < _updatableComponents.Count; i++ )
+			updateLists();
+			for( var i = 0; i < _updatableComponents.length; i++ )
 			{
-				if( _updatableComponents[i].enabled )
-					_updatableComponents[i].update();
+				if( _updatableComponents.buffer[i].enabled )
+					_updatableComponents.buffer[i].update();
 			}
 		}
 
 
-		internal void onEntityTransformChanged()
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		internal void onEntityTransformChanged( Transform.Component comp )
 		{
-			for( var i = 0; i < _components.Count; i++ )
+			for( var i = 0; i < _components.length; i++ )
 			{
-				if( _components[i].enabled )
-					_components[i].onEntityTransformChanged();
+				if( _components.buffer[i].enabled )
+					_components.buffer[i].onEntityTransformChanged( comp );
+			}
+
+			for( var i = 0; i < _componentsToAdd.Count; i++ )
+			{
+				if( _componentsToAdd[i].enabled )
+					_componentsToAdd[i].onEntityTransformChanged( comp );
 			}
 		}
 
 
 		internal void onEntityEnabled()
 		{
-			for( var i = 0; i < _components.Count; i++ )
-				_components[i].onEnabled();
+			for( var i = 0; i < _components.length; i++ )
+				_components.buffer[i].onEnabled();
 		}
 
 
 		internal void onEntityDisabled()
 		{
-			for( var i = 0; i < _components.Count; i++ )
-				_components[i].onDisabled();
+			for( var i = 0; i < _components.length; i++ )
+				_components.buffer[i].onDisabled();
 		}
 
 
 		internal void debugRender( Graphics graphics )
 		{
-			for( var i = 0; i < _components.Count; i++ )
+			for( var i = 0; i < _components.length; i++ )
 			{
-				if( _components[i].enabled )
-					_components[i].debugRender( graphics );
+				if( _components.buffer[i].enabled )
+					_components.buffer[i].debugRender( graphics );
 			}
 		}
-
-
-		#region IEnumerable and array access
-
-		public Component this[int index]
-		{
-			get { return _components[index]; }
-		}
-
-
-		public IEnumerator<Component> GetEnumerator()
-		{
-			return _components.GetEnumerator();
-		}
-
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _components.GetEnumerator();
-		}
-
-		#endregion
 
 	}
 }

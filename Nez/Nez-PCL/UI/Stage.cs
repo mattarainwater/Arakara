@@ -32,12 +32,13 @@ namespace Nez.UI
 		public Keys keyboardActionKey = Keys.Enter;
 
 		Group root;
-		Camera _camera;
+		public Camera camera;
 		bool debugAll, debugUnderMouse, debugParentUnderMouse;
 		Table.TableDebug debugTableUnderMouse = Table.TableDebug.None;
 
 		Vector2 _lastMousePosition;
 		Element _mouseOverElement;
+		private Dictionary<int, Element> _touchOverElement = new Dictionary<int, Element>();
 		List<Element> _inputFocusListeners = new List<Element>();
 
 		static Keys[] _emptyKeys = new Keys[0];
@@ -73,7 +74,7 @@ namespace Nez.UI
 			if( !root.isVisible() )
 				return;
 
-			_camera = camera;
+			this.camera = camera;
 			root.draw( graphics, 1f );
 
 			if( debug )
@@ -168,101 +169,153 @@ namespace Nez.UI
 			if( _isGamepadFocusEnabled )
 				updateGamepadState();
 			updateKeyboardState();
+			updateInputMouse();
 
+			#if !FNA
+			if( Input.touch.isConnected && Input.touch.currentTouches.Count > 0 )
+			{
+				updateInputTouch();
+			}
+			#endif
+		}
+
+
+		/// <summary>
+		/// Handle mouse input events.
+		/// </summary>
+		void updateInputMouse()
+		{
 			// consolidate input checks so that we can add touch input easily later
-			var leftMouseButtonDown = Input.leftMouseButtonDown;
-			var leftMouseButtonPressed = Input.leftMouseButtonPressed;
-			var leftMouseButtonReleased = Input.leftMouseButtonReleased;
 			var currentMousePosition = getMousePosition();
 
-			var didMouseMove = false;
+			var mouseMoved = false;
 			if( _lastMousePosition != currentMousePosition )
 			{
-				didMouseMove = true;
+				mouseMoved = true;
 				_lastMousePosition = currentMousePosition;
 			}
 
-			#if !FNA
-			// convert touch to mouse
-			if( Input.touch.isConnected && Input.touch.currentTouches.Count > 0 )
-			{
-				var touch = Input.touch.currentTouches[0];
-				leftMouseButtonDown = touch.State == Microsoft.Xna.Framework.Input.Touch.TouchLocationState.Pressed || touch.State == Microsoft.Xna.Framework.Input.Touch.TouchLocationState.Moved;
-				leftMouseButtonPressed = touch.State == Microsoft.Xna.Framework.Input.Touch.TouchLocationState.Pressed;
-				leftMouseButtonReleased = touch.State == Microsoft.Xna.Framework.Input.Touch.TouchLocationState.Released || touch.State == Microsoft.Xna.Framework.Input.Touch.TouchLocationState.Invalid;
-				currentMousePosition = touch.Position;
+			var inputPos = screenToStageCoordinates( currentMousePosition );
 
-				didMouseMove = touch.State == Microsoft.Xna.Framework.Input.Touch.TouchLocationState.Moved;
-				if( didMouseMove )
-					_lastMousePosition = currentMousePosition;
+			updateInputPoint( inputPos, Input.leftMouseButtonPressed, Input.leftMouseButtonReleased,
+				mouseMoved, ref _mouseOverElement );
+		}
+
+
+		/// <summary>
+		/// Handle all the touch input events.
+		/// </summary>
+		void updateInputTouch()
+		{
+			#if !FNA
+			foreach( var touch in Input.touch.currentTouches )
+			{
+				var inputPos = screenToStageCoordinates( touch.Position );
+				var inputPressed = touch.State == Microsoft.Xna.Framework.Input.Touch.TouchLocationState.Pressed;
+				var inputReleased = touch.State == Microsoft.Xna.Framework.Input.Touch.TouchLocationState.Released || touch.State == Microsoft.Xna.Framework.Input.Touch.TouchLocationState.Invalid;
+				var inputMoved = false;
+				Microsoft.Xna.Framework.Input.Touch.TouchLocation prevTouch;
+				if( touch.TryGetPreviousLocation( out prevTouch ) )
+				{
+					if( Vector2.Distance( touch.Position, prevTouch.Position ) >= float.Epsilon )
+						inputMoved = true;
+				}
+				Element lastOver;
+				_touchOverElement.TryGetValue( touch.Id, out lastOver );
+
+				updateInputPoint( inputPos, inputPressed, inputReleased, inputMoved, ref lastOver );
+
+				if ( inputReleased )
+					_touchOverElement.Remove( touch.Id );
+				else
+					_touchOverElement[touch.Id] = lastOver;
 			}
 			#endif
+		}
 
-			var mousePos = screenToStageCoordinates( currentMousePosition );
 
-			// mouse moved and released events are only sent to inputFocusListeners
-			if( ( leftMouseButtonDown && !leftMouseButtonPressed ) || leftMouseButtonReleased )
+		/// <summary>
+		/// Process events for Mouse or Touch input.
+		/// </summary>
+		/// <param name="inputPos">location of cursor</param>
+		/// <param name="inputPressed">down this frame</param>
+		/// <param name="inputReleased">up this frame</param>
+		/// <param name="inputMoved">cursor in a different location</param>
+		/// <param name="lastOver">last element that the cursor was over, ref is saved here for next update</param>
+		void updateInputPoint( Vector2 inputPos, bool inputPressed, bool inputReleased, bool inputMoved, ref Element lastOver )
+		{
+			var over = hit( inputPos );
+			if( over != null )
+				handleMouseWheel( over );
+
+			if( inputPressed )
 			{
-				if( leftMouseButtonDown && didMouseMove )
-				{
-					for( var i = _inputFocusListeners.Count - 1; i >= 0; i-- )
-						( (IInputListener)_inputFocusListeners[i] ).onMouseMoved( _inputFocusListeners[i].stageToLocalCoordinates( mousePos ) );
-				}
-				else if( leftMouseButtonReleased )
-				{
-					for( var i = _inputFocusListeners.Count - 1; i >= 0; i-- )
-						( (IInputListener)_inputFocusListeners[i] ).onMouseUp( _inputFocusListeners[i].stageToLocalCoordinates( mousePos ) );
-					_inputFocusListeners.Clear();
-				}
+				updateInputDown( inputPos, over );
 			}
-			else
+			if( inputMoved )
 			{
-				var over = hit( mousePos );
-				if( over != null )
-					handleMouseWheel( over );
-
-				#if !FNA
-				// if we have a touch screen we short circuit enter/exit by setting the mouseOverElement as the hit element
-				if( Input.touch.isConnected && over != null )
-					_mouseOverElement = over;
-				#endif
-
-				// lose keyboard focus if we click outside of the keyboardFocusElement
-				if( leftMouseButtonPressed && _keyboardFocusElement != null && over != _keyboardFocusElement )
-					setKeyboardFocus( null );
-
-				// if we are over the same element and the left button was pressed we notify our listener
-				if( over != null && over == _mouseOverElement )
-				{
-					var elementLocal = _mouseOverElement.stageToLocalCoordinates( mousePos );
-
-					if( leftMouseButtonPressed && _mouseOverElement is IInputListener )
-					{
-						var listener = _mouseOverElement as IInputListener;
-						// add the listener to be notified for all onMouseDown and onMouseUp events
-						if( listener.onMousePressed( elementLocal ) )
-							_inputFocusListeners.Add( _mouseOverElement );
-					}
-				}
-				else // not a mouse pressed event
-				{
-					// enter event
-					if( over != null && over is IInputListener )
-					{
-						var listener = over as IInputListener;
-						listener.onMouseEnter();
-					}
-
-					// exit event
-					if( _mouseOverElement != null && _mouseOverElement is IInputListener )
-					{
-						var listener = _mouseOverElement as IInputListener;
-						listener.onMouseExit();
-					}
-				}
-
-				_mouseOverElement = over;
+				updateInputMoved( inputPos, over, lastOver );
 			}
+			if( inputReleased )
+			{
+				updateInputReleased( inputPos );
+			}
+
+			lastOver = over;
+		}
+
+
+		/// <summary>
+		/// Mouse or touch is down this frame.
+		/// </summary>
+		/// <param name="inputPos">location of cursor</param>
+		/// <param name="over">element under cursor</param>
+		void updateInputDown( Vector2 inputPos, Element over )
+		{
+			// lose keyboard focus if we click outside of the keyboardFocusElement
+			if( _keyboardFocusElement != null && over != _keyboardFocusElement )
+				setKeyboardFocus( null );
+
+			// if we are over an element and the left button was pressed we notify our listener
+			if( over is IInputListener )
+			{
+				var elementLocal = over.stageToLocalCoordinates( inputPos );
+				var listener = over as IInputListener;
+				// add the listener to be notified for all onMouseDown and onMouseUp events
+				if( listener.onMousePressed( elementLocal ) )
+					_inputFocusListeners.Add( over );
+			}
+		}
+
+
+		/// <summary>
+		/// Mouse or touch is being moved.
+		/// </summary>
+		/// <param name="inputPos">location of cursor</param>
+		/// <param name="over">element under cursor</param>
+		/// <param name="lastOver">element that was previously under the cursor</param>
+		void updateInputMoved( Vector2 inputPos, Element over, Element lastOver )
+		{
+			for( var i = _inputFocusListeners.Count - 1; i >= 0; i-- )
+				( (IInputListener)_inputFocusListeners[i] ).onMouseMoved( _inputFocusListeners[i].stageToLocalCoordinates( inputPos ) );
+
+			if( over != lastOver )
+			{
+				( over as IInputListener )?.onMouseEnter();
+				( lastOver as IInputListener )?.onMouseExit();
+			}
+		}
+
+
+		/// <summary>
+		/// Mouse or touch is being released this frame.
+		/// </summary>
+		/// <param name="inputPos">location under cursor</param>
+		void updateInputReleased( Vector2 inputPos )
+		{
+			for( var i = _inputFocusListeners.Count - 1; i >= 0; i-- )
+				( (IInputListener)_inputFocusListeners[i] ).onMouseUp( _inputFocusListeners[i].stageToLocalCoordinates( inputPos ) );
+			_inputFocusListeners.Clear();
 		}
 
 
@@ -628,9 +681,9 @@ namespace Nez.UI
 		/// <param name="screenCoords">Screen coords.</param>
 		public Vector2 screenToStageCoordinates( Vector2 screenCoords )
 		{
-			if( _camera == null )
+			if( camera == null )
 				return screenCoords;
-			return _camera.screenToWorldPoint( screenCoords );
+			return camera.screenToWorldPoint( screenCoords );
 		}
 
 
@@ -641,9 +694,9 @@ namespace Nez.UI
 		/// <param name="stageCoords">Stage coords.</param>
 		public Vector2 stageToScreenCoordinates( Vector2 stageCoords )
 		{
-			if( _camera == null )
+			if( camera == null )
 				return stageCoords;
-			return _camera.worldToScreenPoint( stageCoords );
+			return camera.worldToScreenPoint( stageCoords );
 		}
 
 

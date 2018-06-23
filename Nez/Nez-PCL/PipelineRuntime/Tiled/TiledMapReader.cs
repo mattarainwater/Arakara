@@ -1,10 +1,9 @@
 using System;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Nez.Content;
+using Nez.Pipeline.Content;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using System.Diagnostics;
 
 
 namespace Nez.Tiled
@@ -17,14 +16,20 @@ namespace Nez.Tiled
 			var renderOrder = (TiledRenderOrder)Enum.Parse( typeof( TiledRenderOrder ), reader.ReadString(), true );
 			var tiledMap = new TiledMap( firstGid: reader.ReadInt32(),
 										 width: reader.ReadInt32(),
-				                         height: reader.ReadInt32(),
-				                         tileWidth: reader.ReadInt32(),
-				                         tileHeight: reader.ReadInt32(),
-				                         orientation: (TiledMapOrientation)reader.ReadInt32() )
+										 height: reader.ReadInt32(),
+										 tileWidth: reader.ReadInt32(),
+										 tileHeight: reader.ReadInt32(),
+										 orientation: (TiledMapOrientation)reader.ReadInt32() )
 			{
 				backgroundColor = backgroundColor,
 				renderOrder = renderOrder
 			};
+			tiledMap.largestTileWidth = reader.ReadInt32();
+			tiledMap.largestTileHeight = reader.ReadInt32();
+
+			// determine if we have some tiles that are larger than our standard tile size and if so mark this map for requiring culling
+			if( tiledMap.largestTileWidth > tiledMap.tileWidth || tiledMap.largestTileHeight > tiledMap.tileHeight )
+				tiledMap.requiresLargeTileCulling = true;
 
 			readCustomProperties( reader, tiledMap.properties );
 
@@ -49,7 +54,9 @@ namespace Nez.Tiled
 										tileHeight: reader.ReadInt32(),
 										isStandardTileset: isStandardTileset,
 										spacing: reader.ReadInt32(),
-										margin: reader.ReadInt32() );
+										margin: reader.ReadInt32(),
+										tileCount: reader.ReadInt32(),
+										columns: reader.ReadInt32() );
 				readCustomProperties( reader, tileset.properties );
 
 				// tiledset tile array
@@ -61,12 +68,13 @@ namespace Nez.Tiled
 					var tileAnimationFrameCount = reader.ReadInt32();
 					if( tileAnimationFrameCount > 0 )
 						tile.animationFrames = new List<TiledTileAnimationFrame>( tileAnimationFrameCount );
-					
+
 					for( var k = 0; k < tileAnimationFrameCount; k++ )
 						tile.animationFrames.Add( new TiledTileAnimationFrame( reader.ReadInt32(), reader.ReadSingle() ) );
 
 					// image source is optional
-					if( reader.ReadBoolean() )
+					var isFromImageCollection = reader.ReadBoolean();
+					if( isFromImageCollection )
 					{
 						var rect = new Rectangle( reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32() );
 						( (TiledImageCollectionTileset)tileset ).setTileTextureRegion( tileset.firstId + tile.id, rect );
@@ -74,9 +82,13 @@ namespace Nez.Tiled
 
 					readCustomProperties( reader, tile.properties );
 
-					// give the TiledTilesetTile a change to process and cache any data required
+					// give the TiledTilesetTile a chance to process and cache any data required
 					tile.processProperties();
-					tileset.tiles.Add( tile );
+
+					// if this tile is from an image collection and it has no properties there is no need to keep it around since we
+					// already grabbed the image source above
+					if( !( isFromImageCollection && tile.properties.Count == 0 ) )
+						tileset.tiles.Add( tile );
 				}
 			}
 
@@ -96,7 +108,7 @@ namespace Nez.Tiled
 		}
 
 
-		private static void readCustomProperties( ContentReader reader, Dictionary<string,string> properties )
+		static void readCustomProperties( ContentReader reader, Dictionary<string, string> properties )
 		{
 			var count = reader.ReadInt32();
 			for( var i = 0; i < count; i++ )
@@ -104,7 +116,7 @@ namespace Nez.Tiled
 		}
 
 
-		private static TiledLayer readLayer( ContentReader reader, TiledMap tiledMap )
+		static TiledLayer readLayer( ContentReader reader, TiledMap tiledMap )
 		{
 			var layerName = reader.ReadString();
 			var visible = reader.ReadBoolean();
@@ -128,7 +140,7 @@ namespace Nez.Tiled
 		}
 
 
-		private static TiledTileLayer readTileLayer( ContentReader reader, TiledMap tileMap, string layerName )
+		static TiledLayer readTileLayer( ContentReader reader, TiledMap tileMap, string layerName )
 		{
 			var tileCount = reader.ReadInt32();
 			var tiles = new TiledTile[tileCount];
@@ -148,7 +160,8 @@ namespace Nez.Tiled
 					{
 						if( tilesetTile.animationFrames.Count > 0 )
 						{
-							tiles[i] = new TiledAnimatedTile( tileId, tilesetTile ) {
+							tiles[i] = new TiledAnimatedTile( tileId, tilesetTile )
+							{
 								flippedHorizonally = flippedHorizonally,
 								flippedVertically = flippedVertically,
 								flippedDiagonally = flippedDiagonally
@@ -182,7 +195,7 @@ namespace Nez.Tiled
 		}
 
 
-		private static TiledImageLayer readImageLayer( ContentReader reader, TiledMap tileMap, string layerName )
+		static TiledImageLayer readImageLayer( ContentReader reader, TiledMap tileMap, string layerName )
 		{
 			var assetName = reader.getRelativeAssetPath( reader.ReadString() );
 			var texture = reader.ContentManager.Load<Texture2D>( assetName );
@@ -191,7 +204,7 @@ namespace Nez.Tiled
 		}
 
 
-		private static TiledObjectGroup readObjectGroup( ContentReader reader, TiledMap tiledMap )
+		static TiledObjectGroup readObjectGroup( ContentReader reader, TiledMap tiledMap )
 		{
 			var objectGroup = tiledMap.createObjectGroup(
 				reader.ReadString(), reader.ReadColor(), reader.ReadBoolean(), reader.ReadSingle() );
@@ -214,7 +227,7 @@ namespace Nez.Tiled
 					rotation = reader.ReadInt32(),
 					visible = reader.ReadBoolean()
 				};
-						
+
 				var tiledObjectType = reader.ReadString();
 				if( tiledObjectType == "ellipse" )
 				{
@@ -262,6 +275,6 @@ namespace Nez.Tiled
 
 			return points;
 		}
-	
+
 	}
 }

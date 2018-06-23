@@ -1,8 +1,8 @@
-﻿using System;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using Nez.Systems;
+using System.Runtime.CompilerServices;
 #if !FNA
 using Microsoft.Xna.Framework.Input.Touch;
 #endif
@@ -12,7 +12,7 @@ namespace Nez
 {
 	public static class Input
 	{
-		public static Emitter<InputEventType,InputEvent> emitter;
+		public static Emitter<InputEventType, InputEvent> emitter;
 
 		public static GamePadData[] gamePads;
 		public const float DEFAULT_DEADZONE = 0.1f;
@@ -22,14 +22,14 @@ namespace Nez
 		/// </summary>
 		internal static Vector2 _resolutionScale;
 		/// <summary>
-		/// set by the Scene and used to scale mouse input
+		/// set by the Scene and used to scale input
 		/// </summary>
 		internal static Point _resolutionOffset;
 		static KeyboardState _previousKbState;
 		static KeyboardState _currentKbState;
 		static MouseState _previousMouseState;
 		static MouseState _currentMouseState;
-		static internal List<VirtualInput> _virtualInputs = new List<VirtualInput>();
+		static internal FastList<VirtualInput> _virtualInputs = new FastList<VirtualInput>();
 		static int _maxSupportedGamePads;
 
 		public static TouchInput touch;
@@ -50,7 +50,7 @@ namespace Nez
 
 		static Input()
 		{
-			emitter = new Emitter<InputEventType,InputEvent>();
+			emitter = new Emitter<InputEventType, InputEvent>();
 			touch = new TouchInput();
 
 			_previousKbState = new KeyboardState();
@@ -76,10 +76,26 @@ namespace Nez
 			for( var i = 0; i < _maxSupportedGamePads; i++ )
 				gamePads[i].update();
 
-			for( var i = 0; i < _virtualInputs.Count; i++ )
-				_virtualInputs[i].update();
+			for( var i = 0; i < _virtualInputs.length; i++ )
+				_virtualInputs.buffer[i].update();
 		}
 
+		/// <summary>
+		/// this takes into account the SceneResolutionPolicy and returns the value scaled to the RenderTargets coordinates
+		/// </summary>
+		/// <value>The scaled position.</value>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public static Vector2 scaledPosition( Vector2 position )
+		{
+			var scaledPos = new Vector2( position.X - _resolutionOffset.X, position.Y - _resolutionOffset.Y );
+			return scaledPos * _resolutionScale;
+		}
+
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public static Vector2 scaledPosition( Point position )
+		{
+			return scaledPosition( new Vector2( position.X, position.Y ) );
+		}
 
 		#region Keyboard
 
@@ -153,6 +169,13 @@ namespace Nez
 		#region Mouse
 
 		/// <summary>
+		/// returns the previous mouse state. Use with caution as it only contains raw data and does not take camera scaling into affect like
+		/// Input.mousePosition does.
+		/// </summary>
+		/// <value>The state of the previous mouse.</value>
+		public static MouseState previousMouseState { get { return _previousMouseState; } }
+
+		/// <summary>
 		/// only true if down this frame
 		/// </summary>
 		public static bool leftMouseButtonPressed
@@ -210,6 +233,33 @@ namespace Nez
 		}
 
 		/// <summary>
+		/// only true if down this frame
+		/// </summary>
+		public static bool middleMouseButtonPressed
+		{
+			get { return _currentMouseState.MiddleButton == ButtonState.Pressed && _previousMouseState.MiddleButton == ButtonState.Released; }
+		}
+
+		/// <summary>
+		/// true while the button is down
+		/// </summary>
+		public static bool middleMouseButtonDown
+		{
+			get { return _currentMouseState.MiddleButton == ButtonState.Pressed; }
+		}
+
+		/// <summary>
+		/// true only the frame the button is released
+		/// </summary>
+		public static bool middleMouseButtonReleased
+		{
+			get
+			{
+				return _currentMouseState.MiddleButton == ButtonState.Released && _previousMouseState.MiddleButton == ButtonState.Pressed;
+			}
+		}
+
+		/// <summary>
 		/// gets the raw ScrollWheelValue
 		/// </summary>
 		/// <value>The mouse wheel.</value>
@@ -246,14 +296,7 @@ namespace Nez
 		/// this takes into account the SceneResolutionPolicy and returns the value scaled to the RenderTargets coordinates
 		/// </summary>
 		/// <value>The scaled mouse position.</value>
-		public static Vector2 scaledMousePosition
-		{
-			get
-			{
-				var mousePosition = new Vector2( _currentMouseState.X - _resolutionOffset.X, _currentMouseState.Y - _resolutionOffset.Y );
-				return mousePosition * _resolutionScale;
-			}
-		}
+		public static Vector2 scaledMousePosition { get { return scaledPosition( new Vector2( _currentMouseState.X, _currentMouseState.Y ) ); } }
 
 		public static Point mousePositionDelta
 		{
@@ -271,7 +314,7 @@ namespace Nez
 		}
 
 		#endregion
-	
+
 	}
 
 

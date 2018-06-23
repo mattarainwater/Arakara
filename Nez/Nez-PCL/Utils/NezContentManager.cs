@@ -32,7 +32,7 @@ namespace Nez.Systems
 
 
 		/// <summary>
-		/// loads an ogl effect directly from file and handles disposing of it when the ContentManager is disposed. Name should the the path
+		/// loads an ogl effect directly from file and handles disposing of it when the ContentManager is disposed. Name should be the path
 		/// relative to the Content folder or including the Content folder.
 		/// </summary>
 		/// <returns>The effect.</returns>
@@ -87,11 +87,8 @@ namespace Nez.Systems
 		/// <param name="name">Name.</param>
 		internal T loadEffect<T>( string name, byte[] effectCode ) where T : Effect
 		{
-			var graphicsDeviceService = (IGraphicsDeviceService)ServiceProvider.GetService( typeof( IGraphicsDeviceService ) );
-			var graphicsDevice = graphicsDeviceService.GraphicsDevice;
-
-			var effect = Activator.CreateInstance( typeof( T ), graphicsDevice, effectCode ) as T;
-			effect.Name = typeof( T ).Name + "-" + Utils.randomString( 5 );
+			var effect = Activator.CreateInstance( typeof( T ), Core.graphicsDevice, effectCode ) as T;
+			effect.Name = name + "-" + Utils.randomString( 5 );
 			_loadedEffects[effect.Name] = effect;
 
 			return effect;
@@ -107,10 +104,7 @@ namespace Nez.Systems
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
 		public T loadMonoGameEffect<T>() where T : Effect
 		{
-			var graphicsDeviceService = (IGraphicsDeviceService)ServiceProvider.GetService( typeof( IGraphicsDeviceService ) );
-			var graphicsDevice = graphicsDeviceService.GraphicsDevice;
-
-			var effect = Activator.CreateInstance( typeof( T ), graphicsDevice ) as T;
+			var effect = Activator.CreateInstance( typeof( T ), Core.graphicsDevice ) as T;
 			effect.Name = typeof( T ).Name + "-" + Utils.randomString( 5 );
 			_loadedEffects[effect.Name] = effect;
 
@@ -207,26 +201,39 @@ namespace Nez.Systems
 			{
 				try
 				{
-					var fieldInfo = typeof( ContentManager ).GetRuntimeField( "disposableAssets" );
-					var assets = fieldInfo.GetValue( this ) as List<IDisposable>;
-
-					for( var i = 0; i < assets.Count; i++ )
+					FieldInfo fieldInfo = null;
+					var fields = typeof( ContentManager ).GetRuntimeFields();
+					foreach( var field in fields )
 					{
-						var typedAsset = assets[i] as T;
-						if( typedAsset != null )
+						if( field.Name == "disposableAssets" )
 						{
-							typedAsset.Dispose();
-							assets.RemoveAt( i );
-
-							#if FNA
-							fieldInfo = typeof( ContentManager ).GetRuntimeField( "loadedAssets" );
-							var LoadedAssets = fieldInfo.GetValue( this ) as Dictionary<string, object>;
-							#endif
-
-							LoadedAssets.Remove( assetName );
+							fieldInfo = field;
 							break;
 						}
 					}
+
+					// first fetch the actual asset. we already know its loaded so we'll grab it directly
+					#if FNA
+					fieldInfo = typeof( ContentManager ).GetRuntimeField( "loadedAssets" );
+					var LoadedAssets = fieldInfo.GetValue( this ) as Dictionary<string, object>;
+					#endif
+
+					var assetToRemove = LoadedAssets[assetName];
+
+					var assets = fieldInfo.GetValue( this ) as List<IDisposable>;
+					for( var i = 0; i < assets.Count; i++ )
+					{
+						// see if the asset is disposeable. If so, find and dispose of it.
+						var typedAsset = assets[i] as T;
+						if( typedAsset != null && typedAsset == assetToRemove )
+						{
+							typedAsset.Dispose();
+							assets.RemoveAt( i );
+							break;
+						}
+					}
+
+					LoadedAssets.Remove( assetName );
 				}
 				catch( Exception e )
 				{
@@ -240,13 +247,15 @@ namespace Nez.Systems
 		/// unloads an Effect that was loaded via loadEffect, loadNezEffect or loadMonoGameEffect
 		/// </summary>
 		/// <param name="effectName">Effect.name</param>
-		public void unloadEffect( string effectName )
+		public bool unloadEffect( string effectName )
 		{
 			if( _loadedEffects.ContainsKey( effectName ) )
 			{
 				_loadedEffects[effectName].Dispose();
 				_loadedEffects.Remove( effectName );
+				return true;
 			}
+			return false;
 		}
 
 
@@ -254,9 +263,9 @@ namespace Nez.Systems
 		/// unloads an Effect that was loaded via loadEffect, loadNezEffect or loadMonoGameEffect
 		/// </summary>
 		/// <param name="effectName">Effect.name</param>
-		public void unloadEffect( Effect effect )
+		public bool unloadEffect( Effect effect )
 		{
-			unloadEffect( effect.Name );
+			return unloadEffect( effect.Name );
 		}
 
 
@@ -337,6 +346,18 @@ namespace Nez.Systems
 			if( assetName.StartsWith( "nez://" ) )
 			{
 				var assembly = ReflectionUtils.getAssembly( this.GetType() );
+
+				#if FNA
+				// for FNA, we will just search for the file by name since the assembly name will not be known at runtime
+				foreach( var item in assembly.GetManifestResourceNames() )
+				{
+					if( item.EndsWith( assetName.Substring( assetName.Length - 20 ) ) )
+					{
+						assetName = "nez://" + item;
+						break;
+					}
+				}
+				#endif
 				return assembly.GetManifestResourceStream( assetName.Substring( 6 ) );
 			}
 

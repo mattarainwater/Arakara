@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Arakara.Battle
 {
-    public class BattleController
+    public class BattleController : Component, IUpdatable
     {
         public List<BattleActor> Actors { get; set; }
         public BattleActor CurrentActor { get; set; }
@@ -31,7 +31,7 @@ namespace Arakara.Battle
             Events = new List<BattleEvent>();
         }
 
-        public void Update()
+        public void update()
         {
             if(IsActive)
             {
@@ -108,9 +108,9 @@ namespace Arakara.Battle
             switch (targeting)
             {
                 case Targeting.Allies:
-                    return Actors.Where(x => x.Faction.Id == targerter.Faction.Id).ToList();
+                    return Actors.Where(x => x.Faction == targerter.Faction).ToList();
                 case Targeting.Enemies:
-                    return Actors.Where(x => x.Faction.Id != targerter.Faction.Id).ToList();
+                    return Actors.Where(x => x.Faction != targerter.Faction).ToList();
                 case Targeting.Self:
                     return Actors.Where(x => x == targerter).ToList();
                 default:

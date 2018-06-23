@@ -1,28 +1,26 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Collections;
-
+using System.Runtime.CompilerServices;
 
 namespace Nez
 {
-	public class EntityList : IEnumerable<Entity>, IEnumerable
+	public class EntityList
 	{
 		public Scene scene;
 
 		/// <summary>
 		/// list of entities added to the scene
 		/// </summary>
-		List<Entity> _entities = new List<Entity>();
+		FastList<Entity> _entities = new FastList<Entity>();
 
 		/// <summary>
 		/// The list of entities that were added this frame. Used to group the entities so we can process them simultaneously
 		/// </summary>
-		List<Entity> _entitiesToAdd = new List<Entity>();
+		HashSet<Entity> _entitiesToAdd = new HashSet<Entity>();
 
 		/// <summary>
 		/// The list of entities that were marked for removal this frame. Used to group the entities so we can process them simultaneously
 		/// </summary>
-		List<Entity> _entitiesToRemove = new List<Entity>();
+		HashSet<Entity> _entitiesToRemove = new HashSet<Entity>();
 
 		/// <summary>
 		/// flag used to determine if we need to sort our entities this frame
@@ -32,16 +30,26 @@ namespace Nez
 		/// <summary>
 		/// tracks entities by tag for easy retrieval
 		/// </summary>
-		Dictionary<int,List<Entity>> _entityDict;
-		List<int> _unsortedTags;
+		Dictionary<int, FastList<Entity>> _entityDict = new Dictionary<int, FastList<Entity>>();
+		HashSet<int> _unsortedTags = new HashSet<int>();
+
+		// used in updateLists to double buffer so that the original lists can be modified elsewhere
+		HashSet<Entity> _tempEntityList = new HashSet<Entity>();
 
 
 		public EntityList( Scene scene )
 		{
 			this.scene = scene;
-			_entityDict = new Dictionary<int,List<Entity>>();
-			_unsortedTags = new List<int>();
 		}
+
+
+		#region array access
+
+		public int count { get { return _entities.length; } }
+
+		public Entity this[int index] { get { return _entities.buffer[index]; } }
+
+		#endregion
 
 
 		public void markEntityListUnsorted()
@@ -74,6 +82,13 @@ namespace Nez
 		{
 			Debug.warnIf( _entitiesToRemove.Contains( entity ), "You are trying to remove an entity ({0}) that you already removed", entity.name );
 
+			// guard against adding and then removing an Entity in the same frame
+			if( _entitiesToAdd.Contains( entity ) )
+			{
+				_entitiesToAdd.Remove( entity );
+				return;
+			}
+
 			if( !_entitiesToRemove.Contains( entity ) )
 				_entitiesToRemove.Add( entity );
 		}
@@ -84,18 +99,24 @@ namespace Nez
 		/// </summary>
 		public void removeAllEntities()
 		{
-			for( var i = 0; i < _entities.Count; i++ )
+			// clear lists we don't need anymore
+			_unsortedTags.Clear();
+			_entitiesToAdd.Clear();
+			_isEntityListUnsorted = false;
+
+			// why do we update lists here? Mainly to deal with Entities that were detached before a Scene switch. They will still
+			// be in the _entitiesToRemove list which will get handled by updateLists.
+			updateLists();
+
+			for( var i = 0; i < _entities.length; i++ )
 			{
-				_entities[i]._isDestroyed = true;
-				_entities[i].onRemovedFromScene();
-				_entities[i].scene = null;
+				_entities.buffer[i]._isDestroyed = true;
+				_entities.buffer[i].onRemovedFromScene();
+				_entities.buffer[i].scene = null;
 			}
 
-			_entities.Clear();
-			_entitiesToAdd.Clear();
-			_entitiesToRemove.Clear();
+			_entities.clear();
 			_entityDict.Clear();
-			_unsortedTags.Clear();
 		}
 
 
@@ -105,23 +126,53 @@ namespace Nez
 		/// <param name="entity">Entity.</param>
 		public bool contains( Entity entity )
 		{
-			return _entities.Contains( entity ) || _entitiesToAdd.Contains( entity );
+			return _entities.contains( entity ) || _entitiesToAdd.Contains( entity );
+		}
+
+
+		FastList<Entity> getTagList( int tag )
+		{
+			FastList<Entity> list = null;
+			if( !_entityDict.TryGetValue( tag, out list ) )
+			{
+				list = new FastList<Entity>();
+				_entityDict[tag] = list;
+			}
+
+			return _entityDict[tag];
 		}
 
 
 		internal void addToTagList( Entity entity )
 		{
-			var list = entitiesWithTag( entity.tag );
-			Assert.isFalse( list.Contains( entity ), "Entity tag list already contains this entity: {0}", entity );
-
-			list.Add( entity );
-			_unsortedTags.Add( entity.tag );
+			var list = getTagList( entity.tag );
+			if( !list.contains( entity ) )
+			{
+				list.add( entity );
+				_unsortedTags.Add( entity.tag );
+			}
 		}
 
 
 		internal void removeFromTagList( Entity entity )
 		{
-			_entityDict[entity.tag].Remove( entity );
+			FastList<Entity> list = null;
+			if( _entityDict.TryGetValue( entity.tag, out list ) )
+			{
+				list.remove( entity );
+			}
+		}
+
+
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		internal void update()
+		{
+			for( var i = 0; i < _entities.length; i++ )
+			{
+				var entity = _entities.buffer[i];
+				if( entity.enabled && ( entity.updateInterval == 1 || Time.frameCount % entity.updateInterval == 0 ) )
+					entity.update();
+			}
 		}
 
 
@@ -130,32 +181,31 @@ namespace Nez
 			// handle removals
 			if( _entitiesToRemove.Count > 0 )
 			{
-				for( var i = 0; i < _entitiesToRemove.Count; i++ )
+				Utils.swap( ref _entitiesToRemove, ref _tempEntityList );
+				foreach( var entity in _tempEntityList )
 				{
-					var entity = _entitiesToRemove[i];
-
 					// handle the tagList
 					removeFromTagList( entity );
 
 					// handle the regular entity list
-					_entities.Remove( entity );
+					_entities.remove( entity );
 					entity.onRemovedFromScene();
 					entity.scene = null;
 
 					if( Core.entitySystemsEnabled )
 						scene.entityProcessors.onEntityRemoved( entity );
 				}
-				_entitiesToRemove.Clear();
+
+				_tempEntityList.Clear();
 			}
 
 			// handle additions
 			if( _entitiesToAdd.Count > 0 )
 			{
-				for( var i = 0; i < _entitiesToAdd.Count; i++ )
+				Utils.swap( ref _entitiesToAdd, ref _tempEntityList );
+				foreach( var entity in _tempEntityList )
 				{
-					var entity = _entitiesToAdd[i];
-
-					_entities.Add( entity );
+					_entities.add( entity );
 					entity.scene = scene;
 
 					// handle the tagList
@@ -166,28 +216,24 @@ namespace Nez
 				}
 
 				// now that all entities are added to the scene, we loop through again and call onAddedToScene
-				for( var i = 0; i < _entitiesToAdd.Count; i++ )
-					_entitiesToAdd[i].onAddedToScene();
+				foreach( var entity in _tempEntityList )
+					entity.onAddedToScene();
 
-				_entitiesToAdd.Clear();
+				_tempEntityList.Clear();
 				_isEntityListUnsorted = true;
 			}
 
 			if( _isEntityListUnsorted )
 			{
-				_entities.Sort();
+				_entities.sort();
 				_isEntityListUnsorted = false;
 			}
 
 			// sort our tagList if needed
 			if( _unsortedTags.Count > 0 )
 			{
-				for( var i = 0; i < _unsortedTags.Count; i++ )
-				{
-					var tag = _unsortedTags[i];
-					_entityDict[tag].Sort();
-				}
-
+				foreach( var tag in _unsortedTags )
+					_entityDict[tag].sort();
 				_unsortedTags.Clear();
 			}
 		}
@@ -195,76 +241,97 @@ namespace Nez
 
 		#region Entity search
 
+		/// <summary>
+		/// returns the first Entity found with a name of name. If none are found returns null.
+		/// </summary>
+		/// <returns>The entity.</returns>
+		/// <param name="name">Name.</param>
 		public Entity findEntity( string name )
 		{
-			for( var i = 0; i < _entities.Count; i++ )
+			for( var i = 0; i < _entities.length; i++ )
 			{
-				if( _entities[i].name == name )
-					return _entities[i];
+				if( _entities.buffer[i].name == name )
+					return _entities.buffer[i];
 			}
 
-			// in case an entity is added and searched for in the same frame we check the toAdd list
-			for( var i = 0; i < _entitiesToAdd.Count; i++ )
+			foreach( var entity in _entitiesToAdd )
 			{
-				if( _entitiesToAdd[i].name == name )
-					return _entitiesToAdd[i];
+				if( entity.name == name )
+					return entity;
 			}
 
 			return null;
 		}
 
 
+		/// <summary>
+		/// returns a list of all entities with tag. If no entities have the tag an empty list is returned. The returned List can be put back in the pool via ListPool.free.
+		/// </summary>
+		/// <returns>The with tag.</returns>
+		/// <param name="tag">Tag.</param>
 		public List<Entity> entitiesWithTag( int tag )
 		{
-			List<Entity> list = null;
-			if( !_entityDict.TryGetValue( tag, out list ) )
+			var list = getTagList( tag );
+
+			var returnList = ListPool<Entity>.obtain();
+			returnList.Capacity = _entities.length;
+			for( var i = 0; i < list.length; i++ )
 			{
-				list = new List<Entity>();
-				_entityDict[tag] = list;
+				returnList.Add( _entities.buffer[i] );
 			}
 
-			return _entityDict[tag];
+			return returnList;
 		}
 
 
+		/// <summary>
+		/// returns a List of all Entities of type T. The returned List can be put back in the pool via ListPool.free.
+		/// </summary>
+		/// <returns>The of type.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
 		public List<Entity> entitiesOfType<T>() where T : Entity
 		{
-			var list = new List<Entity>();
-			for( var i = 0; i < _entities.Count; i++ )
+			var list = ListPool<Entity>.obtain();
+			for( var i = 0; i < _entities.length; i++ )
 			{
-				if( _entities[i] is T )
-					list.Add( _entities[i] );
+				if( _entities.buffer[i] is T )
+					list.Add( _entities.buffer[i] );
 			}
 
-			// in case an entity is added and searched for in the same frame we check the toAdd list
-			for( var i = 0; i < _entitiesToAdd.Count; i++ )
+			foreach( var entity in _entitiesToAdd )
 			{
-				if( _entitiesToAdd[i] is T )
-					list.Add( _entitiesToAdd[i] );
+				if ( entity is T )
+				{
+					list.Add( entity );
+				}
 			}
 
 			return list;
 		}
 
 
-		public T findObjectOfType<T>() where T : Component
+		/// <summary>
+		/// returns the first Component found in the Scene of type T
+		/// </summary>
+		/// <returns>The component of type.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public T findComponentOfType<T>() where T : Component
 		{
-			for( var i = 0; i < _entities.Count; i++ )
+			for( var i = 0; i < _entities.length; i++ )
 			{
-				if( _entities[i].enabled )
+				if( _entities.buffer[i].enabled )
 				{
-					var comp = _entities[i].getComponent<T>();
+					var comp = _entities.buffer[i].getComponent<T>();
 					if( comp != null )
 						return comp;
 				}
 			}
 
-			// in case an entity is added and searched for in the same frame we check the toAdd list
-			for( var i = 0; i < _entitiesToAdd.Count; i++ )
+			foreach( var entity in _entitiesToAdd )
 			{
-				if( _entitiesToAdd[i].enabled )
+				if ( entity.enabled )
 				{
-					var comp = _entitiesToAdd[i].getComponent<T>();
+					var comp =  entity.getComponent<T>();
 					if( comp != null )
 						return comp;
 				}
@@ -274,20 +341,26 @@ namespace Nez
 		}
 
 
-		public List<T> findObjectsOfType<T>() where T : Component
+		/// <summary>
+		/// returns all Components found in the Scene of type T. The returned List can be put back in the pool via ListPool.free.
+		/// </summary>
+		/// <returns>The components of type.</returns>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public List<T> findComponentsOfType<T>() where T : Component
 		{
-			var comps = new List<T>();
-			for( var i = 0; i < _entities.Count; i++ )
+			var comps = ListPool<T>.obtain();
+			for( var i = 0; i < _entities.length; i++ )
 			{
-				if( _entities[i].enabled )
-					_entities[i].getComponents<T>( comps );
+				if( _entities.buffer[i].enabled )
+					_entities.buffer[i].getComponents<T>( comps );
 			}
 
-			// in case an entity is added and searched for in the same frame we check the toAdd list
-			for( var i = 0; i < _entitiesToAdd.Count; i++ )
+			foreach( var entity in _entitiesToAdd )
 			{
-				if( _entitiesToAdd[i].enabled )
-					_entitiesToAdd[i].getComponents<T>( comps );
+				if ( entity.enabled )
+				{
+					entity.getComponents<T>( comps );
+				}
 			}
 
 			return comps;
@@ -295,40 +368,6 @@ namespace Nez
 
 		#endregion
 
-
-		public int Count
-		{
-			get
-			{
-				return _entities.Count;
-			}
-		}
-
-
-		#region IEnumerable and array access
-
-		public Entity this[int index]
-		{
-			get
-			{
-				return _entities[index];
-			}
-		}
-
-
-		public IEnumerator<Entity> GetEnumerator()
-		{
-			return _entities.GetEnumerator();
-		}
-
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _entities.GetEnumerator();
-		}
-
-		#endregion
-	
 	}
 }
 

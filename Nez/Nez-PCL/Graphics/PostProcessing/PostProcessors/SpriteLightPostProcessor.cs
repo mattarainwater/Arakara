@@ -8,7 +8,7 @@ namespace Nez
 {
 	/// <summary>
 	/// post processor to assist with making blended sprite lights. Usage is as follows:
-	/// - render all sprite lights with a separate Renderer to a RenderTarget. The clear color or the Renderer is your ambient light color.
+	/// - render all sprite lights with a separate Renderer to a RenderTarget. The clear color of the Renderer is your ambient light color.
 	/// - render all normal objects in standard fashion
 	/// - add this PostProcessor with the RenderTarget from your lights Renderer
 	/// </summary>
@@ -42,8 +42,8 @@ namespace Nez
 
 		public override void onAddedToScene()
 		{
-			effect = scene.contentManager.loadEffect<Effect>( "spriteLightMultiply", EffectResource.spriteLightMultiplyBytes );
-			effect.Parameters["lightTexture"].SetValue( _lightsRenderTexture );
+			effect = scene.content.loadEffect<Effect>( "spriteLightMultiply", EffectResource.spriteLightMultiplyBytes );
+			effect.Parameters["_lightTexture"].SetValue( _lightsRenderTexture );
 			effect.Parameters["_multiplicativeFactor"].SetValue( _multiplicativeFactor );
 		}
 
@@ -60,7 +60,7 @@ namespace Nez
 		public override void onSceneBackBufferSizeChanged( int newWidth, int newHeight )
 		{
 			// when the RenderTexture changes we have to reset the shader param since the underlying RenderTarget will be different
-			effect.Parameters["lightTexture"].SetValue( _lightsRenderTexture );
+			effect.Parameters["_lightTexture"].SetValue( _lightsRenderTexture );
 		}
 
 	}
