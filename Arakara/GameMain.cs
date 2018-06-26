@@ -23,7 +23,7 @@ namespace Arakara
             base.Initialize();
             CommonResources.DefaultBitmapFont = Graphics.instance.bitmapFont;
             CommonResources.Icons = Subtexture.subtexturesFromAtlas(content.Load<Texture2D>("icons"), 32, 32);
-            scene = new TestGameScene();
+            scene = new TestNewBattleScene();
             VirtualButtons.SetupInput();
         }
     }

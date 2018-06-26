@@ -51,8 +51,8 @@
     <Compile Include="Components\Events\Hoverable.cs" />
     <Compile Include="Containers\Aspect.cs" />
     <Compile Include="Containers\Container.cs" />
-    <Compile Include="Containers\States\BaseState.cs" />
-    <Compile Include="Containers\States\StateMachine.cs" />
+    <Compile Include="States\BaseState.cs" />
+    <Compile Include="States\StateMachine.cs" />
     <Compile Include="Extensions\SetExtensions.cs" />
     <Compile Include="Notifications\Global.cs" />
     <Compile Include="Notifications\NotificationCenter.cs" />

@@ -15,8 +15,7 @@ namespace Arakara.BattleEngine.Systems
     {
         public void ChangeTurn()
         {
-            var battle = Container.GetBattle();
-            var nextIndex = GetNextIndex(battle);
+            var nextIndex = GetNextIndex();
             ChangeTurn(nextIndex);
         }
 
@@ -43,8 +42,9 @@ namespace Arakara.BattleEngine.Systems
             battle.CurrentActorIndex = action.TargetActorIndex;
         }
 
-        private int GetNextIndex(Battle battle)
+        public int GetNextIndex()
         {
+            var battle = Container.GetBattle();
             var currentIndex = battle.CurrentActorIndex;
             if(currentIndex + 1 == battle.Actors.Count())
             {

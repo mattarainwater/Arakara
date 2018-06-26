@@ -1,4 +1,5 @@
 ﻿using Arakara.BattleEngine.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Arakara.BattleEngine.Systems
 {
     public class DataSystem : Aspect
     {
-        public Battle battle = new Battle();
+        public Battle Battle = new Battle();
     }
 
     public static class DataSystemExtensions
@@ -18,7 +19,13 @@ namespace Arakara.BattleEngine.Systems
         public static Battle GetBattle(this IContainer game)
         {
             var dataSystem = game.GetAspect<DataSystem>();
-            return dataSystem.battle;
+            return dataSystem.Battle;
+        }
+
+        public static string GetBattleAsJson(this IContainer game)
+        {
+            var dataSystem = game.GetAspect<DataSystem>();
+            return string.Join("\r\n", dataSystem.Battle.Actors.Select(x => x.Name + " " + x.CurrentHP + " / " + x.MaxHP));
         }
     }
 }

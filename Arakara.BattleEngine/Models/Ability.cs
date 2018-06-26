@@ -10,7 +10,7 @@ namespace Arakara.BattleEngine.Models
     public class Ability : Container, IAspect
     {
         public IContainer Container { get; set; }
-        public BattleAction Action { get; set; }
+        public Move Action { get { return Container as Move; } }
         public string ActionName { get; set; }
         public object UserInfo { get; set; }
     }

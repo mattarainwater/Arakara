@@ -27,6 +27,18 @@ namespace Tenswee.Common.Containers
             return aspect;
         }
 
+        public T AddOrUpdate<T>(T aspect, string key = null) where T : IAspect
+        {
+            key = key ?? typeof(T).Name;
+            if(aspects.ContainsKey(key))
+            {
+                aspects.Remove(key);
+            }
+            aspects.Add(key, aspect);
+            aspect.Container = this;
+            return aspect;
+        }
+
         public T GetAspect<T>(string key = null) where T : IAspect
         {
             key = key ?? typeof(T).Name;

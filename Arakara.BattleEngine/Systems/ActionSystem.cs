@@ -16,7 +16,6 @@ namespace Arakara.BattleEngine.Systems
         #region Notifications
         public const string beginSequenceNotification = "ActionSystem.beginSequenceNotification";
         public const string endSequenceNotification = "ActionSystem.endSequenceNotification";
-        public const string deathReaperNotification = "ActionSystem.deathReaperNotification";
         public const string completeNotification = "ActionSystem.completeNotification";
         #endregion
 

@@ -11,6 +11,6 @@ namespace Arakara.BattleEngine.Models.AI
 
         }
 
-        public List<BattleAction> Actions { get; set; }
+        public List<Move> Moves { get; set; }
     }
 }

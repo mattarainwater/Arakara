@@ -10,6 +10,6 @@ namespace Arakara.BattleEngine.Interfaces
 {
     public interface ITargetSelector : IAspect
     {
-        List<Actor> SelectTargets(IContainer game);
+        List<Actor> SelectTargets(IContainer game, int factionId);
     }
 }

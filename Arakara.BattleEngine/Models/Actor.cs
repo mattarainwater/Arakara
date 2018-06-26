@@ -12,5 +12,6 @@
 
         public int MaxHP { get; set; }
         public int CurrentHP { get; set; }
+        public int FactionId { get; set; }
     }
 }

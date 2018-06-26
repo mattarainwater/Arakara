@@ -7,13 +7,11 @@ using Tenswee.Common.Containers;
 
 namespace Arakara.BattleEngine.Models
 {
-    public class BattleAction : Container
+    public class Target : Aspect
     {
-        public BattleAction()
-        {
-            OrderOfPlay = int.MaxValue;
-        }
-
-        public int OrderOfPlay { get; set; }
+        public bool Required { get; set; }
+        public Mark Preferred { get; set; }
+        public Mark Allowed { get; set; }
+        public Actor Selected { get; set; }
     }
 }
