@@ -1,4 +1,4 @@
-﻿using Arakara.BattleEngine.Systems;
+﻿using Arakara.BattleEngine.Systems.AI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +9,10 @@ using Tenswee.Common.States;
 
 namespace Arakara.BattleEngine.States
 {
-    public class SequenceState : BaseState
+    public class EnemyTurnState : BaseState
     {
-        public const string EnterNotification = "SequenceState.EnterNotification";
-        public const string ExitNotification = "SequenceState.ExitNotification";
+        public const string EnterNotification = "EnemyTurnState.EnterNotification";
+        public const string ExitNotification = "EnemyTurnState.ExitNotification";
 
         public override void Enter()
         {

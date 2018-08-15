@@ -8,7 +8,7 @@ using Tenswee.Common.Notifications;
 
 namespace Arakara.BattleEngine.Actions
 {
-    public class GameAction
+    public abstract class GameAction
     {
         #region Fields & Properties
         public readonly int id;
@@ -35,6 +35,8 @@ namespace Arakara.BattleEngine.Actions
         {
             isCanceled = true;
         }
+
+        public abstract string GetLog();
         #endregion
 
         #region Protected

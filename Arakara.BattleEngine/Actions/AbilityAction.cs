@@ -15,5 +15,10 @@ namespace Arakara.BattleEngine.Actions
         {
             Ability = ability;
         }
+
+        public override string GetLog()
+        {
+            return $"Ability";
+        }
     }
 }

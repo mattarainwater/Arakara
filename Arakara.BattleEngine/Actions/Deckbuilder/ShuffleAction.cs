@@ -8,5 +8,9 @@ namespace Arakara.BattleEngine.Actions.Deckbuilder
 {
     public class ShuffleAction : GameAction
     {
+        public override string GetLog()
+        {
+            return $"Shuffle deck";
+        }
     }
 }

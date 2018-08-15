@@ -45,5 +45,10 @@ namespace Arakara.BattleEngine.Actions
             }
             Amount = Convert.ToInt32(ability.UserInfo);
         }
+
+        public override string GetLog()
+        {
+            return $"Deal {Amount} damage to {string.Join(", ", Targets.Select(x => x.Name))}";
+        }
     }
 }

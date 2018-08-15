@@ -10,18 +10,23 @@ using Tenswee.Common.States;
 
 namespace Arakara.BattleEngine.States
 {
-    public class PlayerIdleState : BaseState
+    public class StartState : BaseState
     {
-        public const string EnterNotification = "PlayerIdleState.EnterNotification";
-        public const string ExitNotification = "PlayerIdleState.ExitNotification";
+        public const string EnterNotification = "StartState.EnterNotification";
+        public const string ExitNotification = "StartState.ExitNotification";
 
         public override void Enter()
         {
             this.PostNotification(EnterNotification);
             var battle = Container.GetBattle();
-            if(battle.CurrentActor is AIActor)
+            var firstActor = battle.CurrentActor;
+            if(firstActor is AIActor)
             {
-                Container.GetAspect<TurnSystem>().ChangeTurn();
+                Container.ChangeState<EnemyTurnState>();
+            }
+            else
+            {
+                Container.ChangeState<WaitingForInputState>();
             }
         }
 

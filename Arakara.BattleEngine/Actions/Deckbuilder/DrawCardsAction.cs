@@ -36,6 +36,11 @@ namespace Arakara.BattleEngine.Actions.Deckbuilder
             Actor = game.GetBattle().Actors.First(x => x is DeckbuilderActor) as DeckbuilderActor;
             Amount = Convert.ToInt32(ability.UserInfo);
         }
+
+        public override string GetLog()
+        {
+            return $"{Actor.Name} drew {Amount} cards";
+        }
         #endregion
     }
 }

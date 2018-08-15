@@ -1,4 +1,6 @@
 ﻿using Arakara.BattleEngine.Interfaces;
+using Arakara.BattleEngine.Models;
+using Arakara.BattleEngine.Models.AI;
 using Arakara.BattleEngine.Systems;
 using Tenswee.Common.Containers;
 using Tenswee.Common.Notifications;
@@ -8,6 +10,8 @@ namespace Arakara.BattleEngine.States
 {
     public class GlobalGameState : Aspect, IObservable
     {
+        private Actor _actorAtLastSequenceEnd;
+
         public void Awake()
         {
             this.AddObserver(OnBeginSequence, ActionSystem.beginSequenceNotification);
@@ -27,7 +31,24 @@ namespace Arakara.BattleEngine.States
 
         void OnCompleteAllActions(object sender, object args)
         {
-            Container.ChangeState<PlayerIdleState>();
+            var battle = Container.GetBattle();
+            var firstActor = battle.CurrentActor;
+            if(firstActor == _actorAtLastSequenceEnd)
+            {
+                if(firstActor is AIActor)
+                {
+                    Container.GetAspect<TurnSystem>().ChangeTurn();
+                }
+                else
+                {
+                    Container.ChangeState<WaitingForInputState>();
+                }
+            }
+            else
+            {
+                this.PostNotification(firstActor.GetType().FullName + ".startTurn", firstActor);
+            }
+            _actorAtLastSequenceEnd = firstActor;
         }
     }
 }

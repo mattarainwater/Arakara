@@ -46,11 +46,7 @@ namespace Arakara.BattleEngine
             actionSystem = Container.GetAspect<ActionSystem>();
             Temp_SetupDefaultBattle();
             Container.GetAspect<TurnSystem>().ChangeTurn(0);
-        }
-
-        public override void onAddedToEntity()
-        {
-            Container.ChangeState<PlayerIdleState>();
+            Container.ChangeState<StartState>();
         }
 
         public void update()

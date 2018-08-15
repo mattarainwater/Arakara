@@ -1,0 +1,108 @@
+Myriad Paths: Her Fist Clenched Red
+Game Design Document by Matt Rainwater - 0.0.1
+
+Game Overview
+	Game Concept
+		Visual novel meets turn-based RPG. Main draw is that each character operates in unique and interesting ways, inspired by board game mechanics (deckbuilder, worker placement, etc.). Storywise, the draw is that choices matter with regard to how you pursue your goals. Sneaking in might be easier, but a loud entrance might make people wary of you next time.
+	
+	Genre
+		Visual Novel, RPG
+	
+	Target Audience
+		Gamers who want story-driven games, strategic games, and single-player games.
+	
+	Game Flow Summary
+		The game is played through three main modes: dialog, battle, and map. Each can flow into the other, but usually the flow will be dialogs leading into either map or battle, and map or battle leading back into dialog. The game is very story-based, so dialog being the "bridge" between the other game modes gives context to the map and battle modes.
+		
+		Dialog
+			The dialog mode consists primarily of text being displayed to the user. The text is characters speaking to each other, with their portraits appearing above text boxes. The player procedes through the dialog until another game mode is reached. The dialog mode can also feature choices the player makes. Depending on the choices made, the player will see different dialog, fight different battles, or see different locations on the map.
+			The dialog mode can also "interupt" the other two modes and appear on top of the other modes to give more story/context to the player.
+
+		Battle
+			The battle mode features the player's party fighting against some group of enemies. Each character has different styles of play, UI, and strategic decisions to consider. The result of the battle (victory, loss, or other events that happen) can impact the game in similar ways to choices in the dialog mode: different dialog, map changes, etc.
+
+		Map
+			The map mode shows the player current events they can explore, usually leading to a dialog scene and/or a battle scene. Choices of which events to explore in what order can impact the game in similar ways to choices in the dialog mode: different dialog, map changes, etc.
+	
+	Look and Feel
+		Character portaits are fully illustrated, full body portraits. Each character can have several different portraits representing different moods or actions of the character (angry, sad, attacking, etc.) There is no animation in the portraits, merely static images that might change based on the current scene. Inspirations are Banner Saga, Tales of, and Fire Emblem (3DS).
+
+		Battle sprites are pixel art with full animation for attacks/spells/etc. Inspirations are Risk of Rain, Sword and Sworcery, and Fire Emblem (GBA).
+
+Gameplay and  Mechanics
+	Gameplay
+		Game Progression
+			Progression is story-based, there is no level/equipment/status-based progression. There is strategic progression in that the player should get better at playing through the battles.
+
+		Event Structure
+
+		Objectives
+
+	Mechanics
+		Combat
+
+		Screen Flow
+
+		Story Decisions
+
+		Map Events
+
+	Game Options
+
+	Replaying and Saving 
+
+	Cheats and Easter Eggs
+
+Story, Setting and Character  
+	Story and Narrative
+		Overview
+
+		Prologue
+
+		Act One
+
+		Act Two
+
+		Act Three
+
+		Epilogue
+
+	Game World
+		World Overview
+
+		Areas
+
+	Characters
+		Playable Characters
+
+		Other Main Characters
+
+		Minor Characters
+
+Events
+
+Interface
+	Visual System
+
+	Control System
+
+	Audio
+
+	Help System
+
+Artificial Intelligence
+	AI-controlled enemies will most likely operate on a heuristic specific to each enemy.
+
+	Enemies
+
+Technical 
+	Target Hardware
+		Windows PC, leave option open for consoles
+
+	Development software
+		Framework/Engine
+			Monogame with Nez
+
+		Asset Creation
+			Pyxel Edit
+			Tiled

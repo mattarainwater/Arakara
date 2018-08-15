@@ -17,5 +17,10 @@ namespace Arakara.BattleEngine.Actions
             Move = move;
             FactionId = factionId;
         }
+
+        public override string GetLog()
+        {
+            return $"Move {Move.Name} executed";
+        }
     }
 }

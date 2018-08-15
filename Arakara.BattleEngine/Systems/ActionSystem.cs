@@ -24,6 +24,13 @@ namespace Arakara.BattleEngine.Systems
         IEnumerator rootSequence;
         List<GameAction> openReactions;
         public bool IsActive { get { return rootSequence != null; } }
+
+        public List<string> Log { get; set; }
+
+        public ActionSystem()
+        {
+            Log = new List<string>();
+        }
         #endregion
 
         #region Public
@@ -59,6 +66,8 @@ namespace Arakara.BattleEngine.Systems
         IEnumerator Sequence(GameAction action)
         {
             this.PostNotification(beginSequenceNotification, action);
+
+            Log.Add(action.GetLog());
 
             if (action.Validate() == false)
                 action.Cancel();

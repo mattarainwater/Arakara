@@ -26,6 +26,7 @@ namespace Arakara.BattleEngine.Factories
             game.AddAspect<AbilitySystem>();
             game.AddAspect<AITurnSystem>();
             game.AddAspect<BattleMoveSystem>();
+            game.AddAspect<VictorySystem>();
 
             // Add Other
             game.AddAspect<StateMachine>();

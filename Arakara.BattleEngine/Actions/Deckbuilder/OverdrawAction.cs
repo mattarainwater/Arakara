@@ -12,5 +12,10 @@ namespace Arakara.BattleEngine.Actions.Deckbuilder
         public OverdrawAction(DeckbuilderActor actor, int amount) : base(actor, amount)
         {
         }
+
+        public override string GetLog()
+        {
+            return $"{Actor.Name} overdrew {Amount} cards";
+        }
     }
 }

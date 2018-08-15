@@ -19,5 +19,18 @@ namespace Arakara.BattleEngine.Models
                 return Actors[CurrentActorIndex];
             }
         }
+
+        public Actor PreviousActor
+        {
+            get
+            {
+                var previousIndex = 
+                    CurrentActorIndex == 0 ? 
+                    Actors.Count() - 1 : 
+                    CurrentActorIndex - 1;
+
+                return Actors[previousIndex];
+            }
+        }
     }
 }

@@ -124,11 +124,10 @@ namespace Nez.Sprites
 				// if we arent looping and elapsedTime is 0 we are done. Handle it appropriately
 				if( !_currentAnimation.loop && elapsedTime == 0 )
 				{
-					// the animation is done so fire our event
-					if( onAnimationCompletedEvent != null )
-						onAnimationCompletedEvent( _currentAnimationKey );
+                    // the animation is done so fire our event
+                    onAnimationCompletedEvent?.Invoke(_currentAnimationKey);
 
-					isPlaying = false;
+                    isPlaying = false;
 
 					switch( _currentAnimation.completionBehavior )
 					{
@@ -157,11 +156,10 @@ namespace Nez.Sprites
 				}
 				else
 				{
-					// the animation is done so fire our event
-					if( onAnimationCompletedEvent != null )
-						onAnimationCompletedEvent( _currentAnimationKey );
+                    // the animation is done so fire our event
+                    onAnimationCompletedEvent?.Invoke(_currentAnimationKey);
 
-					isPlaying = false;
+                    isPlaying = false;
 					return;
 				}
 			}

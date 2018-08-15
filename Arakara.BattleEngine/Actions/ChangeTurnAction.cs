@@ -14,5 +14,10 @@ namespace Arakara.BattleEngine.Actions
         {
             TargetActorIndex = targetActorIndex;
         }
+
+        public override string GetLog()
+        {
+            return $"Change turn, now {TargetActorIndex} turn";
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Arakara.BattleEngine.Systems;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +8,10 @@ using Tenswee.Common.States;
 
 namespace Arakara.BattleEngine.States
 {
-    public class SequenceState : BaseState
+    public class BattleOverState : BaseState
     {
-        public const string EnterNotification = "SequenceState.EnterNotification";
-        public const string ExitNotification = "SequenceState.ExitNotification";
+        public const string EnterNotification = "BattleOverState.EnterNotification";
+        public const string ExitNotification = "BattleOverState.ExitNotification";
 
         public override void Enter()
         {
