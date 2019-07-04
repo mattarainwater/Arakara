@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Arakara.Common;
+using Tenswee.Common.Extensions;
 
 namespace Arakara.Battle.Effects
 {

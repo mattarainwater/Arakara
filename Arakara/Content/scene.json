@@ -1,0 +1,90 @@
+{
+	"id": "merchant_key_extraction",
+	"name": "Merchant Key Extraction",
+	"segments": [
+		{
+			"requirements": [],
+			"index": 1,
+			"onStart": [{
+				"type": "backgroundTransition",
+				"background": "market",
+			}],
+			"onEnd": [],
+			"actions": [
+				{
+					"text": "Attack him!",
+					"startIndex": 2,
+					"endIndex": -1,
+					"default": false,
+					"onChoose": [
+						{
+					 		"type": "segmentTransition",
+					 		"target": 3
+						},
+						{
+							"type": "flag",
+							"target": "violent_towards_merchants",
+							"value": true
+						}
+					]
+				},
+				{
+					"text": "Ask about the key",
+					"startIndex": 2,
+					"endIndex": -1,
+					"default": true,
+					"onChoose": [
+						{
+					 		"type": "segmentTransition",
+					 		"target": 2
+						}
+					]
+				},
+			],
+			"entries": [
+				{
+					"index": 1,
+					"type": "dialogue",
+					"dialogue": "Hey, you're a merchant!",
+					"title": "Prisca",
+					"onStart": [{
+						"type": "portrait",
+						"active": true,
+						"portrait": "prisca",
+						"facing": "right",
+						"position": "left"
+					},
+					{
+						"type": "portrait",
+						"active": false,
+						"portrait": "default_merchant",
+						"facing": "left",
+						"position": "right"
+					}],
+					"onEnd": [],
+				},
+				{
+					"index": 2,
+					"type": "dialogue",
+					"dialogue": "Yes, I am!",
+					"title": "Merchant",
+					"onStart": [{
+						"type": "portrait",
+						"active": false,
+						"portrait": "prisca",
+						"facing": "right",
+						"position": "left"
+					},
+					{
+						"type": "portrait",
+						"active": true,
+						"portrait": "default_merchant",
+						"facing": "left",
+						"position": "right"
+					}],
+					"onEnd": [],
+				},
+			]
+		}
+	]
+}

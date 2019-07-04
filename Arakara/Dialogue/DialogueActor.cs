@@ -1,5 +1,7 @@
 ﻿using Arakara.Common;
 using Arakara.Dialogue;
+using Arakara.Dialogue.Models;
+using Arakara.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nez;
@@ -11,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arakara.Components
+namespace Arakara.Dialogue
 {
     public class DialogueActor : Component
     {
@@ -62,35 +64,70 @@ namespace Arakara.Components
 
         public override void onAddedToEntity()
         {
-            TextEntity = entity.scene.createEntity("text");
-            TextEntity.transform.position = new Vector2(entity.transform.position.X + 35, entity.transform.position.Y + 20);
-            Text = TextEntity.addComponent(new Text(FontForText, "", Vector2.Zero, new Color(101, 67, 33)));
-            Text.renderLayer = 70;
-            Text.transform.scale = new Vector2(2f, 2f);
+            float vec = .277f;
 
             TextBoxEntity = entity.scene.createEntity("textBox");
-            TextBoxEntity.transform.position = new Vector2(entity.transform.position.X, entity.transform.position.Y - 15);
+            TextBoxEntity.transform.position = new Vector2(0, 400 * vec);
             var textSprite = TextBoxEntity.addComponent(new Sprite(TextBox));
-            textSprite.renderLayer = 80;
+            textSprite.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
             textSprite.setOrigin(Vector2.Zero);
+            TextBoxEntity.scale *= vec;
 
-            NameEntity = entity.scene.createEntity("name");
-            Name = NameEntity.addComponent(new Text(CommonResources.DefaultBitmapFont, "", new Vector2(entity.transform.position.X + 90, entity.transform.position.Y - 20f), Color.WhiteSmoke));
-            Name.renderLayer = 70;
-            Name.transform.scale = new Vector2(2f, 2f);
+            TextEntity = entity.scene.createEntity("text");
+            TextEntity.transform.position = new Vector2(153 * vec, 425 * vec);
+            Text = TextEntity.addComponent(new Text(FontForText, "", Vector2.Zero, new Color(101, 67, 33)));
+            Text.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
+            //TextEntity.scale *= 4f * vec;
 
-            NameBoxEntity = entity.scene.createEntity("nameBox");
-            NameBoxEntity.transform.position = new Vector2(entity.transform.position.X + 20, entity.transform.position.Y - 30f);
-            var nameSprite = NameBoxEntity.addComponent(new Sprite(NameBox));
-            nameSprite.renderLayer = 80;
-            nameSprite.setOrigin(Vector2.Zero);
+            //TextBoxEntity = entity.scene.createEntity("textBox");
+            //TextBoxEntity.transform.position = new Vector2(128, 400);
+            //var textSprite = TextBoxEntity.addComponent(new Sprite(TextBox));
+            //textSprite.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
+            //textSprite.setOrigin(Vector2.Zero);
+            //TextBoxEntity.scale *= 1f;
 
-            NextDialogueMarker = entity.scene.createEntity("marker");
-            NextDialogueMarker.transform.position = new Vector2(570f, 320f);
-            var markerSprite = NextDialogueMarker.addComponent(new Sprite(Marker));
-            markerSprite.renderLayer = 60;
-            markerSprite.setColor(new Color(101, 67, 33));
-            NextDialogueMarker.enabled = false;
+            //TextEntity = entity.scene.createEntity("text");
+            //TextEntity.transform.position = new Vector2(128 + 25, 425);
+            //Text = TextEntity.addComponent(new Text(FontForText, "", Vector2.Zero, new Color(101, 67, 33)));
+            //Text.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
+            //TextEntity.scale *= 4f;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            //NameBoxEntity = entity.scene.createEntity("nameBox");
+            //NameBoxEntity.transform.position = new Vector2(entity.transform.position.X + 20, entity.transform.position.Y - 30f);
+            //var nameSprite = NameBoxEntity.addComponent(new Sprite(NameBox));
+            //nameSprite.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
+            //nameSprite.setOrigin(Vector2.Zero);
+            //NameBoxEntity.scale *= 2f;
+
+            //NameEntity = entity.scene.createEntity("name");
+            //Name = NameEntity.addComponent(new Text(CommonResources.DefaultBitmapFont, "", new Vector2(entity.transform.position.X + 90, entity.transform.position.Y - 20f), Color.WhiteSmoke));
+            //Name.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
+            //NameEntity.scale *= 4f;
+
+            //NextDialogueMarker = entity.scene.createEntity("marker");
+            //NextDialogueMarker.transform.position = new Vector2(570f, 320f);
+            //var markerSprite = NextDialogueMarker.addComponent(new Sprite(Marker));
+            //markerSprite.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
+            //markerSprite.setColor(new Color(101, 67, 33));
+            //NextDialogueMarker.enabled = false;
+            //NextDialogueMarker.scale *= 2f;
         }
 
         public void ResetDialogue(DialogueEntry dialogue)
@@ -110,16 +147,17 @@ namespace Arakara.Components
             IsFinished = false;
             _dt = 0f;
 
-            Name.setText(dialogue.SpeakerName);
+            //Name.setText(dialogue.SpeakerName);
 
             if(dialogue.LeftPortait != null)
             {
                 LeftPortraitEntity = entity.scene.createEntity("portait");
                 var leftSprite = LeftPortraitEntity.addComponent(new Sprite(dialogue.LeftPortait.PortraitTexture));
                 leftSprite.setOrigin(Vector2.Zero);
-                leftSprite.renderLayer = 100;
+                leftSprite.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
+                leftSprite.setLayerDepth(1);
                 LeftPortraitEntity.transform.position = LeftPortaitPosition;
-                if (!dialogue.LeftPortait.IsActive)
+                if (!dialogue.LeftActive)
                 {
                     leftSprite.setColor(new Color(125, 125, 125));
                 }
@@ -131,15 +169,16 @@ namespace Arakara.Components
                 RightPortraitEntity = entity.scene.createEntity("portait");
                 var rightSprite = RightPortraitEntity.addComponent(new Sprite(dialogue.RightPortait.PortraitTexture));
                 rightSprite.setOrigin(Vector2.Zero);
-                rightSprite.renderLayer = 100;
+                rightSprite.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
                 RightPortraitEntity.transform.position = RightPortaitPosition;
-                if(!dialogue.RightPortait.IsActive)
+                rightSprite.setLayerDepth(1);
+                if (dialogue.LeftActive)
                 {
                     rightSprite.setColor(new Color(125, 125, 125));
                 }
             }
 
-            NextDialogueMarker.enabled = false;
+            //NextDialogueMarker.enabled = false;
         }
 
         private string FormatRawText(string rawText)
@@ -219,7 +258,7 @@ namespace Arakara.Components
             if (_displayedText == RawText)
             {
                 IsFinished = true;
-                NextDialogueMarker.enabled = true;
+                //NextDialogueMarker.enabled = true;
             }
             else if(!IsFinished)
             {
@@ -239,7 +278,7 @@ namespace Arakara.Components
             _displayedText = RawText;
             Text.setText(_displayedText);
             IsFinished = true;
-            NextDialogueMarker.enabled = true;
+            //NextDialogueMarker.enabled = true;
         }
     }
 }

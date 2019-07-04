@@ -19,35 +19,30 @@ namespace Arakara.Scenes
         public override void onStart()
         {
             var dialogueActorEntity = createEntity("dialogueActor");
-            var textBoxTexture = content.Load<Texture2D>("textbox");
+            var textBoxTexture = content.Load<Texture2D>("textbox-2");
             var nameBoxTexture = content.Load<Texture2D>("namebox");
             var markerTexture = content.Load<Texture2D>("marker");
             var dialogueActor = dialogueActorEntity.addComponent(new DialogueActor(textBoxTexture, nameBoxTexture, markerTexture));
 
             var dialogueEntity = createEntity("dialogue");
-            _dialogue = new DialogueContainer(dialogueActor, OnComplete, DimensionConstants.DESIGN_WIDTH, DimensionConstants.DESIGN_HEIGHT);
+            _dialogue = new DialogueContainer(dialogueActor, OnComplete, DimensionConstants.GetCurrentResolution().ScreenWidth, DimensionConstants.GetCurrentResolution().ScreenHeight);
             dialogueEntity.addComponent(_dialogue);
 
-            var texture = content.Load<Texture2D>("prisca-portrait");
-            var leftPortrait = new DialoguePortrait(texture);
-            leftPortrait.IsActive = true;
-            var rightPortrait = new DialoguePortrait(texture);
+            var texture1 = content.Load<Texture2D>("fuuka");
+            var texture2 = content.Load<Texture2D>("akihiko");
+            //var leftPortrait = new DialoguePortrait(texture1);
+            //var rightPortrait = new DialoguePortrait(texture2);
 
-            _dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test! This is a test! This is a test! This isss a test! This is a test! This is a test!", "Prisca", leftPortrait, rightPortrait));
-            _dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test 22!", "Prisca", rightPortrait, leftPortrait));
-            _dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test, a very good one!", "Prisca", leftPortrait, rightPortrait));
+            //_dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test! This is a test! This is a test! This isss a test! This is a test! This is a test!", "Prisca", leftPortrait, rightPortrait, true));
+            //_dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test 22!", "Prisca", leftPortrait, rightPortrait, false));
+            //_dialogue.Controller.AddDialogueEntry(new DialogueEntry("This is a test, a very good one!", "Prisca", leftPortrait, rightPortrait, true));
 
             _dialogue.ToggleDialogueActive();
         }
 
         private void OnComplete()
         {
-            Core.startSceneTransition(new FadeTransition(LoadStartScene) { fadeInDuration = 0f, fadeOutDuration = 0f, delayBeforeFadeInDuration = 0f, fadeToColor = Color.WhiteSmoke });
-        }
-
-        private Scene LoadStartScene()
-        {
-            return new TestGameScene();
+            Core.scene = new TestDialogueScene();
         }
     }
 }

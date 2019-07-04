@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 
-namespace Arakara.Dialogue
+namespace Arakara.Dialogue.Models
 {
     public class DialoguePortrait
     {

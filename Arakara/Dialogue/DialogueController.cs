@@ -1,5 +1,6 @@
 ﻿using Arakara.Common;
 using Arakara.Components;
+using Arakara.Dialogue.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,8 @@ namespace Arakara.Dialogue
 
         public Action OnComplete { get; set; }
 
+        public int resindex { get; set; }
+
         public DialogueController(DialogueActor actor, Action onComplete)
         {
             DialogueEntries = new List<DialogueEntry>();
@@ -37,6 +40,16 @@ namespace Arakara.Dialogue
 
         public void Update()
         {
+            if(VirtualButtons.Dummyinput.isPressed)
+            {
+                resindex++;
+                if(resindex == 3)
+                {
+                    resindex = 0;
+                }
+                DimensionConstants.SetCurrentResolution(resindex);
+            }
+
             if (IsActive && !IsDone)
             {
                 if (!IsInitialized)

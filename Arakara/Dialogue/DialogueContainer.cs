@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arakara.Components
+namespace Arakara.Dialogue
 {
     public class DialogueContainer : Component, IUpdatable
     {
@@ -31,12 +31,21 @@ namespace Arakara.Components
             _marginUpDown = screenHeight / 20;
 
             _halfWayPoint = _screenWidth / 2;
-            _entityYPos = 230;
+            _entityYPos = 450;
             _spacing = _screenWidth / 40;
 
-            dialogueActor.transform.position = new Vector2(20, _entityYPos);
-            dialogueActor.LeftPortaitPosition = new Vector2(0, _entityYPos - DimensionConstants.PORTRAIT_HEIGHT - 10);
-            dialogueActor.RightPortaitPosition = new Vector2(_screenWidth - DimensionConstants.PORTRAIT_WIDTH, _entityYPos - DimensionConstants.PORTRAIT_HEIGHT - 10);
+            //dialogueActor.transform.position = new Vector2(20, _entityYPos);
+            dialogueActor.LeftPortaitPosition = new Vector2(0, 0);
+            dialogueActor.RightPortaitPosition = new Vector2(_screenWidth - 500, 0);
+        }
+
+        public override void onAddedToEntity()
+        {
+            var scene = entity.scene;
+
+            // add dialogbox entity
+            var dialogeBoxEntity = scene.createEntity("box");
+            
         }
 
         public void update()

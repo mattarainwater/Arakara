@@ -88,6 +88,9 @@
     <Compile Include="Battle\Statuses\BattleStatus.cs" />
     <Compile Include="Battle\BattleStatusCollection.cs" />
     <Compile Include="Battle\Statuses\CurseStatus.cs" />
+    <Compile Include="Common\Models\DisplaySetting.cs" />
+    <Compile Include="Common\Models\AspectRatios.cs" />
+    <Compile Include="Common\Models\ResolutionSetting.cs" />
     <Compile Include="Common\ObjectExtensions.cs" />
     <Compile Include="Common\VirtualButtons.cs" />
     <Compile Include="Components\ActionProgrammerActor.cs" />
@@ -105,14 +108,14 @@
     <Compile Include="Common\DimensionConstants.cs" />
     <Compile Include="Common\EntityTags.cs" />
     <Compile Include="Common\JSONReader.cs" />
-    <Compile Include="Common\StringExtensions.cs" />
     <Compile Include="Components\AIActor.cs" />
     <Compile Include="Components\BattleActor.cs" />
     <Compile Include="Battle\BattleController.cs" />
     <Compile Include="Battle\Events\BattleEvent.cs" />
     <Compile Include="Components\DeckBuilderActor.cs" />
-    <Compile Include="Components\DialogueActor.cs" />
-    <Compile Include="Components\DialogueContainer.cs" />
+    <Compile Include="Dialogue\DialogueActor.cs" />
+    <Compile Include="Dialogue\DialogueBox.cs" />
+    <Compile Include="Dialogue\DialogueContainer.cs" />
     <Compile Include="Components\EffectDisplay.cs" />
     <Compile Include="Components\EffectDisplayContainer.cs" />
     <Compile Include="Components\ProgrammedAction.cs" />
@@ -121,9 +124,9 @@
     <Compile Include="Components\Selector.cs" />
     <Compile Include="Battle\TurnOrderDisplay.cs" />
     <Compile Include="Components\UpdatableText.cs" />
-    <Compile Include="Dialogue\DialogueEntry.cs" />
+    <Compile Include="Dialogue\Models\DialogueEntry.cs" />
     <Compile Include="Dialogue\DialogueController.cs" />
-    <Compile Include="Dialogue\DialoguePortrait.cs" />
+    <Compile Include="Dialogue\Models\DialoguePortrait.cs" />
     <Compile Include="Factories\Entities\CardEntityFactory.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="Program.cs" />
@@ -131,7 +134,7 @@
     <Compile Include="Scenes\BaseScene.cs" />
     <Compile Include="Scenes\TestGameScene.cs" />
     <Compile Include="Scenes\MessageScene.cs" />
-    <Compile Include="Scenes\StartMenuScreen.cs" />
+    <Compile Include="Scenes\StartMenuScene.cs" />
     <Compile Include="Scenes\TestDialogueScene.cs" />
     <Compile Include="Scenes\TestNewBattleScene.cs" />
   </ItemGroup>
@@ -140,12 +143,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>External DLLs\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK">
-      <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\OpenTK.dll</HintPath>
-    </Reference>
-    <Reference Include="NVorbis">
-      <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\NVorbis.dll</HintPath>
-    </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\MonoGame.Framework.dll</HintPath>
     </Reference>
@@ -153,7 +150,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Content\default.fnt" />
+    <None Include="Content\test.ink.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="x86\SDL2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -218,6 +219,10 @@
     <ProjectReference Include="..\Arakara.BattleEngine\Arakara.BattleEngine.csproj">
       <Project>{1376d10d-82f2-4a3c-8a49-073a7e739622}</Project>
       <Name>Arakara.BattleEngine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arakara.DialogueEngine\Arakara.DialogueEngine.csproj">
+      <Project>{1ddc7033-502b-4618-8232-d7b47867eaa9}</Project>
+      <Name>Arakara.DialogueEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\Nez\Nez-PCL\Nez.csproj">
       <Project>{60b7197d-d0d5-405c-90a2-a56903e9b039}</Project>

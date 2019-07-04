@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenswee.Common", "Tenswee.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arakara.BattleEngine", "Arakara.BattleEngine\Arakara.BattleEngine.csproj", "{1376D10D-82F2-4A3C-8A49-073A7E739622}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arakara.DialogueEngine", "Arakara.DialogueEngine\Arakara.DialogueEngine.csproj", "{1DDC7033-502B-4618-8232-D7B47867EAA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,14 @@ Global
 		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Release|x86.ActiveCfg = Release|Any CPU
 		{1376D10D-82F2-4A3C-8A49-073A7E739622}.Release|x86.Build.0 = Release|Any CPU
+		{1DDC7033-502B-4618-8232-D7B47867EAA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DDC7033-502B-4618-8232-D7B47867EAA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DDC7033-502B-4618-8232-D7B47867EAA9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1DDC7033-502B-4618-8232-D7B47867EAA9}.Debug|x86.Build.0 = Debug|Any CPU
+		{1DDC7033-502B-4618-8232-D7B47867EAA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DDC7033-502B-4618-8232-D7B47867EAA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DDC7033-502B-4618-8232-D7B47867EAA9}.Release|x86.ActiveCfg = Release|Any CPU
+		{1DDC7033-502B-4618-8232-D7B47867EAA9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
