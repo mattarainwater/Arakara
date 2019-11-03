@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 
 namespace Arakara.Components
 {
-    public class EffectDisplay : Text, IUpdatable
+    public class EffectDisplay : TextComponent, IUpdatable
     {
         public int TimeToLive { get; set; }
 
@@ -20,15 +20,15 @@ namespace Arakara.Components
         {
             TimeToLive = timeToLive;
             _container = container;
-            renderLayer = 5;
+            RenderLayer = 5;
         }
 
-        public void update()
+        public void Update()
         {
-            _elapsedTIme += Time.altDeltaTime;
+            _elapsedTIme += Time.AltDeltaTime;
             if (_elapsedTIme >= TimeToLive)
             {
-                entity.destroy();
+                Entity.Destroy();
                 _container.Remove(this);
             }
         }

@@ -13,39 +13,39 @@ namespace Tenswee.Common.Components
     {
         private bool _isDragging;
 
-        public const string onDropNotification = "DragToLocation.onDrop";
+        public const string OnDropNotification = "DragToLocation.OnDrop";
 
         public DragToLocation(RectangleF rectangle)
             : base(rectangle)
         {
         }
 
-        public override void onEnabled()
+        public override void OnEnabled()
         {
-            this.AddObserver(drag, onClickNotification);
+            this.AddObserver(Drag, OnClickNotifcation);
         }
 
-        public override void onDisabled()
+        public override void OnDisabled()
         {
-            this.RemoveObserver(drag, onClickNotification);
+            this.RemoveObserver(Drag, OnClickNotifcation);
         }
 
-        public override void onAddedToEntity()
+        public override void OnAddedToEntity()
         {
-            base.onAddedToEntity();
+            base.OnAddedToEntity();
         }
 
-        public override void update()
+        public override void Update()
         {
-            base.update();
-            if (Input.leftMouseButtonReleased && _isDragging)
+            base.Update();
+            if (Input.LeftMouseButtonReleased && _isDragging)
             {
                 _isDragging = false;
-                this.PostNotification(onDropNotification, Input.mousePosition);
+                this.PostNotification(OnDropNotification, Input.MousePosition);
             }
         }
 
-        private void drag(object sender, object position)
+        private void Drag(object sender, object position)
         {
             _isDragging = true;
         }

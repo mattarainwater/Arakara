@@ -26,11 +26,11 @@ namespace Arakara.Battle.Effects
 
         public override void Perform(BattleActor actor, List<BattleActor> targets, BattleController controller)
         {
-            var crit = Nez.Random.nextFloat() <= actor.CriticalHitChance ? 2 : 1;
-            DamageDealt = Nez.Random.range(MinDamage, MaxDamage + 1) * crit;
+            var crit = Nez.Random.NextFloat() <= actor.CriticalHitChance ? 2 : 1;
+            DamageDealt = Nez.Random.Range(MinDamage, MaxDamage + 1) * crit;
             foreach(var target in targets)
             {
-                var dodge = Nez.Random.nextFloat() <= target.DodgeChance ? 0 : 1;
+                var dodge = Nez.Random.NextFloat() <= target.DodgeChance ? 0 : 1;
                 DamageDealt *= dodge;
                 var defense = 0;
                 var defenseUp = target.Statuses.Get("DefenseUp");
@@ -42,15 +42,15 @@ namespace Arakara.Battle.Effects
                 target.CurrentHP -= DamageDealt;
                 var displayText = dodge == 0 ? "Miss" : crit == 2 ? "Crit! " + DamageDealt.ToString() : DamageDealt == 0 ? "Blocked!" : DamageDealt.ToString();
                 var displayColor = DamageDealt == 0 ? Color.DarkGray : crit == 2 ? Color.DarkViolet : Color.Red;
-                var effectDisplayContainer = target.getComponent<EffectDisplayContainer>();
+                var effectDisplayContainer = target.GetComponent<EffectDisplayContainer>();
                 effectDisplayContainer.MakeEffectDisplay(displayText, displayColor);
 
-                var animator = target.getComponent<Sprite<Animations>>();
-                if(animator.getAnimation(Animations.Hit) != null && dodge != 0)
+                var animator = target.GetComponent<SpriteAnimator>();
+                if(animator.HasAnimation(Animations.Hit) && dodge != 0)
                 {
-                    animator.play(Animations.Hit);
-                    Core.schedule(1f, (t) => {
-                        animator.play(Animations.Idle);
+                    animator.Play(Animations.Hit);
+                    Core.Schedule(1f, (t) => {
+                        animator.Play(Animations.Idle);
                     });
                 }
             }

@@ -14,9 +14,9 @@ namespace Arakara.BattleEngine.Systems
     public class ActionSystem : Aspect
     {
         #region Notifications
-        public const string beginSequenceNotification = "ActionSystem.beginSequenceNotification";
-        public const string endSequenceNotification = "ActionSystem.endSequenceNotification";
-        public const string completeNotification = "ActionSystem.completeNotification";
+        public const string BeginSequenceNotification = "ActionSystem.BbeginSequenceNotification";
+        public const string EndSequenceNotification = "ActionSystem.EndSequenceNotification";
+        public const string CompleteNotification = "ActionSystem.CompleteNotification";
         #endregion
 
         #region Fields & Properties
@@ -51,7 +51,7 @@ namespace Arakara.BattleEngine.Systems
                 rootAction = null;
                 rootSequence = null;
                 openReactions = null;
-                this.PostNotification(completeNotification);
+                this.PostNotification(CompleteNotification);
             }
         }
 
@@ -65,7 +65,7 @@ namespace Arakara.BattleEngine.Systems
         #region Private
         IEnumerator Sequence(GameAction action)
         {
-            this.PostNotification(beginSequenceNotification, action);
+            this.PostNotification(BeginSequenceNotification, action);
 
             Log.Add(action.GetLog());
 
@@ -81,7 +81,7 @@ namespace Arakara.BattleEngine.Systems
             phase = MainPhase(action.cancel);
             while (phase.MoveNext()) { yield return null; }
 
-            this.PostNotification(endSequenceNotification, action);
+            this.PostNotification(EndSequenceNotification, action);
         }
 
         IEnumerator MainPhase(Phase phase)

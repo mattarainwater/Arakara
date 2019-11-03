@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -13,7 +13,7 @@
     <AssemblyName>Arakara</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MonoGamePlatform>DesktopGL</MonoGamePlatform>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,6 +29,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -69,29 +70,12 @@
     <Compile Include="Battle\Events\Effects\SceneTransitionEffect.cs" />
     <Compile Include="Battle\Events\Triggers\OnDeathTrigger.cs" />
     <Compile Include="Battle\Events\Triggers\OnFactionWinTrigger.cs" />
-    <Compile Include="Battle\Phases\ActionProgammer\CleanUpPhase.cs" />
-    <Compile Include="Battle\Phases\ActionProgammer\SelectActionsPhase.cs" />
-    <Compile Include="Battle\Phases\AI\CleanUpPhase.cs" />
-    <Compile Include="Battle\Phases\AI\SelectActionPhase.cs" />
-    <Compile Include="Battle\Phases\AI\SelectTargetPhase.cs" />
-    <Compile Include="Battle\Phases\Common\AnimationPhase.cs" />
-    <Compile Include="Battle\Phases\Common\ApplyEffectsPhase.cs" />
-    <Compile Include="Battle\Phases\Common\ApplyStatusEffectsPhase.cs" />
-    <Compile Include="Battle\Phases\Common\WaitPhase.cs" />
-    <Compile Include="Battle\Phases\DeckBuilder\CleanUpPhase.cs" />
-    <Compile Include="Battle\Phases\DeckBuilder\DrawBuyableCardsPhase.cs" />
-    <Compile Include="Battle\Phases\DeckBuilder\DrawCardsPhase.cs" />
-    <Compile Include="Battle\Phases\DeckBuilder\SelectBuyableCardPhase.cs" />
-    <Compile Include="Battle\Phases\DeckBuilder\SelectCardPhase.cs" />
-    <Compile Include="Battle\Phases\Common\SelectTargetPhase.cs" />
-    <Compile Include="Battle\Phases\Phase.cs" />
     <Compile Include="Battle\Statuses\BattleStatus.cs" />
     <Compile Include="Battle\BattleStatusCollection.cs" />
     <Compile Include="Battle\Statuses\CurseStatus.cs" />
     <Compile Include="Common\Models\DisplaySetting.cs" />
     <Compile Include="Common\Models\AspectRatios.cs" />
     <Compile Include="Common\Models\ResolutionSetting.cs" />
-    <Compile Include="Common\ObjectExtensions.cs" />
     <Compile Include="Common\VirtualButtons.cs" />
     <Compile Include="Components\ActionProgrammerActor.cs" />
     <Compile Include="Components\Card.cs" />
@@ -139,12 +123,11 @@
     <Compile Include="Scenes\TestNewBattleScene.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>External DLLs\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -224,8 +207,8 @@
       <Project>{1ddc7033-502b-4618-8232-d7b47867eaa9}</Project>
       <Name>Arakara.DialogueEngine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Nez\Nez-PCL\Nez.csproj">
-      <Project>{60b7197d-d0d5-405c-90a2-a56903e9b039}</Project>
+    <ProjectReference Include="..\Nez\Nez.Portable\Nez.csproj">
+      <Project>{767b11c1-de82-42be-9fc3-2f1472cd5f39}</Project>
       <Name>Nez</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tenswee.Common\Tenswee.Common.csproj">

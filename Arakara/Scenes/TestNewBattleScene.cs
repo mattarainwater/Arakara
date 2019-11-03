@@ -24,31 +24,31 @@ namespace Arakara.Scenes
 {
     public class TestNewBattleScene : BaseScene
     {
-        public override void onStart()
+        public override void OnStart()
         {
             var gameViewSystem = new GameViewSystem();
 
-            var gameViewSystemEntity = createEntity("battle");
-            gameViewSystemEntity.addComponent(gameViewSystem);
+            var gameViewSystemEntity = CreateEntity("battle");
+            gameViewSystemEntity.AddComponent(gameViewSystem);
 
-            var text = createEntity("text");
-            text.addComponent(new UpdatableText(CommonResources.DefaultBitmapFont, new Vector2(300, 100), Color.Black, () => {
+            var text = CreateEntity("text");
+            text.AddComponent(new UpdatableText(CommonResources.DefaultBitmapFont, new Vector2(300, 100), Color.Black, () => {
                 Console.WriteLine(gameViewSystem.Container.GetBattleAsJson());
                 return gameViewSystem.Container.GetBattleAsJson();
             }));
 
-            var text2 = createEntity("text2");
-            text2.addComponent(new UpdatableText(CommonResources.DefaultBitmapFont, new Vector2(300, 200), Color.Black, () => {
+            var text2 = CreateEntity("text2");
+            text2.AddComponent(new UpdatableText(CommonResources.DefaultBitmapFont, new Vector2(300, 200), Color.Black, () => {
                 Console.WriteLine(gameViewSystem.Container.GetAspect<StateMachine>().currentState.GetType().FullName);
                 return gameViewSystem.Container.GetAspect<StateMachine>().currentState.GetType().FullName;
             }));
 
-            var guard1 = createEntity("guard1");
-            var texture = content.Load<Texture2D>("brigand");
-            var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
-            var sprite = new Sprite<Animations>(subtextures[0]);
-            guard1.addComponent(sprite);
-            var attackAnimationFrames = new List<Subtexture>
+            var guard1 = CreateEntity("guard1");
+            var texture = Content.Load<Texture2D>("brigand");
+            var subtextures = Sprite.SpritesFromAtlas(texture, 64, 64);
+            var sprite = new SpriteAnimator(subtextures[0]);
+            guard1.AddComponent(sprite);
+            var attackAnimationFrames = new Sprite[]
             {
                 subtextures[0],
                 subtextures[0],
@@ -67,28 +67,28 @@ namespace Arakara.Scenes
                 subtextures[3],
                 subtextures[3],
             };
-            var idleAnimationFrames = new List<Subtexture>
+            var idleAnimationFrames = new Sprite[]
             {
                 subtextures[0],
             };
-            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames) { loop = false, fps = 30});
-            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true });
-            sprite.setOrigin(Vector2.Zero);
-            guard1.position = new Vector2(100, 100);
+            sprite.AddAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames, 30));
+            sprite.AddAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames, 30));
+            sprite.SetOrigin(Vector2.Zero);
+            guard1.Position = new Vector2(100, 100);
             var actor = new TestBattleActor(0, sprite);
             actor.Awake();
-            guard1.addComponent(actor);
+            guard1.AddComponent(actor);
 
 
 
 
 
-            var guard2 = createEntity("guard2");
-            var texture2 = content.Load<Texture2D>("brigand");
-            var subtextures2 = Subtexture.subtexturesFromAtlas(texture2, 64, 64);
-            var sprite2 = new Sprite<Animations>(subtextures2[0]);
-            guard2.addComponent(sprite2);
-            var attackAnimationFrames2 = new List<Subtexture>
+            var guard2 = CreateEntity("guard2");
+            var texture2 = Content.Load<Texture2D>("brigand");
+            var subtextures2 = Sprite.SpritesFromAtlas(texture2, 64, 64);
+            var sprite2 = new SpriteAnimator(subtextures2[0]);
+            guard2.AddComponent(sprite2);
+            var attackAnimationFrames2 = new Sprite[]
             {
                 subtextures2[0],
                 subtextures2[0],
@@ -107,27 +107,27 @@ namespace Arakara.Scenes
                 subtextures2[3],
                 subtextures2[3],
             };
-            var idleAnimationFrames2 = new List<Subtexture>
+            var idleAnimationFrames2 = new Sprite[]
             {
                 subtextures2[0],
             };
-            sprite2.addAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames2) { loop = false, fps = 30 });
-            sprite2.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames2) { loop = true });
-            sprite2.setOrigin(Vector2.Zero);
-            sprite2.flipX = true;
-            guard2.position = new Vector2(200, 100);
+            sprite2.AddAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames2, 30));
+            sprite2.AddAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames2, 30));
+            sprite2.SetOrigin(Vector2.Zero);
+            sprite2.FlipX = true;
+            guard2.Position = new Vector2(200, 100);
             var actor2 = new TestBattleActor(1, sprite2);
             actor2.Awake();
-            guard2.addComponent(actor2);
+            guard2.AddComponent(actor2);
         }
     }
 
     public class TestBattleActor : Component, IObservable
     {
         public int Index { get; set; }
-        public Sprite<Animations> Sprite { get; set; }
+        public SpriteAnimator Sprite { get; set; }
 
-        public TestBattleActor(int index, Sprite<Animations> sprite)
+        public TestBattleActor(int index, SpriteAnimator sprite)
         {
             Index = index;
             Sprite = sprite;
@@ -156,12 +156,12 @@ namespace Arakara.Scenes
 
         private IEnumerator PlayAttack(IContainer game, GameAction action)
         {
-            Sprite.onAnimationCompletedEvent += (t) => {
-                Sprite.onAnimationCompletedEvent += null;
-                Sprite.play(Animations.Idle);
+            Sprite.OnAnimationCompletedEvent += (t) => {
+                Sprite.OnAnimationCompletedEvent += null;
+                Sprite.Play(Animations.Idle);
             };
-            Sprite.play(Animations.Attack1);
-            while (Sprite.isAnimationPlaying(Animations.Attack1))
+            Sprite.Play(Animations.Attack1);
+            while (Sprite.IsAnimationActive(Animations.Attack1))
             {
                 yield return null;
             }

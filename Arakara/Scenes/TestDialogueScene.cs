@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Nez;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,20 +17,23 @@ namespace Arakara.Scenes
     {
         private DialogueContainer _dialogue;
 
-        public override void onStart()
+        public override void OnStart()
         {
-            var dialogueActorEntity = createEntity("dialogueActor");
-            var textBoxTexture = content.Load<Texture2D>("textbox-2");
-            var nameBoxTexture = content.Load<Texture2D>("namebox");
-            var markerTexture = content.Load<Texture2D>("marker");
-            var dialogueActor = dialogueActorEntity.addComponent(new DialogueActor(textBoxTexture, nameBoxTexture, markerTexture));
+            var dialogueActorEntity = CreateEntity("dialogueActor");
+            var textBoxTexture = Content.Load<Texture2D>("textbox-2");
+            var nameBoxTexture = Content.Load<Texture2D>("namebox");
+            var markerTexture = Content.Load<Texture2D>("marker");
+            var dialogueActor = dialogueActorEntity.AddComponent(new DialogueActor());
 
-            var dialogueEntity = createEntity("dialogue");
-            _dialogue = new DialogueContainer(dialogueActor, OnComplete, DimensionConstants.GetCurrentResolution().ScreenWidth, DimensionConstants.GetCurrentResolution().ScreenHeight);
-            dialogueEntity.addComponent(_dialogue);
+            var dialogueEntity = CreateEntity("dialogue");
 
-            var texture1 = content.Load<Texture2D>("fuuka");
-            var texture2 = content.Load<Texture2D>("akihiko");
+            var json = File.ReadAllText(@"Content\test.ink.json");
+
+            _dialogue = new DialogueContainer(dialogueActor, OnComplete, DimensionConstants.GetCurrentResolution().ScreenWidth, DimensionConstants.GetCurrentResolution().ScreenHeight, json);
+            dialogueEntity.AddComponent(_dialogue);
+
+            var texture1 = Content.Load<Texture2D>("fuuka");
+            var texture2 = Content.Load<Texture2D>("akihiko");
             //var leftPortrait = new DialoguePortrait(texture1);
             //var rightPortrait = new DialoguePortrait(texture2);
 
@@ -42,7 +46,7 @@ namespace Arakara.Scenes
 
         private void OnComplete()
         {
-            Core.scene = new TestDialogueScene();
+            Core.Scene = new TestDialogueScene();
         }
     }
 }

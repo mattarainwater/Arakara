@@ -19,39 +19,39 @@ namespace Tenswee.Common.Components
 
         }
 
-        public override void onEnabled()
+        public override void OnEnabled()
         {
-            this.AddObserver(drag, onClickNotification);
+            this.AddObserver(Drag, OnClickNotifcation);
         }
 
-        public override void onDisabled()
+        public override void OnDisabled()
         {
-            this.RemoveObserver(drag, onClickNotification);
+            this.RemoveObserver(Drag, OnClickNotifcation);
         }
 
-        public override void onAddedToEntity()
+        public override void OnAddedToEntity()
         {
-            base.onAddedToEntity();
+            base.OnAddedToEntity();
         }
 
-        public override void update()
+        public override void Update()
         {
-            base.update();
-            if(Input.leftMouseButtonReleased)
+            base.Update();
+            if(Input.LeftMouseButtonReleased)
             {
                 _isDragging = false;
             }
             if(_isDragging)
             {
-                var newPos = entity.scene.camera.mouseToWorldPoint() - new Vector2(Rectangle.width / 2, Rectangle.height / 2);
-                var tween = entity.transform.tweenPositionTo(newPos, .02f);
-                tween.start();
+                var newPos = Entity.Scene.Camera.MouseToWorldPoint() - new Vector2(Rectangle.Width / 2, Rectangle.Height / 2);
+                var tween = Entity.Transform.TweenPositionTo(newPos, .02f);
+                tween.Start();
                 //entity.transform.position = newPos;
-                Rectangle.location = entity.transform.position;
+                Rectangle.Location = Entity.Transform.Position;
             }
         }
 
-        private void drag(object sender, object entity)
+        private void Drag(object sender, object entity)
         {
             _isDragging = true;
         }

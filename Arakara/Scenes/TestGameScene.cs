@@ -4,9 +4,6 @@ using Arakara.Battle.Effects;
 using Arakara.Battle.Events;
 using Arakara.Battle.Events.Effects;
 using Arakara.Battle.Events.Triggers;
-using Arakara.Battle.Phases.AI;
-using Arakara.Battle.Phases.Common;
-using Arakara.Battle.Phases.DeckBuilder;
 using Arakara.Battle.Statuses;
 using Arakara.Common;
 using Arakara.Components;
@@ -28,12 +25,12 @@ namespace Arakara.Scenes
 {
     public class TestGameScene : BaseScene
     {
-        public override void onStart()
+        public override void OnStart()
         {
             var battleController = new BattleController();
 
-            var battleEntity = createEntity("battle");
-            battleEntity.addComponent(battleController);
+            var battleEntity = CreateEntity("battle");
+            battleEntity.AddComponent(battleController);
 
             battleController.AddActor(MakeMC());
 
@@ -63,7 +60,7 @@ namespace Arakara.Scenes
 
         private BattleActor MakeMC()
         {
-            var mainCharacterEntity = createEntity("mc");
+            var mainCharacterEntity = CreateEntity("mc");
             var mainCharacterActor = new DeckBuilderActor("Prisca", 20, Faction.Ally, 
             new List<Card>()
             {
@@ -204,62 +201,51 @@ namespace Arakara.Scenes
                     Cost = 3
                 },
             }
-            ,0, 0, 200f, Animations.Idle);
+            ,0, 0, 200f);
 
-            mainCharacterEntity.addComponent(mainCharacterActor);
+            mainCharacterEntity.AddComponent(mainCharacterActor);
 
-            mainCharacterActor.AddPhase(new DrawCardsPhase(mainCharacterActor));
-            mainCharacterActor.AddPhase(new SelectCardPhase(mainCharacterActor));
-            mainCharacterActor.AddPhase(new Battle.Phases.Common.SelectTargetPhase(mainCharacterActor));
-            mainCharacterActor.AddPhase(new AnimationPhase(mainCharacterActor));
-            mainCharacterActor.AddPhase(new ApplyEffectsPhase(mainCharacterActor));
-            mainCharacterActor.AddPhase(new WaitPhase(mainCharacterActor));
-            mainCharacterActor.AddPhase(new DrawBuyableCardsPhase(mainCharacterActor));
-            mainCharacterActor.AddPhase(new SelectBuyableCardPhase(mainCharacterActor));
-            mainCharacterActor.AddPhase(new Battle.Phases.DeckBuilder.CleanUpPhase(mainCharacterActor));
-            mainCharacterActor.AddPhase(new ApplyStatusEffectsPhase(mainCharacterActor));
-
-            var texture = content.Load<Texture2D>("prisca_5");
-            var subtextures = Subtexture.subtexturesFromAtlas(texture, 128, 128);
-            var sprite = new Sprite<Animations>(subtextures[5]);
-            sprite.scale = Vector2.One * 2;
-            mainCharacterEntity.addComponent(sprite);
-            var attackAnimationFrames = new List<Subtexture>
+            var texture = Content.Load<Texture2D>("prisca_5");
+            var subtextures = Sprite.SpritesFromAtlas(texture, 128, 128);
+            var sprite = new SpriteAnimator(subtextures[5]);
+            sprite.Transform.Scale = Vector2.One * 2;
+            mainCharacterEntity.AddComponent(sprite);
+            var attackAnimationFrames = new Sprite[]
             {
                 subtextures[5],
             };
-            var idleAnimationFrames = new List<Subtexture>
+            var idleAnimationFrames = new Sprite[]
             {
                 subtextures[5],
             };
-            var potionAnimationFrames = new List<Subtexture>
+            var potionAnimationFrames = new Sprite[]
             {
                 subtextures[5],
             };
-            var woundedAnimationFrames = new List<Subtexture>
+            var woundedAnimationFrames = new Sprite[]
             {
                 subtextures[5],
             };
-            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames) { loop = false, fps = 30 });
-            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true });
-            sprite.addAnimation(Animations.Support1, new SpriteAnimation(potionAnimationFrames) { loop = false });
-            sprite.addAnimation(Animations.Hit, new SpriteAnimation(woundedAnimationFrames) { loop = false });
-            sprite.flipX = false;
-            sprite.setOrigin(Vector2.Zero);
-            sprite.renderLayer = 1000;
+            sprite.AddAnimation(Animations.Attack1, new SpriteAnimation(attackAnimationFrames, 30));
+            sprite.AddAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames, 30));
+            sprite.AddAnimation(Animations.Support1, new SpriteAnimation(potionAnimationFrames, 30));
+            sprite.AddAnimation(Animations.Hit, new SpriteAnimation(woundedAnimationFrames, 30));
+            sprite.FlipX = false;
+            sprite.SetOrigin(Vector2.Zero);
+            sprite.RenderLayer = 1000;
 
             return mainCharacterActor;
         }
 
         private BattleActor MakeKnight()
         {
-            var enemyEntity = createEntity("enemy");
+            var enemyEntity = CreateEntity("enemy");
 
-            var texture = content.Load<Texture2D>("guard_big");
-            var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
-            var sprite = new Sprite<Animations>(subtextures[0]);
-            enemyEntity.addComponent(sprite);
-            var animationFrames = new List<Subtexture>
+            var texture = Content.Load<Texture2D>("guard_big");
+            var subtextures = Sprite.SpritesFromAtlas(texture, 64, 64);
+            var sprite = new SpriteAnimator(subtextures[0]);
+            enemyEntity.AddComponent(sprite);
+            var animationFrames = new Sprite[]
             {
                 subtextures[0],
                 subtextures[1],
@@ -267,14 +253,14 @@ namespace Arakara.Scenes
                 subtextures[1],
                 subtextures[0]
             };
-            var idleAnimationFrames = new List<Subtexture>
+            var idleAnimationFrames = new Sprite[]
             {
                 subtextures[0]
             };
-            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false });
-            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = false });
-            sprite.setOrigin(Vector2.Zero);
-            sprite.renderLayer = 1000;
+            sprite.AddAnimation(Animations.Attack1, new SpriteAnimation(animationFrames, 30));
+            sprite.AddAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames, 30));
+            sprite.SetOrigin(Vector2.Zero);
+            sprite.RenderLayer = 1000;
 
             var aIActor = new AIActor("Guard", 15, Faction.Enemy,
                 new List<BattleAction>
@@ -287,31 +273,22 @@ namespace Arakara.Scenes
                         Targeting = Targeting.Enemies
                     },
                 },
-                new RandomAIDecider(), 0f, 0f, 100f, Animations.Idle
-            );
+                new RandomAIDecider(), 0f, 0f, 100f);
 
-            enemyEntity.addComponent(aIActor);
-
-            aIActor.AddPhase(new SelectActionPhase(aIActor));
-            aIActor.AddPhase(new Battle.Phases.AI.SelectTargetPhase(aIActor));
-            aIActor.AddPhase(new AnimationPhase(aIActor));
-            aIActor.AddPhase(new ApplyEffectsPhase(aIActor));
-            aIActor.AddPhase(new WaitPhase(aIActor));
-            aIActor.AddPhase(new Battle.Phases.AI.CleanUpPhase(aIActor));
-            aIActor.AddPhase(new ApplyStatusEffectsPhase(aIActor));
+            enemyEntity.AddComponent(aIActor);
 
             return aIActor;
         }
 
         private BattleActor MakeNecromancer()
         {
-            var enemyEntity = createEntity("enemy");
+            var enemyEntity = CreateEntity("enemy");
 
-            var texture = content.Load<Texture2D>("necromancer_big");
-            var subtextures = Subtexture.subtexturesFromAtlas(texture, 64, 64);
-            var sprite = new Sprite<Animations>(subtextures[0]);
-            enemyEntity.addComponent(sprite);
-            var animationFrames = new List<Subtexture>
+            var texture = Content.Load<Texture2D>("necromancer_big");
+            var subtextures = Sprite.SpritesFromAtlas(texture, 64, 64);
+            var sprite = new SpriteAnimator(subtextures[0]);
+            enemyEntity.AddComponent(sprite);
+            var animationFrames = new Sprite[]
             {
                 subtextures[0],
                 subtextures[1],
@@ -320,7 +297,7 @@ namespace Arakara.Scenes
                 subtextures[1],
                 subtextures[0]
             };
-            var idleAnimationFrames = new List<Subtexture>
+            var idleAnimationFrames = new Sprite[]
             {
                 subtextures[0],
                 subtextures[3],
@@ -331,10 +308,10 @@ namespace Arakara.Scenes
                 subtextures[3],
                 subtextures[0]
             };
-            sprite.addAnimation(Animations.Attack1, new SpriteAnimation(animationFrames) { loop = false });
-            sprite.addAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames) { loop = true });
-            sprite.setOrigin(Vector2.Zero);
-            sprite.renderLayer = 1000;
+            sprite.AddAnimation(Animations.Attack1, new SpriteAnimation(animationFrames, 30));
+            sprite.AddAnimation(Animations.Idle, new SpriteAnimation(idleAnimationFrames, 30));
+            sprite.SetOrigin(Vector2.Zero);
+            sprite.RenderLayer = 1000;
 
             var aIActor = new AIActor("Warlock", 10, Faction.Enemy,
                 new List<BattleAction>
@@ -354,18 +331,9 @@ namespace Arakara.Scenes
                         Targeting = Targeting.Enemies
                     },
                 },
-                new RandomAIDecider(), 0f, 0f, 50f, Animations.Idle
-            );
+                new RandomAIDecider(), 0f, 0f, 50f);
 
-            enemyEntity.addComponent(aIActor);
-
-            aIActor.AddPhase(new SelectActionPhase(aIActor));
-            aIActor.AddPhase(new Battle.Phases.AI.SelectTargetPhase(aIActor));
-            aIActor.AddPhase(new AnimationPhase(aIActor));
-            aIActor.AddPhase(new ApplyEffectsPhase(aIActor));
-            aIActor.AddPhase(new WaitPhase(aIActor));
-            aIActor.AddPhase(new Battle.Phases.AI.CleanUpPhase(aIActor));
-            aIActor.AddPhase(new ApplyStatusEffectsPhase(aIActor));
+            enemyEntity.AddComponent(aIActor);
 
             return aIActor;
         }

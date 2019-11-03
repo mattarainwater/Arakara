@@ -16,39 +16,19 @@ namespace Arakara.Dialogue
         private int _screenHeight;
         private int _marginLeftRight;
         private int _marginUpDown;
-        private int _entityYPos;
-        private int _halfWayPoint;
-        private int _spacing;
 
         public DialogueController Controller { get; set; }
 
-        public DialogueContainer(DialogueActor dialogueActor, Action onComplete, int screenWidth, int screenHeight)
+        public DialogueContainer(DialogueActor dialogueActor, Action onComplete, int screenWidth, int screenHeight, string dialogueJson)
         {
-            Controller = new DialogueController(dialogueActor, onComplete);
+            Controller = new DialogueController(dialogueActor, onComplete, dialogueJson);
             _screenWidth = screenWidth;
             _screenHeight = screenHeight;
             _marginLeftRight = _screenWidth / 20;
             _marginUpDown = screenHeight / 20;
-
-            _halfWayPoint = _screenWidth / 2;
-            _entityYPos = 450;
-            _spacing = _screenWidth / 40;
-
-            //dialogueActor.transform.position = new Vector2(20, _entityYPos);
-            dialogueActor.LeftPortaitPosition = new Vector2(0, 0);
-            dialogueActor.RightPortaitPosition = new Vector2(_screenWidth - 500, 0);
         }
 
-        public override void onAddedToEntity()
-        {
-            var scene = entity.scene;
-
-            // add dialogbox entity
-            var dialogeBoxEntity = scene.createEntity("box");
-            
-        }
-
-        public void update()
+        public void Update()
         {
             Controller.Update();
         }

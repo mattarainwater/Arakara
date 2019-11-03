@@ -11,16 +11,16 @@ namespace Arakara
         public GameMain()
             : base(windowTitle: "Arakara", isFullScreen: false)
         {
-            defaultSamplerState = SamplerState.PointClamp;
+            DefaultSamplerState = SamplerState.PointClamp;
             DimensionConstants.SetCurrentResolution(0);
         }
 
         protected override void Initialize()
         {
             base.Initialize();
-            CommonResources.DefaultBitmapFont = Graphics.instance.bitmapFont;
-            CommonResources.Icons = Subtexture.subtexturesFromAtlas(content.Load<Texture2D>("icons"), 32, 32);
-            scene = new StartMenuScene();
+            CommonResources.DefaultBitmapFont = Graphics.Instance.BitmapFont;
+            CommonResources.Icons = Sprite.SpritesFromAtlas(Content.Load<Texture2D>("icons"), 32, 32);
+            Scene = new StartMenuScene();
             VirtualButtons.SetupInput();
         }
     }

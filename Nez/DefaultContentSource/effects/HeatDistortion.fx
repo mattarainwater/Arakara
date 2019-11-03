@@ -1,6 +1,9 @@
 sampler s0;
-sampler _distortionTexture
+
+texture _distortionTexture;
+sampler2D _distortionTextureSampler = sampler_state
 {
+    Texture = <_distortionTexture>;
     AddressU = Wrap;
     AddressV = Wrap;
 };
@@ -11,13 +14,13 @@ float _distortionFactor; // default 0.005. Factor used to control severity of th
 float _riseFactor; // default 0.15. Factor used to control how fast air rises
 
 
-float4 PixelShaderFunction( float2 coords:TEXCOORD0 ) : COLOR0
+float4 mainPS( float2 coords:TEXCOORD0 ) : COLOR0
 {
     float2 distortionUV = coords;
     distortionUV.y -= _time * -_riseFactor;
     
     // Compute the distortion by reading the distortion map
-    float2 distortionMapValue = tex2D( _distortionTexture, distortionUV ).xy;
+    float2 distortionMapValue = tex2D( _distortionTextureSampler, distortionUV ).xy;
 
 	// bring it into the -1 to 1 range
     float2 distortionPositionOffset = distortionMapValue;
@@ -41,6 +44,6 @@ technique Technique1
 {
     pass Pass1
     {
-        PixelShader = compile ps_2_0 PixelShaderFunction();
+        PixelShader = compile ps_2_0 mainPS();
     }
 }

@@ -19,8 +19,8 @@ namespace Arakara.Common
         {
             _resolutionIndex = index;
             var currentResolution = GetCurrentResolution();
-            Screen.setSize(currentResolution.ScreenWidth, currentResolution.ScreenHeight);
-            Screen.isFullscreen = isFullScreen;
+            Screen.SetSize(currentResolution.ScreenWidth, currentResolution.ScreenHeight);
+            Screen.IsFullscreen = isFullScreen;
         }
 
         public static List<ResolutionSetting> GetResolutions()

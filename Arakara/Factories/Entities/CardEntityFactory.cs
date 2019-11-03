@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nez;
 using Nez.Sprites;
+using Nez.Textures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,30 +25,30 @@ namespace Arakara.Factories.Entities
 
         public Entity GetCardEntity(Card card, Vector2 position, int layer)
         {
-            var cardEntity = Core.scene.createEntity("card", position);
+            var cardEntity = Core.Scene.CreateEntity("card", position);
 
-            var sprite = new Sprite(_cardSprite);
-            sprite.origin = Vector2.Zero;
-            sprite.setRenderLayer(layer);
-            cardEntity.addComponent(sprite);
+            var sprite = new SpriteRenderer(_cardSprite);
+            sprite.Origin = Vector2.Zero;
+            sprite.SetRenderLayer(layer);
+            cardEntity.AddComponent(sprite);
 
-            var nameText = new Text(CommonResources.DefaultBitmapFont, card.Action.Name, new Vector2(20, 7), Color.White);
-            nameText.setRenderLayer(layer - 1);
-            cardEntity.addComponent(nameText);
+            var nameText = new TextComponent(CommonResources.DefaultBitmapFont, card.Action.Name, new Vector2(20, 7), Color.White);
+            nameText.SetRenderLayer(layer - 1);
+            cardEntity.AddComponent(nameText);
 
-            var costText = new Text(CommonResources.DefaultBitmapFont, card.Cost.ToString(), new Vector2(97, 7), Color.White);
-            costText.setRenderLayer(layer - 1);
-            cardEntity.addComponent(costText);
+            var costText = new TextComponent(CommonResources.DefaultBitmapFont, card.Cost.ToString(), new Vector2(97, 7), Color.White);
+            costText.SetRenderLayer(layer - 1);
+            cardEntity.AddComponent(costText);
 
-            var cardText = new Text(CommonResources.DefaultBitmapFont, card.Action.Effect.FormatDescription(), new Vector2(20, 40), Color.White);
-            cardText.setRenderLayer(layer - 1);
-            cardEntity.addComponent(cardText);
+            var cardText = new TextComponent(CommonResources.DefaultBitmapFont, card.Action.Effect.FormatDescription(), new Vector2(20, 40), Color.White);
+            cardText.SetRenderLayer(layer - 1);
+            cardEntity.AddComponent(cardText);
 
-            var buyValueText = new Text(CommonResources.DefaultBitmapFont, card.BuyValue.ToString(), new Vector2(97, 107), Color.White);
-            buyValueText.setRenderLayer(layer - 1);
-            cardEntity.addComponent(buyValueText);
+            var buyValueText = new TextComponent(CommonResources.DefaultBitmapFont, card.BuyValue.ToString(), new Vector2(97, 107), Color.White);
+            buyValueText.SetRenderLayer(layer - 1);
+            cardEntity.AddComponent(buyValueText);
 
-            cardEntity.addComponent(card);
+            cardEntity.AddComponent(card);
 
             return cardEntity;
         }

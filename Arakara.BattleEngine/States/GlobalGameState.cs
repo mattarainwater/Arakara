@@ -14,14 +14,14 @@ namespace Arakara.BattleEngine.States
 
         public void Awake()
         {
-            this.AddObserver(OnBeginSequence, ActionSystem.beginSequenceNotification);
-            this.AddObserver(OnCompleteAllActions, ActionSystem.completeNotification);
+            this.AddObserver(OnBeginSequence, ActionSystem.BeginSequenceNotification);
+            this.AddObserver(OnCompleteAllActions, ActionSystem.CompleteNotification);
         }
 
         public void Destroy()
         {
-            this.RemoveObserver(OnBeginSequence, ActionSystem.beginSequenceNotification);
-            this.RemoveObserver(OnCompleteAllActions, ActionSystem.completeNotification);
+            this.RemoveObserver(OnBeginSequence, ActionSystem.BeginSequenceNotification);
+            this.RemoveObserver(OnCompleteAllActions, ActionSystem.CompleteNotification);
         }
 
         void OnBeginSequence(object sender, object args)

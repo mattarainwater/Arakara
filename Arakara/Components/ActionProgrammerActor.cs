@@ -21,9 +21,8 @@ namespace Arakara.Components
             float dodgeChance,
             float critChance,
             float speed,
-            Animations idleAnimations,
             List<ProgrammedAction> actions) 
-                : base(name, maxHP, faction, dodgeChance, critChance, speed, idleAnimations)
+                : base(name, maxHP, faction, dodgeChance, critChance, speed)
         {
             Actions = actions;
             Queue = new Queue<BattleAction>();

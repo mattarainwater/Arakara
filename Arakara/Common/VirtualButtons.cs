@@ -19,28 +19,28 @@ namespace Arakara.Common
         public static void SetupInput()
         {
             SelectInput = new VirtualButton();
-            SelectInput.nodes.Add(new VirtualButton.KeyboardKey(Keys.J));
-            SelectInput.nodes.Add(new VirtualButton.GamePadButton(0, Buttons.A));
+            SelectInput.Nodes.Add(new VirtualButton.KeyboardKey(Keys.J));
+            SelectInput.Nodes.Add(new VirtualButton.GamePadButton(0, Buttons.A));
 
             BackInput = new VirtualButton();
-            BackInput.nodes.Add(new VirtualButton.KeyboardKey(Keys.L));
-            BackInput.nodes.Add(new VirtualButton.GamePadButton(0, Buttons.B));
+            BackInput.Nodes.Add(new VirtualButton.KeyboardKey(Keys.L));
+            BackInput.Nodes.Add(new VirtualButton.GamePadButton(0, Buttons.B));
 
             Dummyinput = new VirtualButton();
-            Dummyinput.nodes.Add(new VirtualButton.KeyboardKey(Keys.Q));
-            Dummyinput.nodes.Add(new VirtualButton.GamePadButton(0, Buttons.X));
+            Dummyinput.Nodes.Add(new VirtualButton.KeyboardKey(Keys.Q));
+            Dummyinput.Nodes.Add(new VirtualButton.GamePadButton(0, Buttons.X));
 
             LeftInput = new VirtualButton();
-            LeftInput.nodes.Add(new VirtualButton.KeyboardKey(Keys.A));
-            LeftInput.nodes.Add(new VirtualButton.KeyboardKey(Keys.Left));
-            LeftInput.nodes.Add(new VirtualButton.GamePadButton(0, Buttons.DPadLeft));
-            LeftInput.nodes.Add(new VirtualButton.GamePadButton(0, Buttons.LeftThumbstickLeft));
+            LeftInput.Nodes.Add(new VirtualButton.KeyboardKey(Keys.A));
+            LeftInput.Nodes.Add(new VirtualButton.KeyboardKey(Keys.Left));
+            LeftInput.Nodes.Add(new VirtualButton.GamePadButton(0, Buttons.DPadLeft));
+            LeftInput.Nodes.Add(new VirtualButton.GamePadButton(0, Buttons.LeftThumbstickLeft));
 
             RightInput = new VirtualButton();
-            RightInput.nodes.Add(new VirtualButton.KeyboardKey(Keys.D));
-            RightInput.nodes.Add(new VirtualButton.KeyboardKey(Keys.Right));
-            RightInput.nodes.Add(new VirtualButton.GamePadButton(0, Buttons.DPadRight));
-            RightInput.nodes.Add(new VirtualButton.GamePadButton(0, Buttons.LeftThumbstickRight));
+            RightInput.Nodes.Add(new VirtualButton.KeyboardKey(Keys.D));
+            RightInput.Nodes.Add(new VirtualButton.KeyboardKey(Keys.Right));
+            RightInput.Nodes.Add(new VirtualButton.GamePadButton(0, Buttons.DPadRight));
+            RightInput.Nodes.Add(new VirtualButton.GamePadButton(0, Buttons.LeftThumbstickRight));
         }
     }
 }

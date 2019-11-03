@@ -18,12 +18,12 @@ namespace Arakara.Scenes
             Message = message;
         }
 
-        public override void onStart()
+        public override void OnStart()
         {
-            var messageEntity = createEntity("message");
-            var textComponent = new Text(CommonResources.DefaultBitmapFont, Message, Vector2.Zero, Color.Black);
-            messageEntity.addComponent(textComponent);
-            messageEntity.transform.position = new Vector2(150, 150);
+            var messageEntity = CreateEntity("message");
+            var textComponent = new TextComponent(CommonResources.DefaultBitmapFont, Message, Vector2.Zero, Color.Black);
+            messageEntity.AddComponent(textComponent);
+            messageEntity.Transform.Position = new Vector2(150, 150);
         }
     }
 }

@@ -18,37 +18,38 @@ namespace Arakara.Scenes
         public BaseScene()
         {
             _screenSpaceRenderer = new ScreenSpaceRenderer(100, SCREEN_SPACE_RENDER_LAYER);
-            _screenSpaceRenderer.shouldDebugRender = false;
-            finalRenderDelegate = this;
+            _screenSpaceRenderer.ShouldDebugRender = false;
+            FinalRenderDelegate = this;
 
-            addRenderer(new RenderLayerExcludeRenderer(0, SCREEN_SPACE_RENDER_LAYER));
+            AddRenderer(new RenderLayerExcludeRenderer(0, SCREEN_SPACE_RENDER_LAYER));
         }
 
-        public override void initialize()
+        public override void Initialize()
         {
-            setDesignResolution(DimensionConstants.DESIGN_WIDTH, DimensionConstants.DESIGN_HEIGHT, SceneResolutionPolicy.BestFit);
-            clearColor = Color.WhiteSmoke;
+            SetDesignResolution(DimensionConstants.DESIGN_WIDTH, DimensionConstants.DESIGN_HEIGHT, SceneResolutionPolicy.BestFit);
+            ClearColor = Color.WhiteSmoke;
         }
 
-        public void onAddedToScene()
-        { }
-
-        public void onSceneBackBufferSizeChanged(int newWidth, int newHeight)
+        public void OnSceneBackBufferSizeChanged(int newWidth, int newHeight)
         {
-            _screenSpaceRenderer.onSceneBackBufferSizeChanged(newWidth, newHeight);
+            _screenSpaceRenderer.OnSceneBackBufferSizeChanged(newWidth, newHeight);
         }
 
         public Scene scene { get; set; }
 
-        public void handleFinalRender(Color letterboxColor, RenderTarget2D source, Rectangle finalRenderDestinationRect, SamplerState samplerState)
+        public void HandleFinalRender(RenderTarget2D finalRenderTarget, Color letterboxColor, RenderTarget2D source, Rectangle finalRenderDestinationRect, SamplerState samplerState)
         {
-            Core.graphicsDevice.SetRenderTarget(null);
-            Core.graphicsDevice.Clear(letterboxColor);
-            Graphics.instance.batcher.begin(BlendState.Opaque, samplerState, DepthStencilState.None, RasterizerState.CullNone, null);
-            Graphics.instance.batcher.draw(source, finalRenderDestinationRect, Color.White);
-            Graphics.instance.batcher.end();
+            Core.GraphicsDevice.SetRenderTarget(null);
+            Core.GraphicsDevice.Clear(letterboxColor);
+            Graphics.Instance.Batcher.Begin(BlendState.Opaque, samplerState, DepthStencilState.None, RasterizerState.CullNone, null);
+            Graphics.Instance.Batcher.Draw(source, finalRenderDestinationRect, Color.White);
+            Graphics.Instance.Batcher.End();
 
-            _screenSpaceRenderer.render(scene);
+            _screenSpaceRenderer.Render(scene);
+        }
+
+        public void OnAddedToScene(Scene scene)
+        {
         }
     }
 }

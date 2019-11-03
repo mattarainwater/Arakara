@@ -12,6 +12,6 @@ namespace Arakara.Battle
         public ActionEffect Effect { get; set; }
         public Targeting Targeting { get; set; }
         public string Name { get; set; }
-        public Animations Animation { get; set; }
+        public string Animation { get; set; }
     }
 }

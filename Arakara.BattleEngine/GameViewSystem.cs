@@ -36,11 +36,10 @@ namespace Arakara.BattleEngine
             }
         }
 
-        IContainer _container;
+        private IContainer _container;
+        private ActionSystem actionSystem;
 
-        ActionSystem actionSystem;
-
-        public override void initialize()
+        public override void Initialize()
         {
             Container.Awake();
             actionSystem = Container.GetAspect<ActionSystem>();
@@ -49,7 +48,7 @@ namespace Arakara.BattleEngine
             Container.ChangeState<StartState>();
         }
 
-        public void update()
+        public void Update()
         {
             actionSystem.Update();
         }

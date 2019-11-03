@@ -13,6 +13,6 @@ namespace Arakara.Common
     {
         public static BitmapFont DefaultBitmapFont { get; set; }
 
-        public static List<Subtexture> Icons { get; set; }
+        public static List<Sprite> Icons { get; set; }
     }
 }

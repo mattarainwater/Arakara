@@ -25,7 +25,7 @@ namespace Arakara.Battle.Events.Effects
                 Controller.CurrentActor = null;
                 Controller.CurrentActorIndex--;
             }
-            Target.entity.destroy();
+            Target.Entity.Destroy();
             State = BattleEventEffectState.EndOfEventEffect;
         }
 

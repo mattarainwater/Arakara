@@ -14,32 +14,28 @@ namespace Arakara.Scenes
 
         public StartMenuScene()
         {
-            _canvas = createEntity("ui").addComponent(new UICanvas());
-            _canvas.isFullScreen = true;
-            _canvas.renderLayer = SCREEN_SPACE_RENDER_LAYER;
+            _canvas = CreateEntity("ui").AddComponent(new UICanvas());
+            _canvas.IsFullScreen = true;
+            _canvas.RenderLayer = SCREEN_SPACE_RENDER_LAYER;
 
-            _table = _canvas.stage.addElement(new Table());
-            _table.setFillParent(true).center();
+            _table = _canvas.Stage.AddElement(new Table());
+            _table.SetFillParent(true).Center();
 
             AddStartMenuOptions();
-
-            var json = File.ReadAllText(@"Content\test.ink.json");
-            var loader = new LoadTest();
-            loader.Load(json);
         }
 
         private void AddStartMenuOptions()
         {
             var topButtonStyle = new TextButtonStyle(new PrimitiveDrawable(Color.Black, 10f), new PrimitiveDrawable(Color.Yellow), new PrimitiveDrawable(Color.DarkSlateBlue))
             {
-                downFontColor = Color.Black,
+                DownFontColor = Color.Black,
             };
-            _table.add(new TextButton("Start Game", topButtonStyle)).setFillX().setAlign(Align.center).setMinHeight(60).setMinWidth(200).getElement<Button>().onClicked += OnStartButtonClicked;
+            _table.Add(new TextButton("Start Game", topButtonStyle)).SetFillX().SetAlign(Align.Center).SetMinHeight(60).SetMinWidth(200).GetElement<Button>().OnClicked += OnStartButtonClicked;
         }
 
         private void OnStartButtonClicked(Button button)
         {
-            Core.startSceneTransition(new FadeTransition(LoadStartScene));
+            Core.StartSceneTransition(new FadeTransition(LoadStartScene));
         }
 
         private Scene LoadStartScene()

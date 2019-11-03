@@ -27,7 +27,7 @@ namespace Arakara.Battle.Effects
                 {
                     target.CurrentHP = target.MaxHP;
                 }
-                var effectDisplayContainer = target.getComponent<EffectDisplayContainer>();
+                var effectDisplayContainer = target.GetComponent<EffectDisplayContainer>();
                 if(Healing > 0)
                 {
                     effectDisplayContainer.MakeEffectDisplay("+" + Healing, Color.LimeGreen);

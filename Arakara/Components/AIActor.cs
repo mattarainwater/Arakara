@@ -1,6 +1,5 @@
 ﻿using Arakara.Battle;
 using Arakara.Battle.AI;
-using Arakara.Battle.Phases;
 using Microsoft.Xna.Framework;
 using Nez;
 using Nez.Sprites;
@@ -25,9 +24,8 @@ namespace Arakara.Components
             AIDecider decider, 
             float dodgeChance, 
             float critChance, 
-            float speed,
-            Animations idleAnimations) 
-                : base(name, maxHP, faction, dodgeChance, critChance, speed, idleAnimations)
+            float speed) 
+                : base(name, maxHP, faction, dodgeChance, critChance, speed)
         {
             Actions = actions;
             Decider = decider;

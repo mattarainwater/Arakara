@@ -1,5 +1,4 @@
 ﻿using Arakara.Battle;
-using Arakara.Battle.Phases;
 using Arakara.Common;
 using Microsoft.Xna.Framework;
 using Nez;
@@ -26,22 +25,17 @@ namespace Arakara.Components
         public float CriticalHitChance { get; set; }
         public float Speed { get; set; }
         public BattleStatusCollection Statuses { get; set; }
-        public Sprite<Animations> Animator { get; set; }
-        public Animations IdleAnimation { get; set; }
+        public SpriteAnimator Animator { get; set; }
         public BattleAction CurrentAction { get; set; }
-
-        public LinkedList<Phase> Phases { get; set; }
-        private LinkedListNode<Phase> _currentPhase;
-
         public List<BattleActor> SelectedTargets { get; set; }
+
 
         public BattleActor(int size = 1)
         {
             Statuses = new BattleStatusCollection();
-            Phases = new LinkedList<Phase>();
         }
 
-        public BattleActor(string name, int maxHp, Faction faction, float dodgeChance, float critChance, float speed, Animations idleAnimation)
+        public BattleActor(string name, int maxHp, Faction faction, float dodgeChance, float critChance, float speed)
         {
             Name = name;
             MaxHP = maxHp;
@@ -52,58 +46,23 @@ namespace Arakara.Components
             DodgeChance = dodgeChance;
             CriticalHitChance = critChance;
             Statuses = new BattleStatusCollection();
-            Phases = new LinkedList<Phase>();
-            IdleAnimation = Animations.Idle;
         }
 
-        public void AddPhase(Phase phase)
+        public override void OnAddedToEntity()
         {
-            Phases.AddLast(phase);
+            var nameText = Entity.AddComponent(new TextComponent(CommonResources.DefaultBitmapFont, Name, new Vector2(0f, -5), Color.Gray));
+            nameText.RenderLayer = 70;
+
+            Animator = Entity.GetComponent<SpriteAnimator>();
+            Animator.Play(Animations.Idle);
         }
 
-        public override void onAddedToEntity()
-        {
-            var nameText = entity.addComponent(new Text(CommonResources.DefaultBitmapFont, Name, new Vector2(0f, -5), Color.Gray));
-            nameText.renderLayer = 70;
-
-            Animator = entity.getComponent<Sprite<Animations>>();
-            Animator.play(IdleAnimation);
-        }
-
-        public void update()
+        public void Update()
         {
         }
 
         public void ProcessTurn()
         {
-            if(_currentPhase == null)
-            {
-                IsActive = true;
-                _currentPhase = Phases.First;
-                _currentPhase.Value.Initialize();
-            }
-            if (_currentPhase.Value.IsFinished && _currentPhase.Next != null)
-            {
-                _currentPhase = _currentPhase.Next;
-                _currentPhase.Value.Initialize();
-            }
-            if(_currentPhase.Value.GoBack && _currentPhase.Previous != null)
-            {
-                _currentPhase = _currentPhase.Previous;
-                _currentPhase.Value.Initialize();
-            }
-
-            _currentPhase.Value.Update();
-
-            if(_currentPhase.Value.IsFinished)
-            {
-                _currentPhase.Value.Finish();
-                if(_currentPhase.Next == null)
-                {
-                    IsActive = false;
-                    _currentPhase = null;
-                }
-            }
         }
 
         public void SelectTarget(BattleActor target)

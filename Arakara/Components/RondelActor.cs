@@ -17,9 +17,8 @@ namespace Arakara.Components
             Faction faction,
             float dodgeChance,
             float critChance,
-            float speed,
-            Animations idleAnimation)
-                : base(name, maxHP, faction, dodgeChance, critChance, speed, idleAnimation)
+            float speed)
+                : base(name, maxHP, faction, dodgeChance, critChance, speed)
         {
             Rondel = rondel;
         }

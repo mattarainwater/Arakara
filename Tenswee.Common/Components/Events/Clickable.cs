@@ -12,31 +12,31 @@ namespace Tenswee.Common.Components
     {
         public RectangleF Rectangle;
 
-        public const string onClickNotification = "Clickable.onClick";
+        public const string OnClickNotifcation = "Clickable.OnClick";
 
         public Clickable(RectangleF rectangle)
         {
             Rectangle = rectangle;
         }
 
-        public override void onAddedToEntity()
+        public override void OnAddedToEntity()
         {
-            Rectangle.location = entity.transform.position;
+            Rectangle.Location = Entity.Transform.Position;
         }
 
-        public virtual void update()
+        public virtual void Update()
         {
-            if(Input.leftMouseButtonPressed 
-                && checkMousePosition())
+            if(Input.LeftMouseButtonPressed 
+                && CheckMousePosition())
             {
-                this.PostNotification(onClickNotification, Input.mousePosition);
+                this.PostNotification(OnClickNotifcation, Input.MousePosition);
             }
         }
 
-        private bool checkMousePosition()
+        private bool CheckMousePosition()
         {
-            var mousePos = entity.scene.camera.mouseToWorldPoint();
-            return Rectangle.contains(mousePos);
+            var mousePos = Entity.Scene.Camera.MouseToWorldPoint();
+            return Rectangle.Contains(mousePos);
         }
     }
 }

@@ -38,17 +38,17 @@ namespace Arakara.Components
             _rightInput = rightInput;
         }
 
-        public void update()
+        public void Update()
         {
-            if (_rightInput.isPressed)
+            if (_rightInput.IsPressed)
             {
                 MoveNext();
             }
-            else if (_leftInput.isPressed)
+            else if (_leftInput.IsPressed)
             {
                 MoveBack();
             }
-            else if (_selectInput.isPressed)
+            else if (_selectInput.IsPressed)
             {
                 SelectHoveredEntity();
             }

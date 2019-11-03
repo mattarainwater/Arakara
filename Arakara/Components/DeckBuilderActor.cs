@@ -9,7 +9,6 @@ using Nez.Sprites;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Nez.Textures;
-using Arakara.Battle.Phases;
 using Arakara.Factories.Entities;
 
 namespace Arakara.Components
@@ -45,12 +44,11 @@ namespace Arakara.Components
             List<Card> buyableCards,
             float dodgeChance, 
             float critChance, 
-            float speed,
-            Animations idleAnimation) 
-                : base(name, maxHP, faction, dodgeChance, critChance, speed, idleAnimation)
+            float speed) 
+                : base(name, maxHP, faction, dodgeChance, critChance, speed)
         {
             Deck = cards;
-            Deck.shuffle();
+            Deck.Shuffle();
             Hand = new List<Card>();
             DiscardPile = new List<Card>();
             HandEntities = new List<Entity>();
@@ -59,14 +57,14 @@ namespace Arakara.Components
             BuyableHandEntities = new List<Entity>();
         }
 
-        public override void onAddedToEntity()
+        public override void OnAddedToEntity()
         {
-            base.onAddedToEntity();
+            base.OnAddedToEntity();
 
-            DefaultCardTexture = entity.scene.content.Load<Texture2D>("card");
-            DisabledCardTexture = entity.scene.content.Load<Texture2D>("card_dark");
-            HoverCardTexture = entity.scene.content.Load<Texture2D>("card_light");
-            BackdropTexture = entity.scene.content.Load<Texture2D>("backdrop");
+            DefaultCardTexture = Entity.Scene.Content.Load<Texture2D>("card");
+            DisabledCardTexture = Entity.Scene.Content.Load<Texture2D>("card_dark");
+            HoverCardTexture = Entity.Scene.Content.Load<Texture2D>("card_light");
+            BackdropTexture = Entity.Scene.Content.Load<Texture2D>("backdrop");
 
             Factory = new CardEntityFactory(DefaultCardTexture);
         }

@@ -29,12 +29,12 @@ namespace Arakara.Battle.Events.Effects
             if(!_transitionStarted)
             {
                 _transitionStarted = true;
-                Core.startSceneTransition(new FadeTransition(SceneTransition)
+                Core.StartSceneTransition(new FadeTransition(SceneTransition)
                 {
-                    fadeInDuration = 0f,
-                    fadeOutDuration = 0f,
-                    delayBeforeFadeInDuration = 0f,
-                    fadeToColor = Color.WhiteSmoke
+                    FadeInDuration = 0f,
+                    FadeOutDuration = 0f,
+                    DelayBeforeFadeInDuration = 0f,
+                    FadeToColor = Color.WhiteSmoke
                 });
             }
         }

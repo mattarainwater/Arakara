@@ -12,8 +12,8 @@ namespace Tenswee.Common.Components
     {
         public RectangleF Rectangle;
 
-        public const string onHoverNotification = "Hoverable.onHover";
-        public const string onBlurNotification = "Hoverable.onBlur";
+        public const string OnHoverNotification = "Hoverable.OnHover";
+        public const string OnBlurNotification = "Hoverable.OnBlur";
 
         private bool _isHovering;
 
@@ -22,29 +22,29 @@ namespace Tenswee.Common.Components
             Rectangle = rectangle;
         }
 
-        public override void onAddedToEntity()
+        public override void OnAddedToEntity()
         {
-            Rectangle.location = entity.transform.position;
+            Rectangle.Location = Entity.Transform.Position;
         }
 
-        public void update()
+        public void Update()
         {
-            if (checkMousePosition())
+            if (CheckMousePosition())
             {
-                this.PostNotification(onHoverNotification, entity);
+                this.PostNotification(OnHoverNotification, Entity);
                 _isHovering = true;
             }
             else if(_isHovering)
             {
                 _isHovering = false;
-                this.PostNotification(onBlurNotification, entity);
+                this.PostNotification(OnBlurNotification, Entity);
             }
         }
 
-        private bool checkMousePosition()
+        private bool CheckMousePosition()
         {
-            var mousePos = entity.scene.camera.mouseToWorldPoint();
-            return Rectangle.contains(mousePos);
+            var mousePos = Entity.Scene.Camera.MouseToWorldPoint();
+            return Rectangle.Contains(mousePos);
         }
     }
 }

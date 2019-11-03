@@ -1,6 +1,7 @@
 ﻿using Arakara.Common;
 using Arakara.Components;
 using Arakara.Dialogue.Models;
+using Arakara.DialogueEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,36 +12,29 @@ namespace Arakara.Dialogue
 {
     public class DialogueController
     {
-        public List<DialogueEntry> DialogueEntries { get; set; }
-        public DialogueEntry CurrentDialogueEntry { get; set; }
-        public int CurrentDialogueIndex { get; set; }
-
         public DialogueActor DialogueActor { get; set; }
-
         public bool IsActive { get; set; }
         public bool IsInitialized { get; set; }
-
-        public bool IsDone { get; set; }
-
         public Action OnComplete { get; set; }
 
         public int resindex { get; set; }
 
-        public DialogueController(DialogueActor actor, Action onComplete)
+        private DialogueManager _manager;
+        private bool _isDone;
+
+        public DialogueController(DialogueActor actor, Action onComplete, string jsonDialogue)
         {
-            DialogueEntries = new List<DialogueEntry>();
             DialogueActor = actor;
             OnComplete = onComplete;
-        }
-
-        public void AddDialogueEntry(DialogueEntry dialogue)
-        {
-            DialogueEntries.Add(dialogue);
+            _manager = new DialogueManager();
+            _manager.Load(jsonDialogue);
         }
 
         public void Update()
         {
-            if(VirtualButtons.Dummyinput.isPressed)
+            _isDone = !_manager.CanContinue() && !_manager.GetCurrentChoices().Any();
+
+            if (VirtualButtons.Dummyinput.IsPressed)
             {
                 resindex++;
                 if(resindex == 3)
@@ -50,14 +44,12 @@ namespace Arakara.Dialogue
                 DimensionConstants.SetCurrentResolution(resindex);
             }
 
-            if (IsActive && !IsDone)
+            if (IsActive && !_isDone)
             {
                 if (!IsInitialized)
                 {
                     IsInitialized = true;
-                    CurrentDialogueIndex = 0;
-                    CurrentDialogueEntry = DialogueEntries[CurrentDialogueIndex];
-                    DialogueActor.ResetDialogue(DialogueEntries.First());
+                    GetNextDialogue();
                 }
 
                 if(!DialogueActor.IsFinished)
@@ -65,7 +57,7 @@ namespace Arakara.Dialogue
                     DialogueActor.Update();
                 }
 
-                if (VirtualButtons.SelectInput.isPressed)
+                if (VirtualButtons.SelectInput.IsPressed)
                 {
                     if (DialogueActor.IsFinished)
                     {
@@ -76,16 +68,11 @@ namespace Arakara.Dialogue
                         DialogueActor.SkipToEnd();
                     }
                 }
-
-                if(CurrentDialogueEntry == null)
-                {
-                    IsDone = true;
-                }
             }
 
-            if(IsDone)
+            if(_isDone)
             {
-                if (VirtualButtons.SelectInput.isPressed)
+                if (VirtualButtons.SelectInput.IsPressed)
                 {
                     OnComplete();
                 }
@@ -94,14 +81,23 @@ namespace Arakara.Dialogue
 
         private void GetNextDialogue()
         {
-            CurrentDialogueIndex++;
-            if (CurrentDialogueIndex == DialogueEntries.Count())
+            _manager.Continue();
+            DialogueActor.ResetDialogue(ToDialogue());
+        }
+
+        private DialogueEntry ToDialogue()
+        {
+            var text = _manager.GetCurrentText();
+            var tags = _manager.GetTags().Select(x => x.Split(':'));
+            var nameTag = tags.FirstOrDefault(x => x[0] == "name");
+            var name = "";
+            if(nameTag != null)
             {
-                CurrentDialogueEntry = null;
-                return;
+                name = nameTag[1];
             }
-            CurrentDialogueEntry = DialogueEntries[CurrentDialogueIndex];
-            DialogueActor.ResetDialogue(CurrentDialogueEntry);
+            return new DialogueEntry(text, null)
+            {
+            };
         }
     }
 }

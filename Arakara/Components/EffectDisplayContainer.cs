@@ -20,12 +20,12 @@ namespace Arakara.Components
 
         public void MakeEffectDisplay(string text, Color color)
         {
-            var scene = entity.scene;
-            var display = scene.addEntity(new Entity());
-            var xPos = entity.transform.position.X + (32 / 2);
-            var yPos = entity.transform.position.Y - 13 - (EffectDisplays.Count * 15);
+            var scene = Entity.Scene;
+            var display = scene.AddEntity(new Entity());
+            var xPos = Entity.Transform.Position.X + (32 / 2);
+            var yPos = Entity.Transform.Position.Y - 13 - (EffectDisplays.Count * 15);
             var effectDisplay = new EffectDisplay(this, CommonResources.DefaultBitmapFont, text, new Vector2(xPos, yPos), color, 3);
-            display.addComponent(effectDisplay);
+            display.AddComponent(effectDisplay);
             EffectDisplays.Add(effectDisplay);
         }
 
@@ -34,7 +34,7 @@ namespace Arakara.Components
             EffectDisplays.Remove(display);
             foreach(var effectDisplay in EffectDisplays)
             {
-                effectDisplay.transform.position = new Vector2(effectDisplay.transform.position.X, effectDisplay.transform.position.Y + 15);
+                effectDisplay.Transform.Position = new Vector2(effectDisplay.Transform.Position.X, effectDisplay.Transform.Position.Y + 15);
             }
         }
     }

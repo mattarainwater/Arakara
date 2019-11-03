@@ -21,8 +21,8 @@ namespace Arakara.Battle
         public List<BattleEvent> Events { get; set; }
         public BattleEvent CurrentEvent { get; set; }
         public int CurrentActorIndex { get; set; }
-
         public bool IsActive { get; set; }
+
         private bool IsInitialized { get; set; }
 
         public BattleController()
@@ -31,7 +31,7 @@ namespace Arakara.Battle
             Events = new List<BattleEvent>();
         }
 
-        public void update()
+        public void Update()
         {
             if(IsActive)
             {
@@ -74,7 +74,7 @@ namespace Arakara.Battle
             RemoveTargetables();
             var targetable = GetTargetableActors(targerter, targeting);
             targetable.ForEach(x => x.Targetable = true);
-            return targetable.Select(x => x.entity);
+            return targetable.Select(x => x.Entity);
         }
 
         public void RemoveTargetables()

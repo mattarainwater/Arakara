@@ -22,15 +22,15 @@ namespace Arakara.Dialogue
 
         public bool IsFinished { get; set; }
         public string RawText { get; set; }
-        public Text Text { get; set; }
+        public TextComponent Text { get; set; }
 
-        public override void onAddedToEntity()
+        public override void OnAddedToEntity()
         {
-            Text = entity.addComponent(new Text(CommonResources.DefaultBitmapFont, "", Vector2.Zero, new Color(101, 67, 33)));
-            Text.renderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
+            Text = Entity.AddComponent(new TextComponent(CommonResources.DefaultBitmapFont, "", Vector2.Zero, new Color(101, 67, 33)));
+            Text.RenderLayer = BaseScene.SCREEN_SPACE_RENDER_LAYER;
         }
 
-        public void update()
+        public void Update()
         {
             if (_displayedText == RawText)
             {
@@ -38,13 +38,13 @@ namespace Arakara.Dialogue
             }
             else if (!IsFinished)
             {
-                _dt += Time.deltaTime;
+                _dt += Time.DeltaTime;
                 if (_dt >= _letterTimeStep)
                 {
                     _dt = 0f;
                     _displayedText += _textRemaining.First();
                     _textRemaining = _textRemaining.Remove(0, 1);
-                    Text.setText(_displayedText);
+                    Text.SetText(_displayedText);
                 }
             }
         }
@@ -61,7 +61,7 @@ namespace Arakara.Dialogue
         public void SkipToEnd()
         {
             _displayedText = RawText;
-            Text.setText(_displayedText);
+            Text.SetText(_displayedText);
             IsFinished = true;
         }
     }

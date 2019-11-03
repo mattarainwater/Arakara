@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 
 namespace Arakara.Components
 {
-    public class UpdatableText : Text, IUpdatable
+    public class UpdatableText : TextComponent, IUpdatable
     {
         public Func<string> TextFunc { get; set; }
 
@@ -16,12 +16,12 @@ namespace Arakara.Components
             : base(font, "", position, color)
         {
             TextFunc = func;
-            renderLayer = 5;
+            RenderLayer = 5;
         }
 
-        public void update()
+        public void Update()
         {
-            setText(TextFunc());
+            SetText(TextFunc());
         }
     }
 }
